@@ -1,0 +1,64 @@
+import { createBrowserRouter, type RouteObject } from "react-router-dom";
+import type { ComponentType } from "react";
+import { AppLayout } from "./pages/apps";
+import { StandaloneLayout } from "./pages/standalone";
+
+type PageModule = {
+  default: ComponentType;
+};
+
+const pages = import.meta.glob("./pages/**/page.tsx", {
+  eager: true,
+});
+
+console.log("Pages", Object.keys(pages));
+
+const appRoutes: RouteObject[] = [];
+const standaloneRoutes: RouteObject[] = [];
+
+for (const [path, module] of Object.entries(pages)) {
+  const page = module as PageModule;
+  const Component = page.default;
+
+  // 1. Convert file path to route
+  let routePath = path
+    .replace("./pages", "")
+    .replace("/page.tsx", "");
+
+  const isStandalone = routePath.includes("/standalone/");
+
+  routePath = routePath
+    .replace("/standalone", "")
+    .replace("/app", "")
+    .replace(/^\/(project|global)(?=\/|$)/, ""); // strip group segment (project/global)
+
+  const normalizePath = routePath.length === 0 ? "/" : routePath;
+
+  // 2. Standalone main is the default route, while remaining available at /main.
+  const isDefaultRoute = isStandalone && normalizePath === "/main";
+
+  if (isDefaultRoute) {
+    standaloneRoutes.push({ index: true, element: <Component /> });
+  }
+
+  const route: RouteObject = { path: normalizePath, element: <Component /> };
+
+  // 3. Classification
+  if (isStandalone) {
+    standaloneRoutes.push(route);
+  } else {
+    appRoutes.push(route);
+  }
+}
+
+export const Router = createBrowserRouter([
+  {
+    path: "/",
+    element: <StandaloneLayout />,
+    children: standaloneRoutes,
+  },
+  {
+    element: <AppLayout />,
+    children: appRoutes,
+  }
+]);
