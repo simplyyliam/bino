@@ -1,5 +1,5 @@
 // Components
-export * from "./components/ui/button";
+export * from "@/components/ui/button";
 // Export additional shadcn components as you add them:
 // export * from "./components/ui/dialog";
 // export * from "./components/ui/input";

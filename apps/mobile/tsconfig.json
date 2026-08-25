@@ -8,6 +8,24 @@
       ],
       "@/assets/*": [
         "./assets/*"
+      ],
+      "@bino/types": [
+        "../../packages/types/src/index.ts"
+      ],
+      "@bino/types/*": [
+        "../../packages/types/src/*"
+      ],
+      "@bino/ui": [
+        "../../packages/ui/src/index.ts"
+      ],
+      "@bino/ui/*": [
+        "../../packages/ui/src/*"
+      ],
+      "@bino/data": [
+        "../../packages/data/src/index.ts"
+      ],
+      "@bino/data/*": [
+        "../../packages/data/src/*"
       ]
     }
   },
