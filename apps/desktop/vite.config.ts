@@ -15,6 +15,7 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
       "@bino/types": path.resolve(__dirname, "../../packages/types/src"),
+      "@bino/ui/styles.css": path.resolve(__dirname, "../../packages/ui/src/styles/globals.css"),
       "@bino/ui": path.resolve(__dirname, "../../packages/ui/src"),
       "@bino/data": path.resolve(__dirname, "../../packages/data/src"),
     },

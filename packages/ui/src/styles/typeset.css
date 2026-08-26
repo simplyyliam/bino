@@ -1,0 +1,152 @@
+.typeset {
+  font-family: var(--typeset-font-body);
+  font-size: var(--typeset-size);
+  line-height: var(--typeset-leading);
+  color: var(--typeset-color, inherit);
+}
+
+/* Headings */
+
+.typeset :where(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--typeset-font-heading);
+  font-weight: var(--typeset-heading-weight, 600);
+  line-height: var(--typeset-heading-leading, 1.2);
+  letter-spacing: var(--typeset-heading-tracking, normal);
+  color: var(--typeset-heading-color, inherit);
+}
+
+.typeset h1 {
+  margin-top: var(--typeset-h1-margin-top, 0);
+  margin-bottom: var(--typeset-h1-margin-bottom, 0.75em);
+  font-size: var(--typeset-h1-size, 2.25em);
+}
+
+.typeset h2 {
+  margin-top: var(--typeset-h2-margin-top, 1.5em);
+  margin-bottom: var(--typeset-h2-margin-bottom, 0.6em);
+  font-size: var(--typeset-h2-size, 1.75em);
+}
+
+.typeset h3 {
+  margin-top: var(--typeset-h3-margin-top, 1.25em);
+  margin-bottom: var(--typeset-h3-margin-bottom, 0.5em);
+  font-size: var(--typeset-h3-size, 1.35em);
+}
+
+.typeset h4 {
+  margin-top: var(--typeset-h4-margin-top, 1.25em);
+  margin-bottom: var(--typeset-h4-margin-bottom, 0.5em);
+  font-size: var(--typeset-h4-size, 1.1em);
+}
+
+/* Paragraphs */
+
+.typeset p {
+  margin-block: var(--typeset-flow);
+}
+
+/* Prevent unnecessary space at the edges */
+
+.typeset > :first-child {
+  margin-top: 0;
+}
+
+.typeset > :last-child {
+  margin-bottom: 0;
+}
+
+/* Links */
+
+.typeset a {
+  color: var(--typeset-link-color, inherit);
+  font-weight: var(--typeset-link-weight, inherit);
+  text-decoration: var(--typeset-link-decoration, underline);
+  text-underline-offset: var(--typeset-link-offset, 0.15em);
+}
+
+/* Strong / emphasis */
+
+.typeset strong {
+  font-weight: var(--typeset-strong-weight, 600);
+}
+
+.typeset em {
+  font-style: italic;
+}
+
+/* Lists */
+
+.typeset ul,
+.typeset ol {
+  margin-block: var(--typeset-flow);
+  padding-left: var(--typeset-list-indent, 1.5em);
+}
+
+.typeset li + li {
+  margin-top: var(--typeset-list-gap, 0.25em);
+}
+
+/* Blockquotes */
+
+.typeset blockquote {
+  margin-block: var(--typeset-flow);
+  padding-left: var(--typeset-blockquote-padding, 1em);
+  border-left: var(--typeset-blockquote-border, 2px solid currentColor);
+  font-style: italic;
+}
+
+/* Inline code */
+
+.typeset :not(pre) > code {
+  font-family: var(--typeset-font-mono);
+  font-size: var(--typeset-code-size, 0.9em);
+  padding: var(--typeset-inline-code-padding, 0.15em 0.35em);
+  border-radius: var(--typeset-code-radius, 0.25rem);
+  background: var(--typeset-code-background, transparent);
+}
+
+/* Code blocks */
+
+.typeset pre {
+  margin-block: var(--typeset-flow);
+  padding: var(--typeset-pre-padding, 1em);
+  overflow-x: auto;
+
+  font-family: var(--typeset-font-mono);
+  font-size: var(--typeset-code-size, 0.9em);
+  line-height: var(--typeset-code-leading, 1.6);
+
+  border-radius: var(--typeset-pre-radius, 0.5rem);
+  background: var(--typeset-pre-background, transparent);
+}
+
+.typeset pre code {
+  padding: 0;
+  background: transparent;
+}
+
+/* Horizontal rule */
+
+.typeset hr {
+  margin-block: var(--typeset-flow);
+  border: 0;
+  border-top: var(--typeset-rule, 1px solid currentColor);
+}
+
+/* Tables */
+
+.typeset table {
+  width: 100%;
+  margin-block: var(--typeset-flow);
+  border-collapse: collapse;
+}
+
+.typeset th,
+.typeset td {
+  padding: var(--typeset-table-padding, 0.5em);
+  text-align: left;
+}
+
+.typeset th {
+  font-weight: var(--typeset-table-heading-weight, 600);
+}
