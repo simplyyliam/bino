@@ -18,6 +18,29 @@
   --typeset-link-weight: 500;
 }
 
+.typeset-input {
+  --typeset-font-body: var(--font-dm-sans);
+
+  --typeset-size: 14px;
+  --typeset-leading: 1.5;
+
+  --typeset-color: var(--foreground);
+  --typeset-placeholder-color: var(--muted-foreground);
+
+  font-family: var(--typeset-font-body);
+  font-size: var(--typeset-size);
+  line-height: var(--typeset-leading);
+  color: var(--typeset-color);
+}
+
+.typeset-input::placeholder {
+  color: var(--typeset-placeholder-color);
+}
+
+.typeset-input:disabled {
+  cursor: not-allowed;
+}
+
 /*.typeset-chat {
     --typeset-font-body: var(--font-dm-sans);
     --typeset-font-heading: var(--font-dm-sans);

@@ -1,6 +1,6 @@
 import { createBrowserRouter, type RouteObject } from "react-router-dom";
 import type { ComponentType } from "react";
-import { AppLayout } from "./pages/apps";
+import { AppLayout } from "./pages/app";
 import { StandaloneLayout } from "./pages/standalone";
 
 type PageModule = {
@@ -30,15 +30,14 @@ for (const [path, module] of Object.entries(pages)) {
   routePath = routePath
     .replace("/standalone", "")
     .replace("/app", "")
-    .replace(/^\/(project|global)(?=\/|$)/, ""); // strip group segment (project/global)
 
   const normalizePath = routePath.length === 0 ? "/" : routePath;
 
   // 2. Standalone main is the default route, while remaining available at /main.
-  const isDefaultRoute = isStandalone && normalizePath === "/main";
+  const isDefaultRoute = !isStandalone && normalizePath === "/home";
 
   if (isDefaultRoute) {
-    standaloneRoutes.push({ index: true, element: <Component /> });
+    appRoutes.push({ index: true, element: <Component /> });
   }
 
   const route: RouteObject = { path: normalizePath, element: <Component /> };
@@ -54,11 +53,12 @@ for (const [path, module] of Object.entries(pages)) {
 export const Router = createBrowserRouter([
   {
     path: "/",
-    element: <StandaloneLayout />,
-    children: standaloneRoutes,
-  },
-  {
     element: <AppLayout />,
     children: appRoutes,
+
+  },
+  {
+    element: <StandaloneLayout />,
+    children: standaloneRoutes,
   }
 ]);

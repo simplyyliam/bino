@@ -1,7 +1,8 @@
+import { RouterProvider } from "react-router-dom";
+import { Router } from "./Router";
+
 export default function App() {
   return (
-    <div className="flex items-center justify-center w-screen h-screen">
-      Welcome To Bino
-    </div>
+    <RouterProvider router={Router}/>
   )
 }
