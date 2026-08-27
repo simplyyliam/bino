@@ -1,6 +1,6 @@
 import type { ICN } from "@bino/types";
 
-export const icns: ICN[] = [
+export const ICNS: ICN[] = [
   {
     id: "icn-001",
     value: "ICN-000001",

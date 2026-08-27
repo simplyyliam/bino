@@ -1,8 +1,8 @@
 import type { Storage } from "@bino/types";
 
-export const storage: Storage[] = [{
+export const Storages: Storage[] = [{
   id: "storage-001",
-  workspaceId: "workspace-001",
+  buildingId: "building-001",
   name: "Main Store Room",
   locationSystemId: "location-system-001"
 }]

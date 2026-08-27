@@ -1,6 +1,6 @@
 export type Storage = {
   id: string 
-  workspaceId: string
+  buildingId: string
   name: string
   locationSystemId: string
 }

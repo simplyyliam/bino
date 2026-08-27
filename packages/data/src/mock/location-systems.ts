@@ -1,6 +1,6 @@
 import type { LocationSystem } from "@bino/types";
 
-export const locationSystem: LocationSystem[] = [{
+export const LocationSystems: LocationSystem[] = [{
   id: "location-system-001",
   name: "Group / Store / Row / Rack / Bin",
   usesExistingCodes: true,

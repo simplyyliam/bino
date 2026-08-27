@@ -1,6 +1,6 @@
 import type { Bin } from "@bino/types";
 
-export const bins: Bin[] = [
+export const Bins: Bin[] = [
   {
     id: "bin-001",
     storageId: "storage-001",

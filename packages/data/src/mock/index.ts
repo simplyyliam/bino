@@ -1,4 +1,4 @@
-export * from "./workspaces";
+export * from "./buildings";
 export * from "./storages";
 export * from "./location-systems";
 export * from "./bins";

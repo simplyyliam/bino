@@ -1,6 +1,6 @@
 import type { Item } from "@bino/types";
 
-export const items: Item[] = [
+export const Items: Item[] = [
   {
     id: "item-001",
     name: "Cable Connector",

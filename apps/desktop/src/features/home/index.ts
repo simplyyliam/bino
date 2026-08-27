@@ -1,1 +1,1 @@
-export { Building } from "./components/building";
+export { BuildingCard } from "./components/building";
