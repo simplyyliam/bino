@@ -11,7 +11,7 @@ export default function Home() {
         </div>
         <div className="columns-2 gap-1.5 typeset typeset-docs">
           {Buildings.map((building) => (
-            <BuildingCard key={building.id} building={building.name} buildingNum={building.buildingNumber} />
+            <BuildingCard key={building.id} building={building.name} buildingNum={building.buildingNumber} buildingId={building.id}/>
           ))}
         </div>
       </div>

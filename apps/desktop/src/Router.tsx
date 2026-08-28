@@ -2,6 +2,7 @@ import { createBrowserRouter, type RouteObject } from "react-router-dom";
 import type { ComponentType } from "react";
 import { AppLayout } from "./pages/app";
 import { StandaloneLayout } from "./pages/standalone";
+import { BuildingLayout } from "./pages/building";
 
 type PageModule = {
   default: ComponentType;
@@ -15,6 +16,7 @@ console.log("Pages", Object.keys(pages));
 
 const appRoutes: RouteObject[] = [];
 const standaloneRoutes: RouteObject[] = [];
+const buildingRoutes: RouteObject[] = [];
 
 for (const [path, module] of Object.entries(pages)) {
   const page = module as PageModule;
@@ -26,10 +28,13 @@ for (const [path, module] of Object.entries(pages)) {
     .replace("/page.tsx", "");
 
   const isStandalone = routePath.includes("/standalone/");
+  const isBuilding = routePath.includes("/building")
 
   routePath = routePath
     .replace("/standalone", "")
     .replace("/app", "")
+    .replace("/building", "")
+    .replace(/\[([^\]]+)\]/g, ":$1");
 
   const normalizePath = routePath.length === 0 ? "/" : routePath;
 
@@ -45,6 +50,8 @@ for (const [path, module] of Object.entries(pages)) {
   // 3. Classification
   if (isStandalone) {
     standaloneRoutes.push(route);
+  } else if (isBuilding) {
+    buildingRoutes.push(route)
   } else {
     appRoutes.push(route);
   }
@@ -60,5 +67,9 @@ export const Router = createBrowserRouter([
   {
     element: <StandaloneLayout />,
     children: standaloneRoutes,
+  },
+  {
+    element: <BuildingLayout />,
+    children: buildingRoutes,
   }
 ]);
