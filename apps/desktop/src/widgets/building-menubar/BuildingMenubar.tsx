@@ -6,6 +6,7 @@ import { useNavigate, useParams } from "react-router-dom"
 import { Buildings } from "@bino/data" // Import dataset from @bino/data
 import { ConfigMenu } from "@/features/building-navbar/components"
 import { useState } from "react"
+import { SearchField } from "@/features/app-navbar"
 
 export const BuildingMenu = () => {
   const [open, setOpen] = useState(false)
@@ -27,6 +28,7 @@ export const BuildingMenu = () => {
         <Pill storeName={storeName} />
       </MenubarGroup>
       <MenubarGroup>
+        <SearchField/>
         <ThemeToggle />
         <ConfigMenu open={open} onOpenChange={setOpen} />
       </MenubarGroup>
