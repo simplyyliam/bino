@@ -1,2 +1,2 @@
-export { AppNavbar } from "./app-navbar/AppNavbar";
-export { BuildingNavbar } from "./building-navbar/BuildingNavbar";
+export { AppMenubar } from "./app-menubar/AppMenubar";
+export { BuildingMenu } from "./building-menubar/BuildingMenubar";

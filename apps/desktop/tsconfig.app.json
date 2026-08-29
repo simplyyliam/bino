@@ -50,5 +50,5 @@
   },
   "include": [
     "src"
-  ]
+, "src/features/building-navbar/components/config-menu.tsx"  ]
 }
