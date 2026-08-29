@@ -16,6 +16,9 @@ importers:
       '@bino/data':
         specifier: workspace:*
         version: link:../../packages/data
+      '@bino/store':
+        specifier: workspace:*
+        version: link:../../packages/stores
       '@bino/types':
         specifier: workspace:*
         version: link:../../packages/types
@@ -110,6 +113,9 @@ importers:
 
   apps/mobile:
     dependencies:
+      '@bino/store':
+        specifier: workspace:*
+        version: link:../../packages/stores
       '@bino/types':
         specifier: workspace:*
         version: link:../../packages/types
@@ -195,6 +201,22 @@ importers:
       '@bino/types':
         specifier: workspace:*
         version: link:../types
+
+  packages/stores:
+    dependencies:
+      '@bino/types':
+        specifier: workspace:*
+        version: link:../types
+      react:
+        specifier: '>=18.0.0'
+        version: 19.2.8
+    devDependencies:
+      '@types/react':
+        specifier: ^19.0.0
+        version: 19.2.18
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
 
   packages/types: {}
 

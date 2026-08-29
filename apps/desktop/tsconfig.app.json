@@ -45,10 +45,17 @@
       ],
       "@bino/data/*": [
         "../../packages/data/src/*"
+      ],
+      "@bino/store": [
+        "../../packages/store/src/index.ts"
+      ],
+      "@bino/store/*": [
+        "../../packages/store/src/*"
       ]
     }
   },
   "include": [
-    "src"
-, "src/features/building-navbar/components/config-menu.tsx"  ]
+    "src",
+    "src/features/building-navbar/components/config-menu.tsx"
+  ]
 }

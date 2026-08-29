@@ -5,6 +5,7 @@
   "dependencies": {
     "@bino/types": "workspace:*",
     "@expo/ui": "~57.0.13",
+    "@bino/store": "workspace:*",
     "expo": "~57.0.16",
     "expo-constants": "~57.0.14",
     "expo-device": "~57.0.1",

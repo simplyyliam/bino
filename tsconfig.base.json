@@ -13,7 +13,9 @@
       "@bino/ui": ["packages/ui/src/index.ts"],
       "@bino/ui/*": ["packages/ui/src/*"],
       "@bino/data": ["packages/data/src/index.ts"],
-      "@bino/data/*": ["packages/data/src/*"]
+      "@bino/data/*": ["packages/data/src/*"],
+      "@bino/store": ["packages/store/src/index.ts"],
+      "@bino/store/*": ["packages/store/src/*"]
     }
   }
 }

@@ -18,6 +18,7 @@ export default defineConfig({
       "@bino/ui/styles.css": path.resolve(__dirname, "../../packages/ui/src/styles/globals.css"),
       "@bino/ui": path.resolve(__dirname, "../../packages/ui/src"),
       "@bino/data": path.resolve(__dirname, "../../packages/data/src"),
+      "@bino/store": path.resolve(__dirname, "../../packages/store/src"),
     },
   },
 })
