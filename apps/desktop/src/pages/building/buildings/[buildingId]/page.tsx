@@ -14,7 +14,7 @@ export default function Building() {
   const colLabels = Array.from({ length: colsCount }, (_, i) => String(i + 1).padStart(2, '0'))
 
   // Y-Axis Level Labels (Left, Top to Bottom): ["L05", "L04", "L03", "L02", "L01"]
-  const rowLabels = Array.from({ length: racksPerColumn }, (_, i) => `L${String(racksPerColumn - i).padStart(2, '0')}`)
+  const rowLabels = Array.from({ length: racksPerColumn }, (_, i) => `L${String(i + 1).padStart(2, '0')}`)
 
   return (
     <div className="flex items-center justify-center w-full h-full typeset typeset-docs">
