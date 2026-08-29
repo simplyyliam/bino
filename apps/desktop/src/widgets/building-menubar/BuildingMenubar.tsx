@@ -25,7 +25,7 @@ export const BuildingMenu = () => {
         <Button variant="ghost" onClick={() => navigate('/home')}>
           <ArrowLeft />
         </Button>
-        <Pill storeName={storeName} />
+        <Pill label={storeName} />
       </MenubarGroup>
       <MenubarGroup>
         <SearchField/>
