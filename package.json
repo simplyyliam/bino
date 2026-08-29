@@ -6,9 +6,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "bino:desktop": "pnpm --filter @bino/desktop",
-    "bino:mobile": "pnpm --filter @bino/mobile",
-    "bino:ui": "pnpm --filter @bino/ui"
+    "desktop": "pnpm --filter @bino/desktop",
+    "mobile": "pnpm --filter @bino/mobile",
+    "ui": "pnpm --filter @bino/ui"
   },
   "keywords": [],
   "author": "",
