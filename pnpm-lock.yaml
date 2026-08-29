@@ -18,7 +18,7 @@ importers:
         version: link:../../packages/data
       '@bino/store':
         specifier: workspace:*
-        version: link:../../packages/stores
+        version: link:../../packages/store
       '@bino/types':
         specifier: workspace:*
         version: link:../../packages/types
@@ -115,7 +115,7 @@ importers:
     dependencies:
       '@bino/store':
         specifier: workspace:*
-        version: link:../../packages/stores
+        version: link:../../packages/store
       '@bino/types':
         specifier: workspace:*
         version: link:../../packages/types
@@ -202,7 +202,7 @@ importers:
         specifier: workspace:*
         version: link:../types
 
-  packages/stores:
+  packages/store:
     dependencies:
       '@bino/types':
         specifier: workspace:*
@@ -210,6 +210,9 @@ importers:
       react:
         specifier: '>=18.0.0'
         version: 19.2.8
+      zustand:
+        specifier: ^5.0.15
+        version: 5.0.15(@types/react@19.2.18)(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))
     devDependencies:
       '@types/react':
         specifier: ^19.0.0
@@ -4600,6 +4603,24 @@ packages:
 
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
+
+  zustand@5.0.15:
+    resolution: {integrity: sha512-MpSEjRiBkA9crSYeOUH32rJC7SVqAbm0Fqcqge/bUi2PPoLcBWKOsG+C8mevmpr8TwXHBVkChbbJiyvkE+i/3A==}
+    engines: {node: '>=12.20.0'}
+    peerDependencies:
+      '@types/react': '>=18.0.0'
+      immer: '>=9.0.6'
+      react: '>=18.0.0'
+      use-sync-external-store: '>=1.2.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      immer:
+        optional: true
+      react:
+        optional: true
+      use-sync-external-store:
+        optional: true
 
 snapshots:
 
@@ -9225,3 +9246,9 @@ snapshots:
       zod: 3.25.76
 
   zod@3.25.76: {}
+
+  zustand@5.0.15(@types/react@19.2.18)(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8)):
+    optionalDependencies:
+      '@types/react': 19.2.18
+      react: 19.2.8
+      use-sync-external-store: 1.6.0(react@19.2.8)

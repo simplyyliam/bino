@@ -3,7 +3,6 @@ import { Minus, Plus } from "@hugeicons/core-free-icons"
 
 interface SettingProps {
   label: string
-
 }
 
 export const ConfigSetting = ({ label }: SettingProps) => {

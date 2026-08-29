@@ -3,32 +3,29 @@ import { ArrowLeft } from "lucide-react"
 import { ThemeToggle } from "../app-theme-toggle/ThemeToggle"
 import { MenubarGroup, Pill } from "@/shared/components"
 import { useNavigate, useParams } from "react-router-dom"
-import { Buildings } from "@bino/data" // Import dataset from @bino/data
 import { ConfigMenu } from "@/features/building-navbar/components"
 import { useState } from "react"
 import { SearchField } from "@/features/app-navbar"
+import { useBuildingStore } from "@bino/store"
 
 export const BuildingMenu = () => {
   const [open, setOpen] = useState(false)
   const { buildingId } = useParams()
+  const buildings = useBuildingStore((state) => state.buildings);
   const navigate = useNavigate()
 
-  // Find matching building by URL parameter
-  const building = Buildings.find((b) => b.id === buildingId)
-
-  // Use building name if found, fallback to parameter
-  const storeName = building ? building.name : buildingId
-
+  const currentBuilding = buildings.find((b) => b.id === buildingId);
+  
   return (
     <div className="flex items-center justify-between w-full p-2.5 typeset typeset-docs">
       <MenubarGroup>
         <Button variant="ghost" onClick={() => navigate('/home')}>
           <ArrowLeft />
         </Button>
-        <Pill label={storeName} />
+        <Pill label={currentBuilding?.name ?? buildingId} />
       </MenubarGroup>
       <MenubarGroup>
-        <SearchField/>
+        <SearchField />
         <ThemeToggle />
         <ConfigMenu open={open} onOpenChange={setOpen} />
       </MenubarGroup>
