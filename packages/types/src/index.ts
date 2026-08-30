@@ -5,5 +5,5 @@ export type { Item } from "./item";
 export type { Building } from "./building";
 export type { LocationLevel } from "./locationLevel";
 export type { Storage } from "./storage";
-export type { LocationSystem } from "./locationSystem";
+export type { LocationSystem, LocationMappingRule } from "./locationSystem";
 

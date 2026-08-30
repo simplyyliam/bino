@@ -1,19 +1,6 @@
 import type { Building } from "@bino/types";
 import { create } from "zustand";
 
-const INITIAL_BUILDINGS: Building[] = [
-  // {
-  //   id: "building-001",
-  //   name: "QStores",
-  //   buildingNumber: "01"
-  // },
-  // {
-  //   id: "building-002",
-  //   name: "WStores",
-  //   buildingNumber: "02"
-  // },
-]
-
 type BuildingState = {
   buildings: Building[]
   selectedBuildingId: string | null

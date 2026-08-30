@@ -1,1 +1,4 @@
 export * from "./building/useBuildingStore"
+export * from "./building/useBinStore"
+export * from "./building/useStorageStore"
+export * from "./building/useLocationSystemStore"

@@ -22,9 +22,6 @@ export const CreateBuildingDialog = ({trigger}: CreateBuildingDialogProps) => {
       id: crypto.randomUUID(),
       name: name.trim(),
       buildingNumber: buildingNumber.trim(),
-      levels,
-      rows,
-      columns,
     })
   }
   return (

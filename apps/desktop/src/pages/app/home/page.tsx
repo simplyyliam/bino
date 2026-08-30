@@ -4,7 +4,6 @@ import { useBuildingStore } from "@bino/store"
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@bino/ui";
 import { Home01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useState } from "react";
 
 export default function Home() {
   const buildings = useBuildingStore((s) => s.buildings);

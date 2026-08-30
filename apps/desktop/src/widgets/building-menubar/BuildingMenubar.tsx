@@ -22,7 +22,7 @@ export const BuildingMenu = () => {
         <Button variant="ghost" onClick={() => navigate('/home')}>
           <ArrowLeft />
         </Button>
-        <Pill label={currentBuilding?.name ?? buildingId} />
+        <Pill label={currentBuilding?.name ?? buildingId ?? "Unknown"} />
       </MenubarGroup>
       <MenubarGroup>
         <SearchField />
