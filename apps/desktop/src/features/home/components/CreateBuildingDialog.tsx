@@ -1,4 +1,4 @@
-import { useBuildingStore } from "@bino/store"
+import { useBuildingStore, useStorageStore, useLocationSystemStore } from "@bino/store"
 import { DialogContent, DialogHeader, Label, DialogFooter, Button, Dialog, DialogClose, DialogDescription, DialogTitle, DialogTrigger, Input } from "@bino/ui"
 import { useState } from "react"
 
@@ -8,22 +8,44 @@ type CreateBuildingDialogProps = {
 
 export const CreateBuildingDialog = ({trigger}: CreateBuildingDialogProps) => {
   const addBuilding = useBuildingStore((state) => state.addBuilding)
+  const addStorage = useStorageStore((state) => state.addStorage)
+  const locationSystems = useLocationSystemStore((state) => state.locationSystems)
 
   const [name, setName] = useState("")
   const [buildingNumber, setBuildingNumber] = useState("")
-  const [levels, setLevels] = useState(1)
-  const [rows, setRows] = useState(1)
-  const [columns, setColumns] = useState(1)
+  const [locationSystemId, setLocationSystemId] = useState(locationSystems[1]?.id || "") // Default to Bino's system
 
   const handleCreateBuilding = () => {
-    if (!name.trim() || !buildingNumber.trim()) return
+    if (!name.trim() || !buildingNumber.trim() || !locationSystemId) return
 
+    const buildingId = crypto.randomUUID()
+
+    // Create the building
     addBuilding({
-      id: crypto.randomUUID(),
+      id: buildingId,
       name: name.trim(),
       buildingNumber: buildingNumber.trim(),
     })
+
+    // Create default storage for this building
+    addStorage({
+      id: crypto.randomUUID(),
+      buildingId,
+      name: "Main Storage",
+      locationSystemId,
+      maxLevel: 0,
+      maxRow: 0,
+      maxColumn: 0
+    })
+
+    // Reset form
+    setName("")
+    setBuildingNumber("")
+    setLocationSystemId(locationSystems[1]?.id || "")
   }
+
+  const selectedSystem = locationSystems.find(s => s.id === locationSystemId)
+
   return (
     <Dialog>
       <DialogTrigger render={trigger} />
@@ -32,7 +54,7 @@ export const CreateBuildingDialog = ({trigger}: CreateBuildingDialogProps) => {
         <DialogHeader>
           <DialogTitle>Create Building</DialogTitle>
           <DialogDescription>
-            Set up the basic structure of your building.
+            Add a new building. A storage area will be created automatically, and you can start adding bins right away.
           </DialogDescription>
         </DialogHeader>
 
@@ -57,39 +79,25 @@ export const CreateBuildingDialog = ({trigger}: CreateBuildingDialogProps) => {
             />
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="levels">Levels</Label>
-              <Input
-                id="levels"
-                type="number"
-                min={1}
-                value={levels}
-                onChange={(e) => setLevels(Number(e.target.value))}
-              />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="rows">Rows</Label>
-              <Input
-                id="rows"
-                type="number"
-                min={1}
-                value={rows}
-                onChange={(e) => setRows(Number(e.target.value))}
-              />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="columns">Columns</Label>
-              <Input
-                id="columns"
-                type="number"
-                min={1}
-                value={columns}
-                onChange={(e) => setColumns(Number(e.target.value))}
-              />
-            </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="location-system">Location System</Label>
+            <select
+              id="location-system"
+              value={locationSystemId}
+              onChange={(e) => setLocationSystemId(e.target.value)}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              {locationSystems.map((system) => (
+                <option key={system.id} value={system.id}>
+                  {system.name}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-muted-foreground">
+              {selectedSystem?.usesExistingCodes
+                ? "Your existing location codes will be preserved"
+                : "Bino will generate location codes automatically"}
+            </p>
           </div>
         </div>
 
@@ -98,7 +106,7 @@ export const CreateBuildingDialog = ({trigger}: CreateBuildingDialogProps) => {
 
           <DialogClose
             render={
-              <Button onClick={handleCreateBuilding}>
+              <Button onClick={handleCreateBuilding} disabled={!name.trim() || !buildingNumber.trim()}>
                 Create Building
               </Button>
             }

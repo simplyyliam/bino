@@ -4,6 +4,7 @@ export type LocationMappingRule = {
   levelId: string
   canonicalField: 'level' | 'row' | 'column' | 'position'
   startValue: number
+  fixedValue?: number
 }
 
 export type LocationSystem = {

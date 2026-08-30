@@ -12,7 +12,7 @@ export type CanonicalLocation = {
 
 /**
  * Determines the next valid canonical location for a new bin in a storage.
- * Default pattern: fill columns first, then rows, then levels.
+ * Pattern: fill 5 racks (rows 0-4) vertically within a column, then advance to next column.
  *
  * @param storage - The storage to add a bin to
  * @param bins - All existing bins in this storage
@@ -27,39 +27,31 @@ export function getNextBinLocation(
     return { level: 0, row: 0, column: 0, position: 0 };
   }
 
-  // Find the highest location values currently in use
-  const maxUsedLevel = Math.max(...bins.map(b => b.level));
-  const maxUsedRow = Math.max(...bins.map(b => b.row));
-  const maxUsedColumn = Math.max(...bins.map(b => b.column));
+  // Create a fast lookup of existing occupied locations
+  const occupied = new Set(
+    bins.map(b => `${b.level ?? 0}-${b.column ?? 0}-${b.row ?? 0}`)
+  );
 
-  // Default expansion pattern: column -> row -> level
-  // Try next column in current row
-  if (maxUsedColumn < storage.maxColumn) {
-    return {
-      level: maxUsedLevel,
-      row: maxUsedRow,
-      column: maxUsedColumn + 1,
-      position: 0
-    };
+  const RACKS_PER_COLUMN = 5;
+  const currentLevel = 0;
+
+  // Find the first unoccupied (column, row) slot
+  // Iterate columns starting from 0, filling rows 0..4 vertically
+  for (let col = 0; col < 1000; col++) {
+    for (let r = 0; r < RACKS_PER_COLUMN; r++) {
+      const key = `${currentLevel}-${col}-${r}`;
+      if (!occupied.has(key)) {
+        return {
+          level: currentLevel,
+          row: r,
+          column: col,
+          position: 0
+        };
+      }
+    }
   }
 
-  // Try next row in current level
-  if (maxUsedRow < storage.maxRow) {
-    return {
-      level: maxUsedLevel,
-      row: maxUsedRow + 1,
-      column: 0,
-      position: 0
-    };
-  }
-
-  // Expand to next level
-  return {
-    level: maxUsedLevel + 1,
-    row: 0,
-    column: 0,
-    position: 0
-  };
+  return { level: 0, row: 0, column: 0, position: 0 };
 }
 
 /**
@@ -78,11 +70,10 @@ export function generateLocationCode(
 
   // Process each level in order according to mapping rules
   for (const rule of system.mappingRules) {
-    // Get the value from the canonical location
-    const canonicalValue = location[rule.canonicalField];
-
-    // Apply the start value offset
-    const displayValue = canonicalValue + rule.startValue;
+    // If fixedValue is specified, use it directly (e.g., fixed Group, Store, Row prefixes)
+    const displayValue = rule.fixedValue !== undefined
+      ? rule.fixedValue
+      : location[rule.canonicalField] + rule.startValue;
 
     // Pad according to system configuration
     const paddedValue = String(displayValue).padStart(system.paddingWidth, '0');
@@ -134,11 +125,12 @@ export function parseLocationCode(
         return null;
       }
 
-      // Reverse the start value offset to get canonical value
-      const canonicalValue = displayValue - rule.startValue;
-
-      // Set the appropriate canonical field
-      location[rule.canonicalField] = canonicalValue;
+      // If it's a fixed value, we don't necessarily update canonical location offsets
+      if (rule.fixedValue === undefined) {
+        // Reverse the start value offset to get canonical value
+        const canonicalValue = displayValue - rule.startValue;
+        location[rule.canonicalField] = canonicalValue;
+      }
     }
 
     return location;
@@ -146,6 +138,7 @@ export function parseLocationCode(
     return null;
   }
 }
+
 
 /**
  * Updates storage dimensions if the new location exceeds current maximums.

@@ -40,11 +40,11 @@ export const LocationSystems: LocationSystem[] = [
       },
     ],
     mappingRules: [
-      { levelId: "level-001", canonicalField: "level", startValue: 6 },
-      { levelId: "level-002", canonicalField: "position", startValue: 10 },
-      { levelId: "level-003", canonicalField: "row", startValue: 1 },
-      { levelId: "level-004", canonicalField: "column", startValue: 1 },
-      { levelId: "level-005", canonicalField: "position", startValue: 1 }
+      { levelId: "level-001", canonicalField: "level", startValue: 6, fixedValue: 6 },
+      { levelId: "level-002", canonicalField: "position", startValue: 10, fixedValue: 10 },
+      { levelId: "level-003", canonicalField: "position", startValue: 1, fixedValue: 1 },
+      { levelId: "level-004", canonicalField: "row", startValue: 1 },
+      { levelId: "level-005", canonicalField: "column", startValue: 1 }
     ]
   },
   {

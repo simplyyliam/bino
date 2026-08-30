@@ -1,6 +1,7 @@
 import type { Bin } from "@bino/types";
 import { getNextBinLocation, generateLocationCode, expandStorage } from "@bino/data";
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import { useStorageStore } from "./useStorageStore";
 import { useLocationSystemStore } from "./useLocationSystemStore";
 
@@ -16,85 +17,111 @@ type BinState = {
   deleteBin: (id: string) => void
 
   // Location-aware actions
-  createBinInStorage: (storageId: string, binName: string) => Bin
+  createBinInStorage: (storageId: string, binName?: string) => Bin
+  removeLastBinFromStorage: (storageId: string) => void
 
   // Helpers
   getSelectedBin: () => Bin | undefined
   getBinsByStorage: (storageId: string) => Bin[]
 }
 
-export const useBinStore = create<BinState>((set, get) => ({
-  bins: [],
-  selectedBinId: null,
+export const useBinStore = create<BinState>()(
+  persist(
+    (set, get) => ({
+      bins: [],
+      selectedBinId: null,
 
-  setBins: (bins) => set({ bins }),
-  setSelectedBinId: (id) => set({ selectedBinId: id }),
-  addBin: (newBin) =>
-    set((state) => ({
-      bins: [...state.bins, newBin]
-    })),
-  updateBin: (id, updateFields) =>
-    set((state) => ({
-      bins: state.bins.map((bin) => bin.id === id ? { ...bin, ...updateFields } : bin)
-    })),
-  deleteBin: (id) =>
-    set((state) => ({
-      bins: state.bins.filter((bin) => bin.id !== id),
-      selectedBinId: state.selectedBinId === id ? null : state.selectedBinId
-    })),
+      setBins: (bins) => set({ bins }),
+      setSelectedBinId: (id) => set({ selectedBinId: id }),
+      addBin: (newBin) =>
+        set((state) => ({
+          bins: [...state.bins, newBin]
+        })),
+      updateBin: (id, updateFields) =>
+        set((state) => ({
+          bins: state.bins.map((bin) => bin.id === id ? { ...bin, ...updateFields } : bin)
+        })),
+      deleteBin: (id) =>
+        set((state) => ({
+          bins: state.bins.filter((bin) => bin.id !== id),
+          selectedBinId: state.selectedBinId === id ? null : state.selectedBinId
+        })),
 
-  createBinInStorage: (storageId, binName) => {
-    const { bins } = get();
-    const storage = useStorageStore.getState().storages.find(s => s.id === storageId);
-    const locationSystem = useLocationSystemStore.getState().locationSystems.find(
-      ls => ls.id === storage?.locationSystemId
-    );
+      createBinInStorage: (storageId, binName) => {
+        const { bins } = get();
+        const storage = useStorageStore.getState().storages.find(s => s.id === storageId);
+        const locationSystem = useLocationSystemStore.getState().locationSystems.find(
+          ls => ls.id === storage?.locationSystemId
+        );
 
-    if (!storage || !locationSystem) {
-      throw new Error("Storage or location system not found");
+        if (!storage || !locationSystem) {
+          throw new Error("Storage or location system not found");
+        }
+
+        const storageBins = bins.filter(b => b.storageId === storageId);
+        const nextLocation = getNextBinLocation(storage, storageBins);
+        const locationCode = generateLocationCode(nextLocation, locationSystem);
+
+        const newBin: Bin = {
+          id: crypto.randomUUID(),
+          storageId,
+          name: binName || `Bin ${storageBins.length + 1}`,
+          locationCode,
+          level: nextLocation.level,
+          row: nextLocation.row,
+          column: nextLocation.column,
+          position: nextLocation.position
+        };
+
+        const updatedStorage = expandStorage(storage, nextLocation);
+        useStorageStore.getState().updateStorage(storageId, {
+          maxLevel: updatedStorage.maxLevel,
+          maxRow: updatedStorage.maxRow,
+          maxColumn: updatedStorage.maxColumn
+        });
+
+        get().addBin(newBin);
+        return newBin;
+      },
+
+      removeLastBinFromStorage: (storageId) => {
+        const { bins } = get();
+        const storageBins = bins.filter(b => b.storageId === storageId);
+        if (storageBins.length === 0) return;
+
+        // Sort bins to find the one with highest column then highest row
+        const sortedBins = [...storageBins].sort((a, b) => {
+          if (a.column !== b.column) return b.column - a.column;
+          return b.row - a.row;
+        });
+
+        const binToRemove = sortedBins[0];
+        get().deleteBin(binToRemove.id);
+
+        // Recalculate dimensions for the storage
+        const remainingBins = storageBins.filter(b => b.id !== binToRemove.id);
+        const maxLevel = remainingBins.length > 0 ? Math.max(...remainingBins.map(b => b.level)) : 0;
+        const maxRow = remainingBins.length > 0 ? Math.max(...remainingBins.map(b => b.row)) : 0;
+        const maxColumn = remainingBins.length > 0 ? Math.max(...remainingBins.map(b => b.column)) : 0;
+
+        useStorageStore.getState().updateStorage(storageId, {
+          maxLevel,
+          maxRow,
+          maxColumn
+        });
+      },
+
+      getSelectedBin: () => {
+        const { bins, selectedBinId } = get();
+        return bins.find((bin) => bin.id === selectedBinId);
+      },
+      getBinsByStorage: (storageId) => {
+        const { bins } = get();
+        return bins.filter((bin) => bin.storageId === storageId);
+      }
+    }),
+    {
+      name: "bino-bins-storage"
     }
-
-    // Get bins for this storage
-    const storageBins = bins.filter(b => b.storageId === storageId);
-
-    // Calculate next location
-    const nextLocation = getNextBinLocation(storage, storageBins);
-
-    // Generate location code
-    const locationCode = generateLocationCode(nextLocation, locationSystem);
-
-    // Create the new bin
-    const newBin: Bin = {
-      id: `bin-${Date.now()}`,
-      storageId,
-      name: binName,
-      locationCode,
-      level: nextLocation.level,
-      row: nextLocation.row,
-      column: nextLocation.column,
-      position: nextLocation.position
-    };
-
-    // Expand storage dimensions if needed
-    const updatedStorage = expandStorage(storage, nextLocation);
-    useStorageStore.getState().updateStorage(storageId, {
-      maxLevel: updatedStorage.maxLevel,
-      maxRow: updatedStorage.maxRow,
-      maxColumn: updatedStorage.maxColumn
-    });
-
-    // Add the bin
-    get().addBin(newBin);
-
-    return newBin;
-  },
-
-  getSelectedBin: () => {
-    const { bins, selectedBinId } = get();
-    return bins.find((bin) => bin.id === selectedBinId);
-  },
-  getBinsByStorage: (storageId) => {
-    const { bins } = get();
-    return bins.filter((bin) => bin.storageId === storageId);
-  }
-}));
+  )
+);
