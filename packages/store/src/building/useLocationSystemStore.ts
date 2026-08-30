@@ -57,7 +57,12 @@ export const useLocationSystemStore = create<LocationSystemState>()(
         const persistedSystems: LocationSystem[] = persistedState?.locationSystems || [];
         const mergedSystems = LocationSystems.map(defaultSys => {
           const persisted = persistedSystems.find(p => p.id === defaultSys.id);
-          return persisted ? { ...defaultSys, ...persisted, mappingRules: defaultSys.mappingRules } : defaultSys;
+          return persisted ? {
+            ...defaultSys,
+            ...persisted,
+            mappingRules: persisted.mappingRules || defaultSys.mappingRules,
+            gridConfig: persisted.gridConfig || defaultSys.gridConfig
+          } : defaultSys;
         });
 
         persistedSystems.forEach(p => {

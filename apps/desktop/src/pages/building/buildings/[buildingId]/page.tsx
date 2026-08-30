@@ -1,16 +1,23 @@
-import React, { useMemo } from "react"
-import { useBinStore, useStorageStore, useSearchStore } from "@bino/store"
+import React, { useMemo, useState } from "react"
+import { useBinStore, useStorageStore, useLocationSystemStore, useSearchStore } from "@bino/store"
 import { organizeBinsIntoGrid } from "@bino/data"
 import { useParams } from "react-router-dom"
+import type { Bin } from "@bino/types"
+import { BinDetailSheet } from "@/features/building/components/BinDetailSheet"
 
 export default function Building() {
   const { buildingId } = useParams()
   const { storages } = useStorageStore()
   const { bins } = useBinStore()
+  const { locationSystems } = useLocationSystemStore()
   const { searchQuery } = useSearchStore()
+
+  const [activeBin, setActiveBin] = useState<Bin | null>(null)
+  const [sheetOpen, setSheetOpen] = useState(false)
 
   // Get the storage for this building
   const storage = storages.find((s) => s.buildingId === buildingId)
+  const locationSystem = locationSystems.find((ls) => ls.id === storage?.locationSystemId)
 
   if (!storage) {
     return (
@@ -38,9 +45,12 @@ export default function Building() {
     )
   }, [searchQuery, storageBins])
 
-  // A rack standard is 5 vertical shelves (L01 to L05)
-  const racksPerColumn = 5
-  const rows = racksPerColumn  // Always 5 rows (L01 to L05)
+  // Get grid dimensions from location system config
+  const racksPerColumn = locationSystem?.gridConfig?.racksPerColumn ?? 5
+  const rowPrefix = locationSystem?.gridConfig?.rowPrefix ?? "L"
+  const colPrefix = locationSystem?.gridConfig?.columnPrefix ?? ""
+
+  const rows = racksPerColumn
   const columns = Math.max(
     1,
     storage.maxColumn + 1,
@@ -50,9 +60,13 @@ export default function Building() {
   // Organize bins into grid using canonical coordinates
   const grid = organizeBinsIntoGrid(storageBins, rows, columns)
 
-  // Generate labels (Columns: 01, 02... | Rows: L01, L02... L05)
-  const colLabels = Array.from({ length: columns }, (_, i) => String(i + 1).padStart(2, '0'))
-  const rowLabels = Array.from({ length: rows }, (_, i) => `L${String(i + 1).padStart(2, '0')}`)
+  // Generate labels based on location system prefixes
+  const colLabels = Array.from({ length: columns }, (_, i) =>
+    `${colPrefix}${String(i + 1).padStart(2, '0')}`
+  )
+  const rowLabels = Array.from({ length: rows }, (_, i) =>
+    `${rowPrefix}${String(i + 1).padStart(2, '0')}`
+  )
 
   return (
     <div className="flex items-center justify-center w-full h-full typeset typeset-docs">
@@ -100,6 +114,10 @@ export default function Building() {
               return (
                 <div
                   key={bin.id}
+                  onClick={() => {
+                    setActiveBin(bin)
+                    setSheetOpen(true)
+                  }}
                   className={`flex items-center justify-center w-17.5 h-17.5 rounded-[20px] transition-all cursor-pointer ${
                     isSearchActive
                       ? isMatching
@@ -115,6 +133,12 @@ export default function Building() {
           </React.Fragment>
         ))}
       </div>
+
+      <BinDetailSheet
+        bin={activeBin}
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+      />
     </div>
   )
 }

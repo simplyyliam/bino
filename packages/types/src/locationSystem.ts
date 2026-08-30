@@ -7,6 +7,15 @@ export type LocationMappingRule = {
   fixedValue?: number
 }
 
+export type LocationGridConfig = {
+  rowCanonicalField?: 'level' | 'row' | 'column' | 'position'
+  columnCanonicalField?: 'level' | 'row' | 'column' | 'position'
+  rowPrefix?: string
+  columnPrefix?: string
+  racksPerColumn?: number
+  maxColumns?: number
+}
+
 export type LocationSystem = {
   id: string
   name: string
@@ -16,4 +25,5 @@ export type LocationSystem = {
   separator: string
   paddingWidth: number
   mappingRules: LocationMappingRule[]
+  gridConfig?: LocationGridConfig
 }

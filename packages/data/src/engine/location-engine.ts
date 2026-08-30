@@ -12,15 +12,17 @@ export type CanonicalLocation = {
 
 /**
  * Determines the next valid canonical location for a new bin in a storage.
- * Pattern: fill 5 racks (rows 0-4) vertically within a column, then advance to next column.
+ * Pattern: fill N racks/shelves vertically within a column, then advance to next column.
  *
  * @param storage - The storage to add a bin to
  * @param bins - All existing bins in this storage
+ * @param system - Optional location system to respect grid configuration
  * @returns The next canonical location
  */
 export function getNextBinLocation(
-  storage: Storage,
-  bins: Bin[]
+  _storage: Storage,
+  bins: Bin[],
+  system?: LocationSystem
 ): CanonicalLocation {
   // If no bins exist, start at origin
   if (bins.length === 0) {
@@ -32,13 +34,13 @@ export function getNextBinLocation(
     bins.map(b => `${b.level ?? 0}-${b.column ?? 0}-${b.row ?? 0}`)
   );
 
-  const RACKS_PER_COLUMN = 5;
+  const racksPerColumn = system?.gridConfig?.racksPerColumn ?? 5;
   const currentLevel = 0;
 
   // Find the first unoccupied (column, row) slot
-  // Iterate columns starting from 0, filling rows 0..4 vertically
+  // Iterate columns starting from 0, filling rows 0..(racksPerColumn - 1) vertically
   for (let col = 0; col < 1000; col++) {
-    for (let r = 0; r < RACKS_PER_COLUMN; r++) {
+    for (let r = 0; r < racksPerColumn; r++) {
       const key = `${currentLevel}-${col}-${r}`;
       if (!occupied.has(key)) {
         return {

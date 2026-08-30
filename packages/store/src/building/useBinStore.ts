@@ -19,6 +19,7 @@ type BinState = {
   // Location-aware actions
   createBinInStorage: (storageId: string, binName?: string) => Bin
   removeLastBinFromStorage: (storageId: string) => void
+  recalculateStorageBinCodes: (storageId: string, system: import("@bino/types").LocationSystem) => void
 
   // Helpers
   getSelectedBin: () => Bin | undefined
@@ -59,7 +60,7 @@ export const useBinStore = create<BinState>()(
         }
 
         const storageBins = bins.filter(b => b.storageId === storageId);
-        const nextLocation = getNextBinLocation(storage, storageBins);
+        const nextLocation = getNextBinLocation(storage, storageBins, locationSystem);
         const locationCode = generateLocationCode(nextLocation, locationSystem);
 
         const newBin: Bin = {
@@ -109,6 +110,24 @@ export const useBinStore = create<BinState>()(
           maxRow,
           maxColumn
         });
+      },
+
+      recalculateStorageBinCodes: (storageId, system) => {
+        set((state) => ({
+          bins: state.bins.map((bin) => {
+            if (bin.storageId !== storageId) return bin;
+            const locationCode = generateLocationCode(
+              {
+                level: bin.level,
+                row: bin.row,
+                column: bin.column,
+                position: bin.position
+              },
+              system
+            );
+            return { ...bin, locationCode };
+          })
+        }));
       },
 
       getSelectedBin: () => {

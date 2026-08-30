@@ -45,11 +45,44 @@ export const LocationSystems: LocationSystem[] = [
       { levelId: "level-003", canonicalField: "position", startValue: 1, fixedValue: 1 },
       { levelId: "level-004", canonicalField: "row", startValue: 1 },
       { levelId: "level-005", canonicalField: "column", startValue: 1 }
-    ]
+    ],
+    gridConfig: {
+      rowCanonicalField: "row",
+      columnCanonicalField: "column",
+      rowPrefix: "L",
+      columnPrefix: "",
+      racksPerColumn: 5,
+      maxColumns: 18
+    }
+  },
+  {
+    id: "location-system-warehouse",
+    name: "Aisle / Shelf / Bay",
+    usesExistingCodes: true,
+    separator: "-",
+    paddingWidth: 2,
+    levels: [
+      { id: "level-aisle", name: "Aisle", order: 0, userManaged: true },
+      { id: "level-shelf", name: "Shelf", order: 1, userManaged: true },
+      { id: "level-bay", name: "Bay", order: 2, userManaged: true }
+    ],
+    mappingRules: [
+      { levelId: "level-aisle", canonicalField: "level", startValue: 1, fixedValue: 1 },
+      { levelId: "level-shelf", canonicalField: "row", startValue: 1 },
+      { levelId: "level-bay", canonicalField: "column", startValue: 1 }
+    ],
+    gridConfig: {
+      rowCanonicalField: "row",
+      columnCanonicalField: "column",
+      rowPrefix: "S",
+      columnPrefix: "B",
+      racksPerColumn: 4,
+      maxColumns: 12
+    }
   },
   {
     id: "location-system-default",
-    name: "Row / Column",
+    name: "Row / Column (Standard)",
     usesExistingCodes: false,
     separator: "/",
     paddingWidth: 2,
@@ -70,6 +103,14 @@ export const LocationSystems: LocationSystem[] = [
     mappingRules: [
       { levelId: "level-row", canonicalField: "row", startValue: 1 },
       { levelId: "level-column", canonicalField: "column", startValue: 1 }
-    ]
+    ],
+    gridConfig: {
+      rowCanonicalField: "row",
+      columnCanonicalField: "column",
+      rowPrefix: "R",
+      columnPrefix: "C",
+      racksPerColumn: 5,
+      maxColumns: 20
+    }
   }
 ];

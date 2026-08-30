@@ -11,6 +11,7 @@ export * from "./components/ui/input-group"
 export * from "./components/ui/textarea"
 export * from "./components/ui/empty"
 export * from "./components/ui/context-menu"
+export * from "./components/ui/sheet"
 // Export additional shadcn components as you add them:
 // export * from "./components/ui/input";
 
