@@ -3,6 +3,8 @@ import { useBinStore, useStorageStore, useLocationSystemStore, useSearchStore } 
 import { getBinState, organizeBinsIntoGrid } from "@bino/data"
 import { useParams } from "react-router-dom"
 import { BinDetailSheet } from "@/features/building/components/BinDetailSheet"
+import { DynamicIcon } from "lucide-react/dynamic";
+import { isValidIconName } from "@/lib/icons"
 export default function Building() {
   const { buildingId } = useParams()
   const { storages } = useStorageStore()
@@ -147,7 +149,9 @@ export default function Building() {
                     } hover:ring-1 hover:ring-border`
                     }`}
                 >
-                  <h5 className="select-none">{bin.locationCode}</h5>
+                  {isValidIconName(bin.icon) && (
+                    <DynamicIcon name={bin.icon} size={24} strokeWidth={1.75} />
+                  )}
                 </div>
               )
             })}

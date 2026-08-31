@@ -4,6 +4,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { useStorageStore } from "./useStorageStore";
 import { useLocationSystemStore } from "./useLocationSystemStore";
+import type { IconName } from "lucide-react/dynamic";
 
 type BinStore = {
   bins: Bin[]
@@ -19,6 +20,7 @@ type BinStore = {
   unstockBin: (id: string) => void
   setBinQuantity: (id: string, quantity: number) => void
   setBinOutOfService: (id: string, value: boolean) => void
+  setBinIcon: (binId: string, icon: IconName) => void;
 
   // Location-aware actions
   createBinInStorage: (storageId: string, binName?: string) => Bin
@@ -160,7 +162,7 @@ export const useBinStore = create<BinStore>()(
           )
         }))
       },
-      
+
       unstockBin: (id) => {
         set((state) => ({
           bins: state.bins.map((bin) =>
@@ -191,8 +193,16 @@ export const useBinStore = create<BinStore>()(
             } : bin
           )
         }))
+      },
+      setBinIcon: (binId, icon) => {
+        set((state) => ({
+          bins: state.bins.map((bin) =>
+            bin.id === binId
+              ? { ...bin, icon }
+              : bin
+          )
+        }))
       }
-
     }),
     {
       name: "bino-bins-storage"

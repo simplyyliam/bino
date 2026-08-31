@@ -1,7 +1,7 @@
 import { Pill } from "@/shared/components"
 import { useStorageStore, useBinStore } from "@bino/store";
 import { useParams } from "react-router-dom";
-import { getBinState, getBinStats } from "@bino/data";
+import { getBinStats } from "@bino/data";
 
 export const BuildingStatusbar = () => {
   const { buildingId } = useParams();

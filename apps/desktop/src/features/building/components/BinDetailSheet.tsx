@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useBinStore, useLocationSystemStore, useStorageStore } from "@bino/store";
+import { useBinStore } from "@bino/store";
 import type { Bin } from "@bino/types";
 import {
   Sheet,
@@ -13,6 +13,8 @@ import {
   Label,
   Badge,
 } from "@bino/ui";
+import { Pill } from "@/shared/components";
+import { IconPicker } from "./IconPicker";
 
 interface BinDetailSheetProps {
   bin: Bin | null;
@@ -26,13 +28,13 @@ export function BinDetailSheet({ bin, open, onOpenChange }: BinDetailSheetProps)
   const unstockBin = useBinStore((s) => s.unstockBin);
   const setBinQuantity = useBinStore((s) => s.setBinQuantity);
   const setBinOutOfService = useBinStore((s) => s.setBinOutOfService);
-  const storages = useStorageStore((s) => s.storages);
-  const locationSystems = useLocationSystemStore((s) => s.locationSystems);
+  // const storages = useStorageStore((s) => s.storages);
+  // const locationSystems = useLocationSystemStore((s) => s.locationSystems);
 
   const [name, setName] = useState(bin?.name || "");
   // local quantity
   const [quantity, setQuantity] = useState(bin?.quantity ?? 0)
-  
+
   // Keep local name state in sync when selected bin changes
   useEffect(() => {
     if (bin) {
@@ -43,8 +45,8 @@ export function BinDetailSheet({ bin, open, onOpenChange }: BinDetailSheetProps)
 
   if (!bin) return null;
 
-  const storage = storages.find((s) => s.id === bin.storageId);
-  const locationSystem = locationSystems.find((ls) => ls.id === storage?.locationSystemId);
+  // const storage = storages.find((s) => s.id === bin.storageId);
+  // const locationSystem = locationSystems.find((ls) => ls.id === storage?.locationSystemId);
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newName = e.target.value;
@@ -56,22 +58,21 @@ export function BinDetailSheet({ bin, open, onOpenChange }: BinDetailSheetProps)
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full sm:max-w-md flex flex-col justify-between">
         <div className="flex flex-col gap-6">
-          <SheetHeader>
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="font-mono text-xs font-semibold px-2 py-0.5">
-                {bin.locationCode}
-              </Badge>
-              <Badge variant="secondary" className="text-[11px]">
-                Active Storage
-              </Badge>
+          <SheetHeader className="gap-2.5">
+            <div className="flex items-center gap-2.5">
+              <IconPicker binId={bin.id} />
+              <div className="flex flex-col gap-2">
+                <SheetTitle className="text-xl pt-1">
+                  {bin.name || bin.locationCode}
+                </SheetTitle>
+                <SheetDescription>
+                  View and manage bin details, assigned items, and location mappings.
+                </SheetDescription>
+              </div>
             </div>
-            <SheetTitle className="text-xl pt-1">
-              {bin.name || bin.locationCode}
-            </SheetTitle>
-            <SheetDescription>
-              View and manage bin details, assigned items, and location mappings.
-            </SheetDescription>
+            <Pill status value={bin.locationCode} label="Location" className="w-fit" />
           </SheetHeader>
+
 
           {/* Bin Name Configuration */}
           <div className="flex flex-col gap-2">
@@ -87,39 +88,6 @@ export function BinDetailSheet({ bin, open, onOpenChange }: BinDetailSheetProps)
             </span>
           </div>
 
-          {/* Location Hierarchy & Coordinates */}
-          <div className="flex flex-col gap-3 rounded-lg border border-border/70 p-4 bg-card/60">
-            <h4 className="text-xs font-semibold text-foreground uppercase tracking-wider">
-              Location Mapping
-            </h4>
-
-            <div className="grid grid-cols-2 gap-3 text-xs">
-              <div className="flex flex-col gap-1 p-2.5 rounded-md bg-muted/40">
-                <span className="text-muted-foreground">System</span>
-                <span className="font-medium text-foreground truncate">
-                  {locationSystem?.name || "Standard"}
-                </span>
-              </div>
-              <div className="flex flex-col gap-1 p-2.5 rounded-md bg-muted/40">
-                <span className="text-muted-foreground">Location Code</span>
-                <span className="font-mono font-semibold text-primary">
-                  {bin.locationCode}
-                </span>
-              </div>
-              <div className="flex flex-col gap-1 p-2.5 rounded-md bg-muted/40">
-                <span className="text-muted-foreground">Grid Column</span>
-                <span className="font-mono font-medium text-foreground">
-                  Column {bin.column + 1}
-                </span>
-              </div>
-              <div className="flex flex-col gap-1 p-2.5 rounded-md bg-muted/40">
-                <span className="text-muted-foreground">Shelf / Row</span>
-                <span className="font-mono font-medium text-foreground">
-                  Row {bin.row + 1}
-                </span>
-              </div>
-            </div>
-          </div>
 
           {/* Parts / ICN Catalog Section */}
           <div className="flex flex-col gap-3">
@@ -143,19 +111,19 @@ export function BinDetailSheet({ bin, open, onOpenChange }: BinDetailSheetProps)
             </div>
           </div>
         </div>
-        
+
         {/* Inventory */}
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <h4 className="text-xs font-semibold text-foreground uppercase tracking-wider">
               Inventory
             </h4>
-        
+
             <Badge variant="outline" className="text-[10px]">
               {bin.itemId ? "Stocked" : "Empty"}
             </Badge>
           </div>
-        
+
           {bin.itemId ? (
             <div className="flex flex-col gap-3 rounded-lg border border-border/70 p-4 bg-card/60">
               <div className="flex flex-col gap-1">
@@ -164,10 +132,10 @@ export function BinDetailSheet({ bin, open, onOpenChange }: BinDetailSheetProps)
                   {bin.itemId}
                 </span>
               </div>
-        
+
               <div className="flex flex-col gap-2">
                 <Label htmlFor="bin-quantity">Quantity</Label>
-        
+
                 <Input
                   id="bin-quantity"
                   type="number"
@@ -180,7 +148,7 @@ export function BinDetailSheet({ bin, open, onOpenChange }: BinDetailSheetProps)
                   }}
                 />
               </div>
-        
+
               <Button
                 variant="outline"
                 size="sm"
@@ -194,7 +162,7 @@ export function BinDetailSheet({ bin, open, onOpenChange }: BinDetailSheetProps)
               <p className="text-xs text-muted-foreground">
                 This bin currently has no item assigned.
               </p>
-        
+
               <Button
                 size="sm"
                 onClick={() => stockBin(bin.id, "example-item", 1)}
@@ -214,7 +182,7 @@ export function BinDetailSheet({ bin, open, onOpenChange }: BinDetailSheetProps)
           >
             Mark Out of Stock
           </Button>
-        
+
           <Button
             variant="destructive"
             className="w-full"
@@ -223,7 +191,7 @@ export function BinDetailSheet({ bin, open, onOpenChange }: BinDetailSheetProps)
           >
             Mark Out of Service
           </Button>
-        
+
           <Button
             variant="default"
             className="w-full"
