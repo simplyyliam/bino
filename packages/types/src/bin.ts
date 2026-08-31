@@ -3,6 +3,9 @@ export type Bin = {
   storageId: string;
   name: string;
   locationCode: string;
+  itemId?: string
+  quantity: number
+  isOutOfService: boolean
   // Canonical location fields
   level: number;
   row: number;

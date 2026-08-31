@@ -1,6 +1,6 @@
 interface PillProps {
   label: string
-  value?: string
+  value?: string | number
   status?: boolean
 }
 

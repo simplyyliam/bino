@@ -5,7 +5,7 @@ import { persist } from "zustand/middleware";
 import { useStorageStore } from "./useStorageStore";
 import { useLocationSystemStore } from "./useLocationSystemStore";
 
-type BinState = {
+type BinStore = {
   bins: Bin[]
   selectedBinId: string | null
 
@@ -15,6 +15,13 @@ type BinState = {
   addBin: (bin: Bin) => void
   updateBin: (id: string, updateFields: Partial<Omit<Bin, "id">>) => void
   deleteBin: (id: string) => void
+
+  // Queries
+  getTotalBins: (storageId: string) => number
+  getEmptyBins: (storageId: string) => Bin[]
+  getStockedBins: (storageId: string) => Bin[]
+  getOutOfStockBins: (storageId: string) => Bin[]
+  getOutOfServiceBins: (storageId: string) => Bin[]
 
   // Location-aware actions
   createBinInStorage: (storageId: string, binName?: string) => Bin
@@ -26,7 +33,7 @@ type BinState = {
   getBinsByStorage: (storageId: string) => Bin[]
 }
 
-export const useBinStore = create<BinState>()(
+export const useBinStore = create<BinStore>()(
   persist(
     (set, get) => ({
       bins: [],
@@ -71,7 +78,11 @@ export const useBinStore = create<BinState>()(
           level: nextLocation.level,
           row: nextLocation.row,
           column: nextLocation.column,
-          position: nextLocation.position
+          position: nextLocation.position,
+        
+          itemId: undefined,
+          quantity: 0,
+          isOutOfService: false
         };
 
         const updatedStorage = expandStorage(storage, nextLocation);
@@ -137,7 +148,54 @@ export const useBinStore = create<BinState>()(
       getBinsByStorage: (storageId) => {
         const { bins } = get();
         return bins.filter((bin) => bin.storageId === storageId);
-      }
+      },
+
+      getTotalBins: (storageId) => {
+        const { bins } = get()
+        return bins.filter((bin) => bin.storageId === storageId).length
+      },
+
+      getEmptyBins: (storageId) => {
+        const { bins } = get()
+        return bins.filter((bin) => bin.storageId === storageId &&
+          !bin.itemId &&
+          !bin.isOutOfService
+        )
+      },
+      getStockedBins: (storageId) => {
+        const { bins } = get();
+
+        return bins.filter(
+          bin =>
+            bin.storageId === storageId &&
+            !!bin.itemId &&
+            bin.quantity > 0 &&
+            !bin.isOutOfService
+        );
+      },
+
+      getOutOfStockBins: (storageId) => {
+        const { bins } = get();
+
+        return bins.filter(
+          bin =>
+            bin.storageId === storageId &&
+            !!bin.itemId &&
+            bin.quantity === 0 &&
+            !bin.isOutOfService
+        );
+      },
+
+      getOutOfServiceBins: (storageId) => {
+        const { bins } = get();
+
+        return bins.filter(
+          bin =>
+            bin.storageId === storageId &&
+            bin.isOutOfService
+        );
+      },
+
     }),
     {
       name: "bino-bins-storage"
