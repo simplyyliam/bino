@@ -9,7 +9,7 @@ export default function Home() {
   const buildings = useBuildingStore((s) => s.buildings);
 
   return (
-    <div className="flex items-center justify-center w-full h-full typeset typeset-docs">
+    <div className="flex items-center justify-center w-full h-full">
       <div className="flex flex-col gap-3">
         <div>
           <h3>Hello John</h3>

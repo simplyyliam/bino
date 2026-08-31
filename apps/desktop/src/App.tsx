@@ -5,7 +5,9 @@ import { ThemeProvider } from "./theme/theme-provider";
 export default function App() {
   return (
     <ThemeProvider>
-      <RouterProvider router={Router}/>
+      <div className="typeset typeset-docs">
+        <RouterProvider router={Router} />
+      </div>
     </ThemeProvider>
   )
 }

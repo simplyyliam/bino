@@ -4,7 +4,7 @@ import { ThemeToggle } from "../app-theme-toggle/ThemeToggle"
 
 export const AppMenubar = () => {
   return (
-    <div className="flex items-center justify-between w-full p-2.5 typeset typeset-docs">
+    <div className="flex items-center justify-between w-full p-2.5">
       <h4>Bino Home</h4>
       <div className="flex items-center gap-1.5">
         <SearchField />

@@ -26,6 +26,14 @@ export default function Building() {
       </div>
     )
   }
+  
+  if (!activeBin) {
+    return (
+      <div className="flex items-center justify-center w-full h-full">
+        <p className="text-muted-foreground">No bins found, please add them</p>
+      </div>
+    )
+  }
 
   // Get bins for this storage
   const storageBins = bins.filter((bin) => bin.storageId === storage.id)
@@ -69,7 +77,7 @@ export default function Building() {
   )
 
   return (
-    <div className="flex items-center justify-center w-full h-full typeset typeset-docs">
+    <div className="flex items-center justify-center w-full h-full">
       <div
         className="inline-grid gap-2 items-center"
         style={{

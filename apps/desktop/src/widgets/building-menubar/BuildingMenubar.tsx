@@ -17,7 +17,7 @@ export const BuildingMenu = () => {
   const currentBuilding = buildings.find((b) => b.id === buildingId);
   
   return (
-    <div className="flex items-center justify-between w-full p-2.5 typeset typeset-docs">
+    <div className="flex items-center justify-between w-full p-2.5">
       <MenubarGroup>
         <Button variant="ghost" onClick={() => navigate('/home')}>
           <ArrowLeft />
