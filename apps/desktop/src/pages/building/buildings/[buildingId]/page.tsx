@@ -19,6 +19,9 @@ export default function Building() {
   const storage = storages.find((s) => s.buildingId === buildingId)
   const locationSystem = locationSystems.find((ls) => ls.id === storage?.locationSystemId)
 
+  // Get bins for this storage
+  const storageBins = bins.filter((bin) => bin.storageId === storage.id)
+
   if (!storage) {
     return (
       <div className="flex items-center justify-center w-full h-full">
@@ -26,8 +29,9 @@ export default function Building() {
       </div>
     )
   }
-  
-  if (!activeBin) {
+
+
+  if (storageBins.length === 0) {
     return (
       <div className="flex items-center justify-center w-full h-full">
         <p className="text-muted-foreground">No bins found, please add them</p>
@@ -35,8 +39,6 @@ export default function Building() {
     )
   }
 
-  // Get bins for this storage
-  const storageBins = bins.filter((bin) => bin.storageId === storage.id)
 
   // Calculate matching bins for search highlighting
   const matchingBinIds = useMemo(() => {
@@ -126,13 +128,12 @@ export default function Building() {
                     setActiveBin(bin)
                     setSheetOpen(true)
                   }}
-                  className={`flex items-center justify-center w-17.5 h-17.5 rounded-[20px] transition-all cursor-pointer ${
-                    isSearchActive
+                  className={`flex items-center justify-center w-17.5 h-17.5 rounded-[20px] transition-all cursor-pointer ${isSearchActive
                       ? isMatching
                         ? "bg-bin-empty ring-2 ring-primary scale-105"
                         : "bg-bin-empty opacity-30"
                       : "bg-bin-empty hover:ring-1 hover:ring-border"
-                  }`}
+                    }`}
                 >
                   <h5 className="select-none">{bin.locationCode}</h5>
                 </div>

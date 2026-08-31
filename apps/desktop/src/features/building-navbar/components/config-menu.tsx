@@ -25,9 +25,11 @@ interface MenuProps {
 
 export const ConfigMenu = ({ open, onOpenChange }: MenuProps) => {
   const { buildingId } = useParams();
-  const { storages } = useStorageStore();
-  const { bins, createBinInStorage, removeLastBinFromStorage } = useBinStore();
-  const { locationSystems } = useLocationSystemStore();
+  const storages = useStorageStore((s) => s.storages)
+  const bins = useBinStore((s) => s.bins)
+  const createBinInStorage = useBinStore((s) => s.createBinInStorage)
+  const removeLastBinFromStorage = useBinStore((s) => s.removeLastBinFromStorage)
+  const  locationSystems  = useLocationSystemStore((s) => s.locationSystems);
 
   const [editorOpen, setEditorOpen] = useState(false);
 

@@ -31,7 +31,7 @@ export const ConfigSetting = ({
           disabled={disabled || value <= min}
           ariaLabel={`Decrease ${label}`}
         />
-        <div className="flex h-7 min-w-[2.5rem] items-center justify-center rounded-md border border-input px-2 text-sm font-medium tabular-nums select-none">
+        <div className="flex h-7 min-w-10 items-center justify-center rounded-md border border-input px-2 text-sm font-medium tabular-nums select-none">
           {value}
         </div>
         <IconButton
