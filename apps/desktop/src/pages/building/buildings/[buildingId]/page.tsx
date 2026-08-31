@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react"
 import { useBinStore, useStorageStore, useLocationSystemStore, useSearchStore } from "@bino/store"
-import { organizeBinsIntoGrid } from "@bino/data"
+import { getBinState, organizeBinsIntoGrid } from "@bino/data"
 import { useParams } from "react-router-dom"
 import { BinDetailSheet } from "@/features/building/components/BinDetailSheet"
 export default function Building() {
@@ -42,7 +42,6 @@ export default function Building() {
       </div>
     )
   }
-
 
   // Calculate matching bins for search highlighting
   const matchingBinIds = useMemo(() => {
@@ -121,6 +120,7 @@ export default function Building() {
                   />
                 )
               }
+              const binState = getBinState(bin)
 
               const isMatching = matchingBinIds.has(bin.id)
               const isSearchActive = searchQuery.trim().length > 0
@@ -135,8 +135,16 @@ export default function Building() {
                   className={`flex items-center justify-center w-17.5 h-17.5 rounded-[20px] transition-all cursor-pointer ${isSearchActive
                     ? isMatching
                       ? "bg-bin-empty ring-2 ring-primary scale-105"
-                      : "bg-bin-empty opacity-30"
-                    : "bg-bin-empty hover:ring-1 hover:ring-border"
+                      : "bg-bin-empty opacity-50"
+                    : `${binState === "stocked"
+                      ? "bg-bin-stocked"
+                      : binState === "outOfStock"
+                        ? "bg-bin-out-of-stock"
+                        : binState === "outOfService"
+                          ? "bg-bin-out-of-service"
+                          : "bg-bin-empty"
+
+                    } hover:ring-1 hover:ring-border`
                     }`}
                 >
                   <h5 className="select-none">{bin.locationCode}</h5>

@@ -205,11 +205,30 @@ export function BinDetailSheet({ bin, open, onOpenChange }: BinDetailSheetProps)
           )}
         </div>
 
-        <SheetFooter className="flex-col!">
-          <Button variant="destructive" className="w-full" onClick={() => setBinQuantity(bin.id, 0)}>
+        <SheetFooter className="flex-col! gap-2 sm:flex-row">
+          <Button
+            variant="destructive"
+            className="w-full"
+            onClick={() => setBinQuantity(bin.id, 0)}
+            disabled={!bin.itemId || bin.quantity === 0}
+          >
             Mark Out of Stock
           </Button>
-          <Button variant="default" className="w-full" onClick={() => onOpenChange(false)}>
+        
+          <Button
+            variant="destructive"
+            className="w-full"
+            onClick={() => setBinOutOfService(bin.id, true)}
+            disabled={bin.isOutOfService}
+          >
+            Mark Out of Service
+          </Button>
+        
+          <Button
+            variant="default"
+            className="w-full"
+            onClick={() => onOpenChange(false)}
+          >
             Done
           </Button>
         </SheetFooter>
