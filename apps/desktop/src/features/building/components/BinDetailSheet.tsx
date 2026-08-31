@@ -21,16 +21,23 @@ interface BinDetailSheetProps {
 }
 
 export function BinDetailSheet({ bin, open, onOpenChange }: BinDetailSheetProps) {
-  const updateBin = useBinStore((state) => state.updateBin);
-  const storages = useStorageStore((state) => state.storages);
-  const locationSystems = useLocationSystemStore((state) => state.locationSystems);
+  const updateBin = useBinStore((s) => s.updateBin);
+  const stockBin = useBinStore((s) => s.stockBin);
+  const unstockBin = useBinStore((s) => s.unstockBin);
+  const setBinQuantity = useBinStore((s) => s.setBinQuantity);
+  const setBinOutOfService = useBinStore((s) => s.setBinOutOfService);
+  const storages = useStorageStore((s) => s.storages);
+  const locationSystems = useLocationSystemStore((s) => s.locationSystems);
 
   const [name, setName] = useState(bin?.name || "");
-
+  // local quantity
+  const [quantity, setQuantity] = useState(bin?.quantity ?? 0)
+  
   // Keep local name state in sync when selected bin changes
   useEffect(() => {
     if (bin) {
       setName(bin.name || "");
+      setQuantity(bin.quantity ?? 0)
     }
   }, [bin]);
 
@@ -136,8 +143,72 @@ export function BinDetailSheet({ bin, open, onOpenChange }: BinDetailSheetProps)
             </div>
           </div>
         </div>
+        
+        {/* Inventory */}
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-semibold text-foreground uppercase tracking-wider">
+              Inventory
+            </h4>
+        
+            <Badge variant="outline" className="text-[10px]">
+              {bin.itemId ? "Stocked" : "Empty"}
+            </Badge>
+          </div>
+        
+          {bin.itemId ? (
+            <div className="flex flex-col gap-3 rounded-lg border border-border/70 p-4 bg-card/60">
+              <div className="flex flex-col gap-1">
+                <span className="text-xs text-muted-foreground">Item</span>
+                <span className="text-sm font-medium">
+                  {bin.itemId}
+                </span>
+              </div>
+        
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="bin-quantity">Quantity</Label>
+        
+                <Input
+                  id="bin-quantity"
+                  type="number"
+                  min={0}
+                  value={quantity}
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    setQuantity(value);
+                    setBinQuantity(bin.id, value);
+                  }}
+                />
+              </div>
+        
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => unstockBin(bin.id)}
+              >
+                Unstock Bin
+              </Button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3 rounded-lg border border-dashed border-border p-4">
+              <p className="text-xs text-muted-foreground">
+                This bin currently has no item assigned.
+              </p>
+        
+              <Button
+                size="sm"
+                onClick={() => stockBin(bin.id, "example-item", 1)}
+              >
+                Stock Bin
+              </Button>
+            </div>
+          )}
+        </div>
 
-        <SheetFooter>
+        <SheetFooter className="flex-col!">
+          <Button variant="destructive" className="w-full" onClick={() => setBinQuantity(bin.id, 0)}>
+            Mark Out of Stock
+          </Button>
           <Button variant="default" className="w-full" onClick={() => onOpenChange(false)}>
             Done
           </Button>

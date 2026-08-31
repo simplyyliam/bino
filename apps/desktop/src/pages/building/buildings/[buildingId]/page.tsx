@@ -2,25 +2,27 @@ import React, { useMemo, useState } from "react"
 import { useBinStore, useStorageStore, useLocationSystemStore, useSearchStore } from "@bino/store"
 import { organizeBinsIntoGrid } from "@bino/data"
 import { useParams } from "react-router-dom"
-import type { Bin } from "@bino/types"
 import { BinDetailSheet } from "@/features/building/components/BinDetailSheet"
-
 export default function Building() {
   const { buildingId } = useParams()
   const { storages } = useStorageStore()
-  const { bins } = useBinStore()
+  const bins = useBinStore((s) => s.bins)
   const { locationSystems } = useLocationSystemStore()
   const { searchQuery } = useSearchStore()
 
-  const [activeBin, setActiveBin] = useState<Bin | null>(null)
+  const selectedBinId = useBinStore((s) => s.selectedBinId)
+  const setSelectedBinId = useBinStore((s) => s.setSelectedBinId)
+  const activeBin = bins.find((bin) => bin.id === selectedBinId) ?? null
+
   const [sheetOpen, setSheetOpen] = useState(false)
+
+
 
   // Get the storage for this building
   const storage = storages.find((s) => s.buildingId === buildingId)
   const locationSystem = locationSystems.find((ls) => ls.id === storage?.locationSystemId)
 
-  // Get bins for this storage
-  const storageBins = bins.filter((bin) => bin.storageId === storage.id)
+
 
   if (!storage) {
     return (
@@ -30,6 +32,8 @@ export default function Building() {
     )
   }
 
+  // Get bins for this storage
+  const storageBins = bins.filter((bin) => bin.storageId === storage.id)
 
   if (storageBins.length === 0) {
     return (
@@ -125,14 +129,14 @@ export default function Building() {
                 <div
                   key={bin.id}
                   onClick={() => {
-                    setActiveBin(bin)
+                    setSelectedBinId(bin.id)
                     setSheetOpen(true)
                   }}
                   className={`flex items-center justify-center w-17.5 h-17.5 rounded-[20px] transition-all cursor-pointer ${isSearchActive
-                      ? isMatching
-                        ? "bg-bin-empty ring-2 ring-primary scale-105"
-                        : "bg-bin-empty opacity-30"
-                      : "bg-bin-empty hover:ring-1 hover:ring-border"
+                    ? isMatching
+                      ? "bg-bin-empty ring-2 ring-primary scale-105"
+                      : "bg-bin-empty opacity-30"
+                    : "bg-bin-empty hover:ring-1 hover:ring-border"
                     }`}
                 >
                   <h5 className="select-none">{bin.locationCode}</h5>
