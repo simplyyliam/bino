@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import type { Item, ICN, BinItem } from "@bino/types";
 import { Items, ICNS, BinItems } from "@bino/data";
+import { useMovementHistoryStore } from "./useMovementHistoryStore";
 
 interface ItemStore {
   items: Item[];
@@ -102,6 +103,15 @@ export const useItemStore = create<ItemStore>((set, get) => ({
       icns: [...state.icns, newICN],
     }));
 
+    // Record history
+    const item = get().items.find((i) => i.id === itemId);
+    useMovementHistoryStore.getState().addHistoryEvent({
+      eventType: "icn_created",
+      icnId: newICN.id,
+      itemId,
+      summary: `ICN ${newICNValue} created for "${item?.name || "Unknown Item"}"`,
+    });
+
     return newICN.id;
   },
 
@@ -138,15 +148,49 @@ export const useItemStore = create<ItemStore>((set, get) => ({
     set((state) => ({
       binItems: [...state.binItems, newBinItem],
     }));
+
+    // Record history
+    const item = get().items.find((i) => i.id === itemId);
+    const icn = icnId ? get().icns.find((i) => i.id === icnId) : undefined;
+    useMovementHistoryStore.getState().addHistoryEvent({
+      eventType: "item_added_to_bin",
+      binId,
+      itemId,
+      icnId,
+      binItemId: newBinItem.id,
+      quantityAfter: quantity,
+      summary: `"${item?.name || "Unknown Item"}"${icn ? ` (${icn.value})` : ""} added to bin with quantity ${quantity}`,
+    });
   },
 
   removeItemFromBin: (binItemId) => {
+    const binItem = get().binItems.find((bi) => bi.id === binItemId);
+
+    if (binItem) {
+      const item = get().items.find((i) => i.id === binItem.itemId);
+      const icn = binItem.icnId ? get().icns.find((i) => i.id === binItem.icnId) : undefined;
+
+      // Record history before removal
+      useMovementHistoryStore.getState().addHistoryEvent({
+        eventType: "item_removed_from_bin",
+        binId: binItem.binId,
+        itemId: binItem.itemId,
+        icnId: binItem.icnId,
+        binItemId,
+        quantityBefore: binItem.quantity,
+        summary: `"${item?.name || "Unknown Item"}"${icn ? ` (${icn.value})` : ""} removed from bin`,
+      });
+    }
+
     set((state) => ({
       binItems: state.binItems.filter((bi) => bi.id !== binItemId),
     }));
   },
 
   updateBinItemQuantity: (binItemId, quantity) => {
+    const binItem = get().binItems.find((bi) => bi.id === binItemId);
+    const oldQuantity = binItem?.quantity ?? 0;
+
     set((state) => ({
       binItems: state.binItems.map((bi) =>
         bi.id === binItemId
@@ -154,9 +198,29 @@ export const useItemStore = create<ItemStore>((set, get) => ({
           : bi
       ),
     }));
+
+    // Record history
+    if (binItem) {
+      const item = get().items.find((i) => i.id === binItem.itemId);
+      const icn = binItem.icnId ? get().icns.find((i) => i.id === binItem.icnId) : undefined;
+      const eventType = quantity > oldQuantity ? "quantity_increased" : "quantity_decreased";
+
+      useMovementHistoryStore.getState().addHistoryEvent({
+        eventType,
+        binId: binItem.binId,
+        itemId: binItem.itemId,
+        icnId: binItem.icnId,
+        binItemId,
+        quantityBefore: oldQuantity,
+        quantityAfter: quantity,
+        summary: `"${item?.name || "Unknown Item"}"${icn ? ` (${icn.value})` : ""} quantity changed: ${oldQuantity} → ${quantity}`,
+      });
+    }
   },
 
   markBinOutOfStock: (binId) => {
+    const binItemsForBin = get().binItems.filter((bi) => bi.binId === binId);
+
     set((state) => ({
       binItems: state.binItems.map((bi) =>
         bi.binId === binId
@@ -164,6 +228,13 @@ export const useItemStore = create<ItemStore>((set, get) => ({
           : bi
       ),
     }));
+
+    // Record history
+    useMovementHistoryStore.getState().addHistoryEvent({
+      eventType: "marked_out_of_stock",
+      binId,
+      summary: `Bin marked out of stock (${binItemsForBin.length} ${binItemsForBin.length === 1 ? 'item' : 'items'} set to quantity 0)`,
+    });
   },
 
   findItemLocations: (itemId) => {

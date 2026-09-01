@@ -1,9 +1,9 @@
-import React, { useMemo, useState, useRef } from "react"
+import React, { useMemo, useState, useRef, useEffect } from "react"
 import { useBinStore, useStorageStore, useLocationSystemStore, useSearchStore, useItemStore } from "@bino/store"
 import { getBinState, organizeBinsIntoGrid } from "@bino/data"
 import { useParams } from "react-router-dom"
 import { BinDetailSheet } from "@/features/building/components/BinDetailSheet"
-import { DynamicIcon } from "lucide-react/dynamic";
+import { BinIcon } from "@/shared/components";
 import { isValidIconName } from "@/lib/icons"
 
 export default function Building() {
@@ -21,7 +21,25 @@ export default function Building() {
   const [sheetOpen, setSheetOpen] = useState(false)
   const [scrollX, setScrollX] = useState(0)
   const [scrollY, setScrollY] = useState(0)
+  const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight })
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+
+  // Track window size changes with debounce
+  useEffect(() => {
+    let timeoutId: number;
+    const handleResize = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+      }, 150);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(timeoutId);
+    };
+  }, []);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const target = e.currentTarget
@@ -97,7 +115,7 @@ export default function Building() {
   // Calculate if grid needs spreadsheet mode (too large to fit comfortably)
   const gridWidth = columns * 76 + 64 + 4; // bins + row labels + padding
   const gridHeight = rows * 76 + 40 + 4; // bins + column labels + padding
-  const needsSpreadsheetMode = gridWidth > window.innerWidth * 0.9 || gridHeight > window.innerHeight * 0.9;
+  const needsSpreadsheetMode = gridWidth > windowSize.width * 0.9 || gridHeight > windowSize.height * 0.9;
 
   return (
     <div className="flex items-center justify-center w-full h-full p-4">
@@ -222,7 +240,7 @@ export default function Building() {
                       }`}
                     >
                       {isValidIconName(bin.icon) && (
-                        <DynamicIcon name={bin.icon} size={24} strokeWidth={1.75} />
+                        <BinIcon iconName={bin.icon} size={24} strokeWidth={1.75} />
                       )}
                     </div>
                   );
@@ -302,7 +320,7 @@ export default function Building() {
                     }`}
                   >
                     {isValidIconName(bin.icon) && (
-                      <DynamicIcon name={bin.icon} size={24} strokeWidth={1.75} />
+                      <BinIcon iconName={bin.icon} size={24} strokeWidth={1.75} />
                     )}
                   </div>
                 );
