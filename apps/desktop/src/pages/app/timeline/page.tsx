@@ -1,6 +1,4 @@
 import { useMemo } from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
 import {
   useMovementHistoryStore,
   useBinStore,
@@ -9,10 +7,8 @@ import {
   useTimelineFilterStore,
 } from "@bino/store";
 import { TimelineDataTable } from "@/features/timeline";
-import { IconButton } from "@/shared/components";
 
 export default function TimelinePage() {
-  const navigate = useNavigate();
   const selectedBuildingId = useTimelineFilterStore((s) => s.selectedBuildingId);
 
   const history = useMovementHistoryStore((s) => s.history);
@@ -38,8 +34,6 @@ export default function TimelinePage() {
 
   return (
     <div className="container mx-auto px-6 py-10 max-w-6xl">
-      <IconButton variant="ghost" onClick={() => navigate(-1)} Label="Back" Icon={ArrowLeft01Icon}/>
-
       <div className="flex flex-col gap-1 mb-8">
         <h1 className="text-3xl font-bold tracking-tight">
           {selectedBuildingId ? buildingNameById.get(selectedBuildingId) ?? "Building" : "All Activity"}

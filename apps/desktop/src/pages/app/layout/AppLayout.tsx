@@ -1,13 +1,16 @@
-import { AppMenubar } from "@/widgets";
+import { AppSidebar } from "@/widgets";
+import { SidebarProvider, SidebarInset } from "@bino/ui";
 import { Outlet } from "react-router-dom";
 
 export default function AppLayout() {
   return (
-    <div className="flex flex-col h-screen bg-background">
-      <AppMenubar/>
-      <div className="flex-1 min-h-0 overflow-hidden">
-        <Outlet />
-      </div>
-    </div>
+    <SidebarProvider className="h-svh overflow-hidden">
+      <AppSidebar />
+      <SidebarInset className="min-w-0 overflow-hidden rounded-lg">
+        <div className="min-h-0 flex-1 overflow-hidden">
+          <Outlet />
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

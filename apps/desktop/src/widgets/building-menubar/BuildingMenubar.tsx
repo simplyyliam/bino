@@ -21,7 +21,7 @@ export const BuildingMenu = () => {
   return (
     <div className="flex items-center justify-between w-full p-2.5">
       <MenubarGroup>
-        <Button variant="ghost" onClick={() => navigate('/home')}>
+        <Button variant="ghost" onClick={() => navigate('/')}>
           <ArrowLeft />
         </Button>
         <Pill label={currentBuilding?.name ?? buildingId ?? "Unknown"} />

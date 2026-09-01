@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import type { MovementHistoryEvent } from "@bino/types";
 
 interface MovementHistoryStore {
@@ -17,7 +18,9 @@ interface MovementHistoryStore {
   clearHistory: () => void;
 }
 
-export const useMovementHistoryStore = create<MovementHistoryStore>((set, get) => ({
+export const useMovementHistoryStore = create<MovementHistoryStore>()(
+  persist(
+    (set, get) => ({
   history: [],
 
   addHistoryEvent: (event) => {
@@ -62,4 +65,9 @@ export const useMovementHistoryStore = create<MovementHistoryStore>((set, get) =
   clearHistory: () => {
     set({ history: [] });
   },
-}));
+    }),
+    {
+      name: "bino-movement-history-storage"
+    }
+  )
+);

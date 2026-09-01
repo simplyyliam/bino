@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import type { Item, ICN, BinItem } from "@bino/types";
 import { Items, ICNS, BinItems } from "@bino/data";
 import { useMovementHistoryStore } from "./useMovementHistoryStore";
@@ -32,7 +33,9 @@ interface ItemStore {
   findICNLocation: (icnValue: string) => { binId: string; quantity: number; binItem: BinItem } | undefined;
 }
 
-export const useItemStore = create<ItemStore>((set, get) => ({
+export const useItemStore = create<ItemStore>()(
+  persist(
+    (set, get) => ({
   items: Items,
   icns: ICNS,
   binItems: BinItems,
@@ -260,4 +263,9 @@ export const useItemStore = create<ItemStore>((set, get) => ({
       binItem,
     };
   },
-}));
+    }),
+    {
+      name: "bino-items-storage"
+    }
+  )
+);
