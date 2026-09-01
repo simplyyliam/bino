@@ -7,6 +7,8 @@ import { ConfigMenu } from "@/features/building-navbar/components"
 import { useState } from "react"
 import { SearchField } from "@/features/app-navbar"
 import { useBuildingStore } from "@bino/store"
+import { Clock03Icon } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
 
 export const BuildingMenu = () => {
   const [open, setOpen] = useState(false)
@@ -26,6 +28,14 @@ export const BuildingMenu = () => {
       </MenubarGroup>
       <MenubarGroup>
         <SearchField />
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate(`/building-timeline/${buildingId}`)}
+        >
+          <HugeiconsIcon icon={Clock03Icon} size={18} strokeWidth={1.67} />
+          Timeline
+        </Button>
         <ThemeToggle />
         <ConfigMenu open={open} onOpenChange={setOpen} />
       </MenubarGroup>

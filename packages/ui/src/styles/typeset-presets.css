@@ -4,11 +4,8 @@
     --typeset-font-mono: var(--font-mono);
 
   --typeset-size: 15px;
-  --typeset-leading: 1.75;
-  --typeset-flow: 1.25em;
 
   --typeset-heading-weight: 600;
-  --typeset-heading-leading: 1.25;
 
   --typeset-h1-size: 2.25em;
   --typeset-h2-size: 1.75em;

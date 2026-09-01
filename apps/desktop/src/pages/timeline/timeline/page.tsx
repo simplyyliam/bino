@@ -1,0 +1,60 @@
+import { useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
+import {
+  useMovementHistoryStore,
+  useBinStore,
+  useStorageStore,
+  useBuildingStore,
+  useTimelineFilterStore,
+} from "@bino/store";
+import { TimelineDataTable } from "@/features/timeline";
+import { IconButton } from "@/shared/components";
+
+export default function TimelinePage() {
+  const navigate = useNavigate();
+  const selectedBuildingId = useTimelineFilterStore((s) => s.selectedBuildingId);
+
+  const history = useMovementHistoryStore((s) => s.history);
+  const bins = useBinStore((s) => s.bins);
+  const storages = useStorageStore((s) => s.storages);
+  const buildings = useBuildingStore((s) => s.buildings);
+
+  const buildingNameById = useMemo(
+    () => new Map(buildings.map((b) => [b.id, b.name])),
+    [buildings]
+  );
+
+  const events = useMemo(() => {
+    if (!selectedBuildingId) return history;
+
+    const storageIds = new Set(
+      storages.filter((s) => s.buildingId === selectedBuildingId).map((s) => s.id)
+    );
+    const binIds = new Set(bins.filter((b) => storageIds.has(b.storageId)).map((b) => b.id));
+
+    return history.filter((event) => event.binId && binIds.has(event.binId));
+  }, [history, storages, bins, selectedBuildingId]);
+
+  return (
+    <div className="container mx-auto px-6 py-10 max-w-6xl">
+      <IconButton variant="ghost" onClick={() => navigate(-1)} Label="Back" Icon={ArrowLeft01Icon}/>
+
+      <div className="flex flex-col gap-1 mb-8">
+        <h1 className="text-3xl font-bold tracking-tight">
+          {selectedBuildingId ? buildingNameById.get(selectedBuildingId) ?? "Building" : "All Activity"}
+        </h1>
+        <p className="text-muted-foreground">
+          Full history of inventory movements and events
+        </p>
+      </div>
+
+      <TimelineDataTable
+        events={events}
+        bins={bins}
+        storages={storages}
+        getBuildingName={selectedBuildingId ? undefined : (id) => buildingNameById.get(id)}
+      />
+    </div>
+  );
+}

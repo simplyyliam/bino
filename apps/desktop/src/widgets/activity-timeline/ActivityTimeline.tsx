@@ -1,20 +1,41 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
   Button,
   Badge,
+  Separator,
 } from "@bino/ui";
 import { useMovementHistoryStore } from "@bino/store";
 import { Clock03Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { useNavigate, useParams } from "react-router-dom";
 
 export const ActivityTimeline = () => {
-  // Subscribe to the raw history array (stable reference), derive the slice in the component body
+  // Subscribe to the raw history array (stable reference), derive the filtered slice in the component body
   const history = useMovementHistoryStore((s) => s.history);
-  const recentHistory = history.slice(0, 25);
+  const { buildingId } = useParams<{ buildingId?: string }>();
+  const navigate = useNavigate();
+
+  // Filter to last 24 hours and limit to 25 events
+  const recentHistory = useMemo(() => {
+    const cutoff = Date.now() - (24 * 3600000); // 24 hours in milliseconds
+    return history
+      .filter(e => new Date(e.timestamp).getTime() > cutoff)
+      .slice(0, 25);
+  }, [history]);
+
   const [open, setOpen] = useState(false);
+
+  const handleViewTimeline = () => {
+    if (buildingId) {
+      navigate(`/building-timeline/${buildingId}`);
+    } else {
+      navigate('/timeline');
+    }
+    setOpen(false);
+  };
 
   const getEventIcon = (eventType: string) => {
     switch (eventType) {
@@ -113,6 +134,19 @@ export const ActivityTimeline = () => {
               ))}
             </div>
           )}
+        </div>
+
+        <Separator className="my-2" />
+
+        <div className="px-3 py-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleViewTimeline}
+            className="w-full justify-center text-xs"
+          >
+            View Full Timeline
+          </Button>
         </div>
       </DropdownMenuContent>
     </DropdownMenu>
