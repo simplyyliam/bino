@@ -2,6 +2,6 @@ export type Item = {
   id: string;
   name: string;
   description?: string;
-  binId: string;
-  quantity: number;
+  category?: string;
+  // Items don't belong to a single bin anymore - that's tracked in BinItem
 };

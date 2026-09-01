@@ -1,6 +1,7 @@
 export type { Bin } from "./bin";
 export type { ICN } from "./icn";
 export type { Item } from "./item";
+export type { BinItem } from "./binItem";
 
 export type { Building } from "./building";
 export type { LocationLevel } from "./locationLevel";

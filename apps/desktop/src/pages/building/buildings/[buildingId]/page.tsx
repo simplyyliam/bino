@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react"
-import { useBinStore, useStorageStore, useLocationSystemStore, useSearchStore } from "@bino/store"
+import { useBinStore, useStorageStore, useLocationSystemStore, useSearchStore, useItemStore } from "@bino/store"
 import { getBinState, organizeBinsIntoGrid } from "@bino/data"
 import { useParams } from "react-router-dom"
 import { BinDetailSheet } from "@/features/building/components/BinDetailSheet"
@@ -9,6 +9,7 @@ export default function Building() {
   const { buildingId } = useParams()
   const { storages } = useStorageStore()
   const bins = useBinStore((s) => s.bins)
+  const binItems = useItemStore((s) => s.binItems)
   const { locationSystems } = useLocationSystemStore()
   const { searchQuery } = useSearchStore()
 
@@ -122,7 +123,11 @@ export default function Building() {
                   />
                 )
               }
-              const binState = getBinState(bin)
+              const binItemCount = binItems.filter(bi => bi.binId === bin.id).length;
+              const totalBinItemQuantity = binItems
+                .filter(bi => bi.binId === bin.id)
+                .reduce((sum, bi) => sum + bi.quantity, 0);
+              const binState = getBinState(bin, binItemCount, totalBinItemQuantity)
 
               const isMatching = matchingBinIds.has(bin.id)
               const isSearchActive = searchQuery.trim().length > 0

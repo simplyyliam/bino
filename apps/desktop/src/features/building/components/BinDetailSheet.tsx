@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useBinStore } from "@bino/store";
+import { useBinStore, useItemStore } from "@bino/store";
 import type { Bin } from "@bino/types";
 import {
   Sheet,
@@ -15,6 +15,8 @@ import {
 } from "@bino/ui";
 import { Pill } from "@/shared/components";
 import { IconPicker } from "./IconPicker";
+import { ItemPicker } from "./ItemPicker";
+import { CreateICNDialog } from "./CreateICNDialog";
 
 interface BinDetailSheetProps {
   bin: Bin | null;
@@ -24,22 +26,38 @@ interface BinDetailSheetProps {
 
 export function BinDetailSheet({ bin, open, onOpenChange }: BinDetailSheetProps) {
   const updateBin = useBinStore((s) => s.updateBin);
-  const stockBin = useBinStore((s) => s.stockBin);
-  const unstockBin = useBinStore((s) => s.unstockBin);
   const setBinQuantity = useBinStore((s) => s.setBinQuantity);
   const setBinOutOfService = useBinStore((s) => s.setBinOutOfService);
-  // const storages = useStorageStore((s) => s.storages);
-  // const locationSystems = useLocationSystemStore((s) => s.locationSystems);
+
+  // Subscribe to the raw binItems array for reactive updates
+  const allBinItems = useItemStore((s) => s.binItems);
+  const items = useItemStore((s) => s.items);
+  const icns = useItemStore((s) => s.icns);
+  const addItemToBin = useItemStore((s) => s.addItemToBin);
+  const removeItemFromBin = useItemStore((s) => s.removeItemFromBin);
+  const updateBinItemQuantity = useItemStore((s) => s.updateBinItemQuantity);
+  const markBinOutOfStock = useItemStore((s) => s.markBinOutOfStock);
 
   const [name, setName] = useState(bin?.name || "");
-  // local quantity
-  const [quantity, setQuantity] = useState(bin?.quantity ?? 0)
+  const [showCreateICN, setShowCreateICN] = useState(false);
+  const [showItemPicker, setShowItemPicker] = useState(false);
+
+  // Derive binItems for this bin from the subscribed arrays
+  const binItems = bin
+    ? allBinItems
+        .filter((bi) => bi.binId === bin.id)
+        .map((binItem) => {
+          const item = items.find((i) => i.id === binItem.itemId);
+          const icn = binItem.icnId ? icns.find((i) => i.id === binItem.icnId) : undefined;
+          return { item: item!, icn, binItem };
+        })
+        .filter(({ item }) => item !== undefined)
+    : [];
 
   // Keep local name state in sync when selected bin changes
   useEffect(() => {
     if (bin) {
       setName(bin.name || "");
-      setQuantity(bin.quantity ?? 0)
     }
   }, [bin]);
 
@@ -96,100 +114,130 @@ export function BinDetailSheet({ bin, open, onOpenChange }: BinDetailSheetProps)
                 Part References & ICNs
               </h4>
               <Badge variant="outline" className="text-[10px]">
-                0 Items
+                {binItems.length} {binItems.length === 1 ? "Item" : "Items"}
               </Badge>
             </div>
 
-            <div className="flex flex-col items-center justify-center p-6 border border-dashed border-border rounded-lg text-center gap-2 bg-muted/20">
-              <p className="text-xs font-medium text-foreground">No parts assigned yet</p>
-              <p className="text-[11px] text-muted-foreground max-w-xs">
-                Part number indexing and inventory tagging will connect directly to this bin location.
-              </p>
-              <Button variant="outline" size="sm" className="mt-2 text-xs" disabled>
-                + Assign Part / ICN
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Inventory */}
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <h4 className="text-xs font-semibold text-foreground uppercase tracking-wider">
-              Inventory
-            </h4>
-
-            <Badge variant="outline" className="text-[10px]">
-              {bin.itemId ? "Stocked" : "Empty"}
-            </Badge>
-          </div>
-
-          {bin.itemId ? (
-            <div className="flex flex-col gap-3 rounded-lg border border-border/70 p-4 bg-card/60">
-              <div className="flex flex-col gap-1">
-                <span className="text-xs text-muted-foreground">Item</span>
-                <span className="text-sm font-medium">
-                  {bin.itemId}
-                </span>
-              </div>
-
+            {binItems.length > 0 ? (
               <div className="flex flex-col gap-2">
-                <Label htmlFor="bin-quantity">Quantity</Label>
+                {binItems.map(({ item, icn, binItem }) => (
+                  <div
+                    key={binItem.id}
+                    className="flex flex-col gap-2 p-3 border border-border rounded-lg bg-card/60"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-sm font-medium">{item.name}</span>
+                        {item.description && (
+                          <span className="text-xs text-muted-foreground">{item.description}</span>
+                        )}
+                        {icn && (
+                          <span className="text-[11px] font-mono text-muted-foreground">
+                            ICN: {icn.value}
+                          </span>
+                        )}
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-xs h-7"
+                        onClick={() => removeItemFromBin(binItem.id)}
+                      >
+                        Remove
+                      </Button>
+                    </div>
 
-                <Input
-                  id="bin-quantity"
-                  type="number"
-                  min={0}
-                  value={quantity}
-                  onChange={(e) => {
-                    const value = Number(e.target.value);
-                    setQuantity(value);
-                    setBinQuantity(bin.id, value);
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor={`quantity-${binItem.id}`} className="text-xs">
+                        Qty:
+                      </Label>
+                      <Input
+                        id={`quantity-${binItem.id}`}
+                        type="number"
+                        min={0}
+                        value={binItem.quantity}
+                        onChange={(e) => {
+                          const value = Number(e.target.value);
+                          updateBinItemQuantity(binItem.id, value);
+                        }}
+                        className="h-8 w-24"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center p-6 border border-dashed border-border rounded-lg text-center gap-2 bg-muted/20">
+                <p className="text-xs font-medium text-foreground">No parts assigned yet</p>
+                <p className="text-[11px] text-muted-foreground max-w-xs">
+                  Part number indexing and inventory tagging will connect directly to this bin location.
+                </p>
+              </div>
+            )}
+
+            {bin && (
+              <div className="flex gap-2">
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => setShowCreateICN(true)}
+                  className="flex-1"
+                >
+                  + Create New ICN
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowItemPicker(true)}
+                  className="flex-1"
+                >
+                  + Assign Existing Item
+                </Button>
+              </div>
+            )}
+
+            {bin && (
+              <>
+                <CreateICNDialog
+                  open={showCreateICN}
+                  onOpenChange={setShowCreateICN}
+                  binId={bin.id}
+                  onCreated={(icnId, itemId) => {
+                    console.log("ICN created:", icnId, itemId);
                   }}
                 />
-              </div>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => unstockBin(bin.id)}
-              >
-                Unstock Bin
-              </Button>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-3 rounded-lg border border-dashed border-border p-4">
-              <p className="text-xs text-muted-foreground">
-                This bin currently has no item assigned.
-              </p>
-
-              <Button
-                size="sm"
-                onClick={() => stockBin(bin.id, "example-item", 1)}
-              >
-                Stock Bin
-              </Button>
-            </div>
-          )}
+                {showItemPicker && (
+                  <ItemPicker
+                    onSelect={(itemId) => {
+                      addItemToBin(bin.id, itemId, 1);
+                      setShowItemPicker(false);
+                    }}
+                  />
+                )}
+              </>
+            )}
+          </div>
         </div>
 
         <SheetFooter className="flex-col! gap-2 sm:flex-row">
           <Button
             variant="destructive"
             className="w-full"
-            onClick={() => setBinQuantity(bin.id, 0)}
-            disabled={!bin.itemId || bin.quantity === 0}
+            onClick={() => {
+              markBinOutOfStock(bin.id);
+              setBinQuantity(bin.id, 0);
+            }}
+            disabled={binItems.length === 0}
           >
             Mark Out of Stock
           </Button>
 
           <Button
-            variant="destructive"
+            variant={bin.isOutOfService ? "default" : "destructive"}
             className="w-full"
-            onClick={() => setBinOutOfService(bin.id, true)}
-            disabled={bin.isOutOfService}
+            onClick={() => setBinOutOfService(bin.id, !bin.isOutOfService)}
           >
-            Mark Out of Service
+            {bin.isOutOfService ? "Mark Serviceable" : "Mark Out of Service"}
           </Button>
 
           <Button

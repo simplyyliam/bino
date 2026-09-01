@@ -1,18 +1,30 @@
 import { Pill } from "@/shared/components"
-import { useStorageStore, useBinStore } from "@bino/store";
+import { useStorageStore, useBinStore, useItemStore } from "@bino/store";
 import { useParams } from "react-router-dom";
 import { getBinStats } from "@bino/data";
 
 export const BuildingStatusbar = () => {
   const { buildingId } = useParams();
   const storages = useStorageStore((s) => s.storages)
-  // Subscribe to bins for re-renders/udpates
+  // Subscribe to bins for re-renders/updates
   const bins = useBinStore((s) => s.bins);
+  // Subscribe to binItems for status updates when ICNs are added
+  const binItems = useItemStore((s) => s.binItems);
   console.log("statusbar bins", bins)
 
   const storage = storages.find((storage) => storage.buildingId === buildingId)
 
   if (!storage) return null
+
+  const getBinItemCount = (binId: string) => {
+    return binItems.filter(bi => bi.binId === binId).length;
+  };
+
+  const getTotalBinItemQuantity = (binId: string) => {
+    return binItems
+      .filter(bi => bi.binId === binId)
+      .reduce((sum, bi) => sum + bi.quantity, 0);
+  };
 
   const {
     total,
@@ -20,14 +32,14 @@ export const BuildingStatusbar = () => {
     stocked,
     outOfStock,
     outOfService,
-  } = getBinStats(bins, storage.id);
+  } = getBinStats(bins, storage.id, getBinItemCount, getTotalBinItemQuantity);
 
 
   return (
     <div className="flex items-center w-full p-2.5 gap-2.5">
       <Pill
         status
-        label="EMPTY"
+        label="BINS"
         value={total}
         className="
           bg-[#F1F1F1]/15!

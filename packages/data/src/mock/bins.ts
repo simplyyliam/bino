@@ -10,7 +10,9 @@ export const Bins: Bin[] = [
     level: 0,
     row: 0,
     column: 0,
-    position: 0
+    position: 0,
+    quantity: 0,
+    isOutOfService: false,
   },
   {
     id: "bin-002",
@@ -20,7 +22,9 @@ export const Bins: Bin[] = [
     level: 0,
     row: 1,
     column: 0,
-    position: 0
+    position: 0,
+    quantity: 0,
+    isOutOfService: false,
   },
   {
     id: "bin-003",
@@ -30,7 +34,9 @@ export const Bins: Bin[] = [
     level: 0,
     row: 2,
     column: 0,
-    position: 0
+    position: 0,
+    quantity: 0,
+    isOutOfService: false,
   },
   {
     id: "bin-004",
@@ -40,7 +46,9 @@ export const Bins: Bin[] = [
     level: 0,
     row: 3,
     column: 0,
-    position: 0
+    position: 0,
+    quantity: 0,
+    isOutOfService: false,
   },
   {
     id: "bin-005",
@@ -50,7 +58,9 @@ export const Bins: Bin[] = [
     level: 0,
     row: 4,
     column: 0,
-    position: 0
+    position: 0,
+    quantity: 0,
+    isOutOfService: false,
   },
 
   // Column 2 (index 1)
@@ -62,7 +72,9 @@ export const Bins: Bin[] = [
     level: 0,
     row: 0,
     column: 1,
-    position: 0
+    position: 0,
+    quantity: 0,
+    isOutOfService: false,
   },
   {
     id: "bin-007",
@@ -72,7 +84,9 @@ export const Bins: Bin[] = [
     level: 0,
     row: 1,
     column: 1,
-    position: 0
+    position: 0,
+    quantity: 0,
+    isOutOfService: false,
   },
   {
     id: "bin-008",
@@ -82,7 +96,9 @@ export const Bins: Bin[] = [
     level: 0,
     row: 2,
     column: 1,
-    position: 0
+    position: 0,
+    quantity: 0,
+    isOutOfService: false,
   },
   {
     id: "bin-009",
@@ -92,7 +108,9 @@ export const Bins: Bin[] = [
     level: 0,
     row: 3,
     column: 1,
-    position: 0
+    position: 0,
+    quantity: 0,
+    isOutOfService: false,
   },
   {
     id: "bin-010",
@@ -102,7 +120,9 @@ export const Bins: Bin[] = [
     level: 0,
     row: 4,
     column: 1,
-    position: 0
+    position: 0,
+    quantity: 0,
+    isOutOfService: false,
   },
 
   // Column 3 (index 2)
@@ -114,7 +134,9 @@ export const Bins: Bin[] = [
     level: 0,
     row: 0,
     column: 2,
-    position: 0
+    position: 0,
+    quantity: 0,
+    isOutOfService: false,
   },
   {
     id: "bin-012",
@@ -124,7 +146,9 @@ export const Bins: Bin[] = [
     level: 0,
     row: 1,
     column: 2,
-    position: 0
+    position: 0,
+    quantity: 0,
+    isOutOfService: false,
   },
   {
     id: "bin-013",
@@ -134,7 +158,9 @@ export const Bins: Bin[] = [
     level: 0,
     row: 2,
     column: 2,
-    position: 0
+    position: 0,
+    quantity: 0,
+    isOutOfService: false,
   },
   {
     id: "bin-014",
@@ -144,7 +170,9 @@ export const Bins: Bin[] = [
     level: 0,
     row: 3,
     column: 2,
-    position: 0
+    position: 0,
+    quantity: 0,
+    isOutOfService: false,
   },
   {
     id: "bin-015",
@@ -154,7 +182,9 @@ export const Bins: Bin[] = [
     level: 0,
     row: 4,
     column: 2,
-    position: 0
+    position: 0,
+    quantity: 0,
+    isOutOfService: false,
   },
 
   // Column 4 (index 3)
@@ -166,7 +196,9 @@ export const Bins: Bin[] = [
     level: 0,
     row: 0,
     column: 3,
-    position: 0
+    position: 0,
+    quantity: 0,
+    isOutOfService: false,
   },
   {
     id: "bin-017",
@@ -176,7 +208,9 @@ export const Bins: Bin[] = [
     level: 0,
     row: 1,
     column: 3,
-    position: 0
+    position: 0,
+    quantity: 0,
+    isOutOfService: false,
   },
   {
     id: "bin-018",
@@ -186,7 +220,9 @@ export const Bins: Bin[] = [
     level: 0,
     row: 2,
     column: 3,
-    position: 0
+    position: 0,
+    quantity: 0,
+    isOutOfService: false,
   },
   {
     id: "bin-019",
@@ -196,7 +232,9 @@ export const Bins: Bin[] = [
     level: 0,
     row: 3,
     column: 3,
-    position: 0
+    position: 0,
+    quantity: 0,
+    isOutOfService: false,
   },
   {
     id: "bin-020",
@@ -206,7 +244,9 @@ export const Bins: Bin[] = [
     level: 0,
     row: 4,
     column: 3,
-    position: 0
+    position: 0,
+    quantity: 0,
+    isOutOfService: false,
   },
 
   // Column 5 (index 4)
@@ -218,7 +258,9 @@ export const Bins: Bin[] = [
     level: 0,
     row: 0,
     column: 4,
-    position: 0
+    position: 0,
+    quantity: 0,
+    isOutOfService: false,
   },
   {
     id: "bin-022",
@@ -228,7 +270,9 @@ export const Bins: Bin[] = [
     level: 0,
     row: 1,
     column: 4,
-    position: 0
+    position: 0,
+    quantity: 0,
+    isOutOfService: false,
   },
   {
     id: "bin-023",
@@ -238,7 +282,9 @@ export const Bins: Bin[] = [
     level: 0,
     row: 2,
     column: 4,
-    position: 0
+    position: 0,
+    quantity: 0,
+    isOutOfService: false,
   },
   {
     id: "bin-024",
@@ -248,7 +294,9 @@ export const Bins: Bin[] = [
     level: 0,
     row: 3,
     column: 4,
-    position: 0
+    position: 0,
+    quantity: 0,
+    isOutOfService: false,
   },
   {
     id: "bin-025",
@@ -258,7 +306,9 @@ export const Bins: Bin[] = [
     level: 0,
     row: 4,
     column: 4,
-    position: 0
+    position: 0,
+    quantity: 0,
+    isOutOfService: false,
   },
 
   // Column 6 (index 5)
@@ -270,7 +320,9 @@ export const Bins: Bin[] = [
     level: 0,
     row: 0,
     column: 5,
-    position: 0
+    position: 0,
+    quantity: 0,
+    isOutOfService: false,
   },
   {
     id: "bin-027",
@@ -280,7 +332,9 @@ export const Bins: Bin[] = [
     level: 0,
     row: 1,
     column: 5,
-    position: 0
+    position: 0,
+    quantity: 0,
+    isOutOfService: false,
   },
   {
     id: "bin-028",
@@ -290,7 +344,9 @@ export const Bins: Bin[] = [
     level: 0,
     row: 2,
     column: 5,
-    position: 0
+    position: 0,
+    quantity: 0,
+    isOutOfService: false,
   },
   {
     id: "bin-029",
@@ -300,7 +356,9 @@ export const Bins: Bin[] = [
     level: 0,
     row: 3,
     column: 5,
-    position: 0
+    position: 0,
+    quantity: 0,
+    isOutOfService: false,
   },
   {
     id: "bin-030",
@@ -310,6 +368,8 @@ export const Bins: Bin[] = [
     level: 0,
     row: 4,
     column: 5,
-    position: 0
+    position: 0,
+    quantity: 0,
+    isOutOfService: false,
   },
 ];
