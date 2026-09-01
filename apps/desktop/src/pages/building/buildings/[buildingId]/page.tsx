@@ -1,10 +1,11 @@
-import React, { useMemo, useState } from "react"
+import React, { useMemo, useState, useRef } from "react"
 import { useBinStore, useStorageStore, useLocationSystemStore, useSearchStore, useItemStore } from "@bino/store"
 import { getBinState, organizeBinsIntoGrid } from "@bino/data"
 import { useParams } from "react-router-dom"
 import { BinDetailSheet } from "@/features/building/components/BinDetailSheet"
 import { DynamicIcon } from "lucide-react/dynamic";
 import { isValidIconName } from "@/lib/icons"
+
 export default function Building() {
   const { buildingId } = useParams()
   const { storages } = useStorageStore()
@@ -18,6 +19,15 @@ export default function Building() {
   const activeBin = bins.find((bin) => bin.id === selectedBinId) ?? null
 
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [scrollX, setScrollX] = useState(0)
+  const [scrollY, setScrollY] = useState(0)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget
+    setScrollX(target.scrollLeft)
+    setScrollY(target.scrollTop)
+  }
 
 
 
@@ -84,85 +94,223 @@ export default function Building() {
     `${rowPrefix}${String(i + 1).padStart(2, '0')}`
   )
 
+  // Calculate if grid needs spreadsheet mode (too large to fit comfortably)
+  const gridWidth = columns * 76 + 64 + 4; // bins + row labels + padding
+  const gridHeight = rows * 76 + 40 + 4; // bins + column labels + padding
+  const needsSpreadsheetMode = gridWidth > window.innerWidth * 0.9 || gridHeight > window.innerHeight * 0.9;
+
   return (
-    <div className="flex items-center justify-center w-full h-full">
-      <div
-        className="inline-grid gap-2 items-center"
-        style={{
-          gridTemplateColumns: `auto repeat(${columns}, minmax(0, 1fr))`,
-        }}
-      >
-        {/* Row 0: Empty Top-Left Corner + Column Numbers */}
-        <div />
-        {colLabels.map((colLabel) => (
-          <div
-            key={`col-${colLabel}`}
-            className="flex items-center justify-center text-xs text-muted-foreground font-medium pb-1 select-none"
-          >
-            {colLabel}
+    <div className="flex items-center justify-center w-full h-full p-4">
+      {needsSpreadsheetMode ? (
+        // Spreadsheet mode: frozen headers, scrollable, with border
+        <div
+          className="relative border border-border rounded-lg overflow-hidden bg-background"
+          style={{
+            width: 'calc(100% - 32px)',
+            height: 'calc(100% - 32px)',
+            maxWidth: '100%',
+            maxHeight: '100%',
+          }}
+        >
+          {/* Fixed top-left corner */}
+          <div className="absolute top-0 left-0 z-30 bg-background border-r border-b border-border">
+            <div className="w-16 h-10 flex items-center justify-center" />
           </div>
-        ))}
 
-        {/* Rows: Level Label on Left (L01..L05) + Bin Cards */}
-        {rowLabels.map((rowLabel, rowIndex) => (
-          <React.Fragment key={`row-${rowLabel}`}>
-            {/* Column 1: Y-Axis Level Label */}
-            <div className="flex items-center justify-end pr-3 text-xs text-muted-foreground font-medium select-none">
-              {rowLabel}
+          {/* Fixed column headers (scrolls horizontally with grid) */}
+          <div className="absolute top-0 left-16 right-0 z-20 bg-background border-b border-border overflow-hidden">
+            <div
+              className="flex gap-2 py-2"
+              style={{
+                transform: `translateX(-${scrollX}px)`,
+                width: `${columns * 76}px`
+              }}
+            >
+              {colLabels.map((colLabel) => (
+                <div
+                  key={`col-${colLabel}`}
+                  className="flex items-center justify-center text-xs text-muted-foreground font-medium select-none"
+                  style={{ width: '70px', minWidth: '70px' }}
+                >
+                  {colLabel}
+                </div>
+              ))}
             </div>
+          </div>
 
-            {/* Columns: Bin Cards for this Level */}
-            {colLabels.map((_, colIndex) => {
-              const bin = grid[rowIndex]?.[colIndex]
+          {/* Fixed row labels (scrolls vertically with grid) */}
+          <div className="absolute top-10 left-0 bottom-0 z-20 bg-background border-r border-border overflow-hidden">
+            <div
+              style={{
+                transform: `translateY(-${scrollY}px)`,
+                height: `${rows * 76}px`
+              }}
+            >
+              {rowLabels.map((rowLabel, index) => (
+                <div
+                  key={`row-${rowLabel}`}
+                  className="flex items-center justify-end pr-3 text-xs text-muted-foreground font-medium select-none"
+                  style={{
+                    height: '70px',
+                    minHeight: '70px',
+                    width: '64px',
+                    marginTop: index === 0 ? '0' : '6px'
+                  }}
+                >
+                  {rowLabel}
+                </div>
+              ))}
+            </div>
+          </div>
 
-              if (!bin) {
+          {/* Scrollable grid area */}
+          <div
+            ref={scrollContainerRef}
+            className="absolute top-10 left-16 right-0 bottom-0 overflow-auto"
+            onScroll={handleScroll}
+          >
+            <div
+              className="grid gap-2"
+              style={{
+                gridTemplateColumns: `repeat(${columns}, 70px)`,
+                gridTemplateRows: `repeat(${rows}, 70px)`,
+                width: `${columns * 76 - 6}px`,
+                height: `${rows * 76 - 6}px`,
+              }}
+            >
+              {rowLabels.map((_, rowIndex) =>
+                colLabels.map((_, colIndex) => {
+                  const bin = grid[rowIndex]?.[colIndex];
+
+                  if (!bin) {
+                    return (
+                      <div
+                        key={`empty-${colIndex}-${rowIndex}`}
+                        className="w-17.5 h-17.5"
+                      />
+                    );
+                  }
+
+                  const binItemCount = binItems.filter(bi => bi.binId === bin.id).length;
+                  const totalBinItemQuantity = binItems
+                    .filter(bi => bi.binId === bin.id)
+                    .reduce((sum, bi) => sum + bi.quantity, 0);
+                  const binState = getBinState(bin, binItemCount, totalBinItemQuantity);
+
+                  const isMatching = matchingBinIds.has(bin.id);
+                  const isSearchActive = searchQuery.trim().length > 0;
+
+                  return (
+                    <div
+                      key={bin.id}
+                      onClick={() => {
+                        setSelectedBinId(bin.id);
+                        setSheetOpen(true);
+                      }}
+                      className={`flex items-center justify-center w-17.5 h-17.5 rounded-[20px] transition-all cursor-pointer ${isSearchActive
+                        ? isMatching
+                          ? "bg-bin-empty ring-2 ring-primary scale-105"
+                          : "bg-bin-empty opacity-50"
+                        : `${binState === "stocked"
+                          ? "bg-bin-stocked"
+                          : binState === "outOfStock"
+                            ? "bg-bin-out-of-stock"
+                            : binState === "outOfService"
+                              ? "bg-bin-out-of-service"
+                              : "bg-bin-empty"
+                        } hover:ring-1 hover:ring-border`
+                      }`}
+                    >
+                      {isValidIconName(bin.icon) && (
+                        <DynamicIcon name={bin.icon} size={24} strokeWidth={1.75} />
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </div>
+      ) : (
+        // Simple centered mode: no scrolling, no border, clean and minimal
+        <div
+          className="inline-grid gap-2 items-center"
+          style={{
+            gridTemplateColumns: `auto repeat(${columns}, minmax(0, 1fr))`,
+          }}
+        >
+          {/* Row 0: Empty Top-Left Corner + Column Numbers */}
+          <div />
+          {colLabels.map((colLabel) => (
+            <div
+              key={`col-${colLabel}`}
+              className="flex items-center justify-center text-xs text-muted-foreground font-medium pb-1 select-none"
+            >
+              {colLabel}
+            </div>
+          ))}
+
+          {/* Rows: Level Label on Left + Bin Cards */}
+          {rowLabels.map((rowLabel, rowIndex) => (
+            <React.Fragment key={`row-${rowLabel}`}>
+              {/* Column 1: Y-Axis Level Label */}
+              <div className="flex items-center justify-end pr-3 text-xs text-muted-foreground font-medium select-none">
+                {rowLabel}
+              </div>
+
+              {/* Columns: Bin Cards for this Level */}
+              {colLabels.map((_, colIndex) => {
+                const bin = grid[rowIndex]?.[colIndex];
+
+                if (!bin) {
+                  return (
+                    <div
+                      key={`empty-${colIndex}-${rowIndex}`}
+                      className="w-17.5 h-17.5"
+                    />
+                  );
+                }
+
+                const binItemCount = binItems.filter(bi => bi.binId === bin.id).length;
+                const totalBinItemQuantity = binItems
+                  .filter(bi => bi.binId === bin.id)
+                  .reduce((sum, bi) => sum + bi.quantity, 0);
+                const binState = getBinState(bin, binItemCount, totalBinItemQuantity);
+
+                const isMatching = matchingBinIds.has(bin.id);
+                const isSearchActive = searchQuery.trim().length > 0;
+
                 return (
                   <div
-                    key={`empty-${colIndex}-${rowIndex}`}
-                    className="w-17.5 h-17.5"
-                  />
-                )
-              }
-              const binItemCount = binItems.filter(bi => bi.binId === bin.id).length;
-              const totalBinItemQuantity = binItems
-                .filter(bi => bi.binId === bin.id)
-                .reduce((sum, bi) => sum + bi.quantity, 0);
-              const binState = getBinState(bin, binItemCount, totalBinItemQuantity)
-
-              const isMatching = matchingBinIds.has(bin.id)
-              const isSearchActive = searchQuery.trim().length > 0
-
-              return (
-                <div
-                  key={bin.id}
-                  onClick={() => {
-                    setSelectedBinId(bin.id)
-                    setSheetOpen(true)
-                  }}
-                  className={`flex items-center justify-center w-17.5 h-17.5 rounded-[20px] transition-all cursor-pointer ${isSearchActive
-                    ? isMatching
-                      ? "bg-bin-empty ring-2 ring-primary scale-105"
-                      : "bg-bin-empty opacity-50"
-                    : `${binState === "stocked"
-                      ? "bg-bin-stocked"
-                      : binState === "outOfStock"
-                        ? "bg-bin-out-of-stock"
-                        : binState === "outOfService"
-                          ? "bg-bin-out-of-service"
-                          : "bg-bin-empty"
-
-                    } hover:ring-1 hover:ring-border`
+                    key={bin.id}
+                    onClick={() => {
+                      setSelectedBinId(bin.id);
+                      setSheetOpen(true);
+                    }}
+                    className={`flex items-center justify-center w-17.5 h-17.5 rounded-[20px] transition-all cursor-pointer ${isSearchActive
+                      ? isMatching
+                        ? "bg-bin-empty ring-2 ring-primary scale-105"
+                        : "bg-bin-empty opacity-50"
+                      : `${binState === "stocked"
+                        ? "bg-bin-stocked"
+                        : binState === "outOfStock"
+                          ? "bg-bin-out-of-stock"
+                          : binState === "outOfService"
+                            ? "bg-bin-out-of-service"
+                            : "bg-bin-empty"
+                      } hover:ring-1 hover:ring-border`
                     }`}
-                >
-                  {isValidIconName(bin.icon) && (
-                    <DynamicIcon name={bin.icon} size={24} strokeWidth={1.75} />
-                  )}
-                </div>
-              )
-            })}
-          </React.Fragment>
-        ))}
-      </div>
+                  >
+                    {isValidIconName(bin.icon) && (
+                      <DynamicIcon name={bin.icon} size={24} strokeWidth={1.75} />
+                    )}
+                  </div>
+                );
+              })}
+            </React.Fragment>
+          ))}
+        </div>
+      )}
 
       <BinDetailSheet
         bin={activeBin}
@@ -170,5 +318,5 @@ export default function Building() {
         onOpenChange={setSheetOpen}
       />
     </div>
-  )
+  );
 }
