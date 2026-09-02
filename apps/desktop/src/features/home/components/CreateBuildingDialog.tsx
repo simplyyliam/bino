@@ -53,33 +53,33 @@ export const CreateBuildingDialog = ({ trigger }: CreateBuildingDialogProps) => 
     }
   }, [selectedSystem])
 
-  const handleCreateBuilding = () => {
+  const handleCreateBuilding = async () => {
     if (!name.trim() || !buildingNumber.trim() || !locationSystemId) return
 
-    const buildingId = crypto.randomUUID()
+    try {
+      // Create the building - the API assigns the real id, use that for the storage below.
+      const building = await addBuilding({
+        name: name.trim(),
+        buildingNumber: buildingNumber.trim(),
+      })
 
-    // Create the building
-    addBuilding({
-      id: buildingId,
-      name: name.trim(),
-      buildingNumber: buildingNumber.trim(),
-    })
+      // Create default storage for this building with selected location system
+      await addStorage({
+        buildingId: building.id,
+        name: "Main Storage",
+        locationSystemId,
+        maxLevel: 0,
+        maxRow: 0,
+        maxColumn: 0
+      })
 
-    // Create default storage for this building with selected location system
-    addStorage({
-      id: crypto.randomUUID(),
-      buildingId,
-      name: "Main Storage",
-      locationSystemId,
-      maxLevel: 0,
-      maxRow: 0,
-      maxColumn: 0
-    })
-
-    // Reset form
-    setName("")
-    setBuildingNumber("")
-    setLocationSystemId(locationSystems[0]?.id || "")
+      // Reset form
+      setName("")
+      setBuildingNumber("")
+      setLocationSystemId(locationSystems[0]?.id || "")
+    } catch (err) {
+      console.error("Failed to create building", err)
+    }
   }
 
   const handleOpenEditor = (sysId: string, e?: React.MouseEvent) => {

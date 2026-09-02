@@ -9,7 +9,8 @@
     "desktop": "pnpm --filter @bino/desktop",
     "mobile": "pnpm --filter @bino/mobile",
     "ui": "pnpm --filter @bino/ui",
-    "store": "pnpm --filter @bino/store"
+    "store": "pnpm --filter @bino/store",
+    "api": "pnpm --filter @bino/api"
   },
   "keywords": [],
   "author": "",

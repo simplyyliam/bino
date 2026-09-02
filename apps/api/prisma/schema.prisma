@@ -1,0 +1,129 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Building {
+  id             String    @id @default(uuid())
+  name           String
+  buildingNumber String
+  storages       Storage[]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Storage {
+  id               String         @id @default(uuid())
+  buildingId       String
+  building         Building       @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  name             String
+  locationSystemId String
+  locationSystem   LocationSystem @relation(fields: [locationSystemId], references: [id])
+  maxLevel         Int
+  maxRow           Int
+  maxColumn        Int
+  bins             Bin[]
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+}
+
+model Bin {
+  id             String            @id @default(uuid())
+  storageId      String
+  storage        Storage           @relation(fields: [storageId], references: [id], onDelete: Cascade)
+  name           String
+  locationCode   String
+  level          Int
+  row            Int
+  column         Int
+  position       Int
+  itemId         String?
+  quantity       Int               @default(0)
+  isOutOfService Boolean           @default(false)
+  icon           String?
+  binItems       BinItem[]
+  historyEvents  MovementHistory[] @relation("BinHistory")
+  fromMoves      MovementHistory[] @relation("FromBin")
+  toMoves        MovementHistory[] @relation("ToBin")
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+}
+
+model Item {
+  id          String            @id @default(uuid())
+  name        String
+  description String?
+  category    String?
+  icns        ICN[]
+  binItems    BinItem[]
+  history     MovementHistory[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+model ICN {
+  id        String            @id @default(uuid())
+  value     String            @unique
+  itemId    String
+  item      Item              @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  metadata  Json?
+  binItems  BinItem[]
+  history   MovementHistory[]
+  createdAt DateTime          @default(now())
+}
+
+model BinItem {
+  id           String            @id @default(uuid())
+  binId        String
+  bin          Bin               @relation(fields: [binId], references: [id], onDelete: Cascade)
+  itemId       String
+  item         Item              @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  icnId        String?
+  icn          ICN?              @relation(fields: [icnId], references: [id], onDelete: SetNull)
+  quantity     Int
+  notes        String?
+  addedAt      DateTime          @default(now())
+  lastModified DateTime          @updatedAt
+  history      MovementHistory[]
+}
+
+model LocationSystem {
+  id                String    @id @default(uuid())
+  name              String
+  usesExistingCodes Boolean
+  separator         String
+  paddingWidth      Int
+  levels            Json
+  mappingRules      Json
+  gridConfig        Json?
+  storages          Storage[]
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model MovementHistory {
+  id             String   @id @default(uuid())
+  timestamp      DateTime @default(now())
+  eventType      String
+  binId          String?
+  bin            Bin?     @relation("BinHistory", fields: [binId], references: [id], onDelete: Cascade)
+  itemId         String?
+  item           Item?    @relation(fields: [itemId], references: [id], onDelete: SetNull)
+  icnId          String?
+  icn            ICN?     @relation(fields: [icnId], references: [id], onDelete: SetNull)
+  binItemId      String?
+  binItem        BinItem? @relation(fields: [binItemId], references: [id], onDelete: SetNull)
+  fromBinId      String?
+  fromBin        Bin?     @relation("FromBin", fields: [fromBinId], references: [id], onDelete: SetNull)
+  toBinId        String?
+  toBin          Bin?     @relation("ToBin", fields: [toBinId], references: [id], onDelete: SetNull)
+  quantityBefore Int?
+  quantityAfter  Int?
+  reason         String?
+  user           String?
+  summary        String
+}
