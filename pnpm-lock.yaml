@@ -210,6 +210,9 @@ importers:
 
   packages/store:
     dependencies:
+      '@bino/data':
+        specifier: workspace:*
+        version: link:../data
       '@bino/types':
         specifier: workspace:*
         version: link:../types

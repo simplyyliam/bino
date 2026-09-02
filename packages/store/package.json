@@ -14,6 +14,7 @@
     "./*": "./src/*.ts"
   },
   "dependencies": {
+    "@bino/data": "workspace:*",
     "@bino/types": "workspace:*",
     "lucide-react": "^1.34.0",
     "zustand": "^5.0.15"

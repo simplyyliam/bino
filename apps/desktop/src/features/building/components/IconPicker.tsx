@@ -108,7 +108,7 @@ export const IconPicker = ({ binId }: IconPickerProp) => {
           {displayedIcons.map((name) => (
             <IconButton
               key={name}
-              iconName={name}
+              Icon={name}
               size={22}
               title={name}
               ariaLabel={name}

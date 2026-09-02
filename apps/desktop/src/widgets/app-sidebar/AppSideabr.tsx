@@ -10,16 +10,20 @@ import {
   SidebarHeader,
   SidebarFooter,
   SidebarMenuAction,
+  ContextMenu,
+  ContextMenuTrigger,
+  ContextMenuContent,
+  ContextMenuItem,
 } from "@bino/ui";
 import { useBuildingStore, useTimelineFilterStore } from "@bino/store";
 import { useNavigate } from "react-router-dom";
 import { ThemeToggle } from "../app-theme-toggle/ThemeToggle";
 import { Plus } from "lucide-react";
 import { CreateBuildingDialog } from "@/features/home";
-import { useState } from "react";
 
 export const AppSidebar = () => {
   const buildings = useBuildingStore((s) => s.buildings);
+  const deleteBuilding = useBuildingStore((s) => s.deleteBuilding);
   const selectedBuildingId = useTimelineFilterStore((s) => s.selectedBuildingId);
   const navigate = useNavigate()
 
@@ -44,12 +48,19 @@ export const AppSidebar = () => {
             <SidebarMenu>
               {buildings.map((building) => (
                 <SidebarMenuItem key={building.id}>
-                  <SidebarMenuButton
-                    isActive={selectedBuildingId === building.id}
-                    onClick={() => navigate(`/buildings/${building.id}`)}
-                  >
-                    {building.name}
-                  </SidebarMenuButton>
+                  <ContextMenu>
+                    <ContextMenuTrigger render={
+                      <SidebarMenuButton
+                        isActive={selectedBuildingId === building.id}
+                        onClick={() => navigate(`/buildings/${building.id}`)}
+                      >
+                        {building.name}
+                      </SidebarMenuButton>
+                    } />
+                    <ContextMenuContent>
+                      <ContextMenuItem variant="destructive" onClick={() => deleteBuilding(building.id)}>Delete</ContextMenuItem>
+                    </ContextMenuContent>
+                  </ContextMenu>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
