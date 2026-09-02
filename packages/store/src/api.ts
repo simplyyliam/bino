@@ -6,7 +6,7 @@ declare const importMetaEnv: Record<string, string | undefined> | undefined;
 function resolveApiBaseUrl(): string {
   try {
     // @ts-ignore - import.meta is only valid in ESM bundlers (Vite); guarded by try/catch for other runtimes.
-    const viteEnv = import.meta?.env?.VITE_API_URL;
+    const viteEnv = import.meta.env.VITE_API_URL;
     if (viteEnv) return viteEnv;
   } catch {
     // import.meta not available in this runtime (e.g. some RN environments)
