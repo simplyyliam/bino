@@ -30,8 +30,9 @@ export function ThemeToggle({ compact = false }: ThemeToggleProps) {
           <IconButton
             Icon={resolvedTheme === 'dark' ? Moon02Icon : Sun03Icon}
             ariaLabel="Change color theme"
+            rounded
             variant={compact ? 'ghost' : 'outline'}
-            className={compact ? 'size-8 rounded-full border border-sidebar-border' : undefined}
+            className={compact ? 'size-8 border border-sidebar-border' : undefined}
           />
         }
       />

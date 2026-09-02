@@ -11,6 +11,7 @@ import { useMovementHistoryStore } from "@bino/store";
 import { Clock03Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useNavigate, useParams } from "react-router-dom";
+import { IconButton } from "@/shared/components";
 
 export const ActivityTimeline = () => {
   // Subscribe to the raw history array (stable reference), derive the filtered slice in the component body
@@ -77,8 +78,7 @@ export const ActivityTimeline = () => {
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger
         render={
-          <Button variant="ghost" size="sm" className="relative">
-            <HugeiconsIcon icon={Clock03Icon} size={18} strokeWidth={1.67} />
+          <IconButton Icon={Clock03Icon} className="relative">
             {recentHistory.length > 0 && (
               <Badge
                 variant="default"
@@ -87,9 +87,10 @@ export const ActivityTimeline = () => {
                 {recentHistory.length > 99 ? "99+" : recentHistory.length}
               </Badge>
             )}
-          </Button>
+          </IconButton>
         }
       />
+
       <DropdownMenuContent align="end" className="w-96">
         <div className="flex items-center justify-between p-3 border-b border-border">
           <h3 className="text-sm font-semibold">Activity Timeline</h3>

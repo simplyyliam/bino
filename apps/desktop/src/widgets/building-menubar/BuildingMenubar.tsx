@@ -1,14 +1,11 @@
-import { Button } from "@bino/ui"
 import { ArrowLeft } from "lucide-react"
-import { ThemeToggle } from "../app-theme-toggle/ThemeToggle"
-import { MenubarGroup, Pill } from "@/shared/components"
+import { IconButton, MenubarGroup, Pill } from "@/shared/components"
 import { useNavigate, useParams } from "react-router-dom"
 import { ConfigMenu } from "@/features/building-navbar/components"
 import { useState } from "react"
 import { SearchField } from "@/features/app-navbar"
 import { useBuildingStore } from "@bino/store"
 import { Clock03Icon } from "@hugeicons/core-free-icons"
-import { HugeiconsIcon } from "@hugeicons/react"
 
 export const BuildingMenu = () => {
   const [open, setOpen] = useState(false)
@@ -17,26 +14,16 @@ export const BuildingMenu = () => {
   const navigate = useNavigate()
 
   const currentBuilding = buildings.find((b) => b.id === buildingId);
-  
+
   return (
     <div className="flex items-center justify-between w-full p-2.5">
       <MenubarGroup>
-        <Button variant="ghost" onClick={() => navigate('/')}>
-          <ArrowLeft />
-        </Button>
+        <IconButton Icon={ArrowLeft} onClick={() => navigate('/')} />
         <Pill label={currentBuilding?.name ?? buildingId ?? "Unknown"} />
       </MenubarGroup>
       <MenubarGroup>
         <SearchField />
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => navigate(`/building-timeline/${buildingId}`)}
-        >
-          <HugeiconsIcon icon={Clock03Icon} size={18} strokeWidth={1.67} />
-          Timeline
-        </Button>
-        <ThemeToggle />
+        <IconButton Label="Timeline" Icon={Clock03Icon} onClick={() => navigate(`/building-timeline/${buildingId}`)} />
         <ConfigMenu open={open} onOpenChange={setOpen} />
       </MenubarGroup>
     </div>

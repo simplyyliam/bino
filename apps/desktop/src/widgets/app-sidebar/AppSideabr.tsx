@@ -8,9 +8,15 @@ import {
   SidebarGroupLabel,
   SidebarGroupContent,
   SidebarHeader,
+  SidebarFooter,
+  SidebarMenuAction,
 } from "@bino/ui";
 import { useBuildingStore, useTimelineFilterStore } from "@bino/store";
 import { useNavigate } from "react-router-dom";
+import { ThemeToggle } from "../app-theme-toggle/ThemeToggle";
+import { Plus } from "lucide-react";
+import { CreateBuildingDialog } from "@/features/home";
+import { useState } from "react";
 
 export const AppSidebar = () => {
   const buildings = useBuildingStore((s) => s.buildings);
@@ -24,7 +30,16 @@ export const AppSidebar = () => {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Buildings</SidebarGroupLabel>
+          <SidebarGroupLabel>
+            Building
+            <CreateBuildingDialog
+              trigger={
+                <SidebarMenuAction>
+                  <Plus/> <span className="sr-only">Add Project</span>
+                </SidebarMenuAction>
+              }
+            />
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {buildings.map((building) => (
@@ -41,6 +56,9 @@ export const AppSidebar = () => {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <ThemeToggle />
+      </SidebarFooter>
     </Sidebar>
   );
 };
