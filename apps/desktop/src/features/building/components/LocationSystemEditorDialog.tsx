@@ -191,28 +191,32 @@ export function LocationSystemEditorDialog({
     }));
   };
 
-  const handleSave = () => {
-    const existing = locationSystems.find((s) => s.id === systemState.id);
-    if (existing) {
-      updateLocationSystem(systemState.id, {
-        name: systemState.name,
-        separator: systemState.separator,
-        paddingWidth: systemState.paddingWidth,
-        levels: systemState.levels,
-        mappingRules: systemState.mappingRules,
-        gridConfig: systemState.gridConfig,
-      });
-    } else {
-      addLocationSystem(systemState);
-    }
+  const handleSave = async () => {
+    try {
+      const existing = locationSystems.find((s) => s.id === systemState.id);
+      if (existing) {
+        await updateLocationSystem(systemState.id, {
+          name: systemState.name,
+          separator: systemState.separator,
+          paddingWidth: systemState.paddingWidth,
+          levels: systemState.levels,
+          mappingRules: systemState.mappingRules,
+          gridConfig: systemState.gridConfig,
+        });
+      } else {
+        await addLocationSystem(systemState);
+      }
 
-    // Recalculate existing bins in the active storage if attached
-    if (storageId) {
-      recalculateStorageBinCodes(storageId, systemState);
-    }
+      // Recalculate existing bins in the active storage if attached
+      if (storageId) {
+        await recalculateStorageBinCodes(storageId, systemState);
+      }
 
-    onSaved?.(systemState);
-    onOpenChange(false);
+      onSaved?.(systemState);
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Failed to save location system:", error);
+    }
   };
 
   return (

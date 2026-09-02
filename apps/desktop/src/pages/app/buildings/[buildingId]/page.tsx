@@ -98,6 +98,22 @@ export default function Building() {
     )
   }, [searchQuery, storageBins])
 
+  // Pre-compute per-bin item count/quantity once per binItems change instead of
+  // filtering the full binItems array for every rendered bin cell.
+  const binItemStatsById = useMemo(() => {
+    const stats = new Map<string, { count: number; totalQuantity: number }>()
+    for (const bi of binItems) {
+      const existing = stats.get(bi.binId)
+      if (existing) {
+        existing.count += 1
+        existing.totalQuantity += bi.quantity
+      } else {
+        stats.set(bi.binId, { count: 1, totalQuantity: bi.quantity })
+      }
+    }
+    return stats
+  }, [binItems])
+
   // Get grid dimensions from location system config
   const racksPerColumn = locationSystem?.gridConfig?.racksPerColumn ?? 5
   const rowPrefix = locationSystem?.gridConfig?.rowPrefix ?? "L"
@@ -215,11 +231,8 @@ export default function Building() {
                         );
                       }
 
-                      const binItemCount = binItems.filter(bi => bi.binId === bin.id).length;
-                      const totalBinItemQuantity = binItems
-                        .filter(bi => bi.binId === bin.id)
-                        .reduce((sum, bi) => sum + bi.quantity, 0);
-                      const binState = getBinState(bin, binItemCount, totalBinItemQuantity);
+                      const stats = binItemStatsById.get(bin.id);
+                      const binState = getBinState(bin, stats?.count ?? 0, stats?.totalQuantity ?? 0);
 
                       const isMatching = matchingBinIds.has(bin.id);
                       const isSearchActive = searchQuery.trim().length > 0;
@@ -296,11 +309,8 @@ export default function Building() {
                       );
                     }
 
-                    const binItemCount = binItems.filter(bi => bi.binId === bin.id).length;
-                    const totalBinItemQuantity = binItems
-                      .filter(bi => bi.binId === bin.id)
-                      .reduce((sum, bi) => sum + bi.quantity, 0);
-                    const binState = getBinState(bin, binItemCount, totalBinItemQuantity);
+                    const stats = binItemStatsById.get(bin.id);
+                    const binState = getBinState(bin, stats?.count ?? 0, stats?.totalQuantity ?? 0);
 
                     const isMatching = matchingBinIds.has(bin.id);
                     const isSearchActive = searchQuery.trim().length > 0;

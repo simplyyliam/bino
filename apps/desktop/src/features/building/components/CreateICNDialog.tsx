@@ -33,44 +33,48 @@ export const CreateICNDialog = ({ open, onOpenChange, binId, onCreated }: Create
   const [serialNumber, setSerialNumber] = useState("");
   const [quantity, setQuantity] = useState(1);
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!itemName.trim()) return;
 
-    // Create the item
-    const itemId = createItem({
-      name: itemName,
-      description: itemDescription || undefined,
-      category: itemCategory || undefined,
-    });
+    try {
+      // Create the item
+      const itemId = await createItem({
+        name: itemName,
+        description: itemDescription || undefined,
+        category: itemCategory || undefined,
+      });
 
-    // Create the ICN
-    const icnId = createICN({
-      itemId,
-      metadata: {
-        manufacturer: manufacturer || undefined,
-        partNumber: partNumber || undefined,
-        serialNumber: serialNumber || undefined,
-      },
-    });
+      // Create the ICN
+      const icnId = await createICN({
+        itemId,
+        metadata: {
+          manufacturer: manufacturer || undefined,
+          partNumber: partNumber || undefined,
+          serialNumber: serialNumber || undefined,
+        },
+      });
 
-    // If a bin is specified, add the item to it
-    if (binId) {
-      addItemToBin(binId, itemId, quantity, icnId);
+      // If a bin is specified, add the item to it
+      if (binId) {
+        await addItemToBin(binId, itemId, quantity, icnId);
+      }
+
+      // Call the callback
+      onCreated?.(icnId, itemId);
+
+      // Reset form
+      setItemName("");
+      setItemDescription("");
+      setItemCategory("");
+      setManufacturer("");
+      setPartNumber("");
+      setSerialNumber("");
+      setQuantity(1);
+
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Failed to create ICN:", error);
     }
-
-    // Call the callback
-    onCreated?.(icnId, itemId);
-
-    // Reset form
-    setItemName("");
-    setItemDescription("");
-    setItemCategory("");
-    setManufacturer("");
-    setPartNumber("");
-    setSerialNumber("");
-    setQuantity(1);
-
-    onOpenChange(false);
   };
 
   return (

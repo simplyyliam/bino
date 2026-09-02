@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useBinStore, useItemStore } from "@bino/store";
 import type { Bin } from "@bino/types";
 import {
@@ -42,6 +42,15 @@ export function BinDetailSheet({ bin, open, onOpenChange }: BinDetailSheetProps)
   const [showCreateICN, setShowCreateICN] = useState(false);
   const [showItemPicker, setShowItemPicker] = useState(false);
 
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Flush any pending name update if the sheet closes or a different bin is selected
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [bin?.id]);
+
   // Derive binItems for this bin from the subscribed arrays
   const binItems = bin
     ? allBinItems
@@ -69,7 +78,13 @@ export function BinDetailSheet({ bin, open, onOpenChange }: BinDetailSheetProps)
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newName = e.target.value;
     setName(newName);
-    updateBin(bin.id, { name: newName });
+
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      updateBin(bin.id, { name: newName }).catch((error) => {
+        console.error("Failed to update bin name:", error);
+      });
+    }, 400);
   };
 
   return (

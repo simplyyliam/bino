@@ -28,7 +28,9 @@ export const ConfigMenu = ({ open, onOpenChange }: MenuProps) => {
   const storages = useStorageStore((s) => s.storages)
   const bins = useBinStore((s) => s.bins)
   const createBinInStorage = useBinStore((s) => s.createBinInStorage)
+  const createBinsInStorage = useBinStore((s) => s.createBinsInStorage)
   const removeLastBinFromStorage = useBinStore((s) => s.removeLastBinFromStorage)
+  const removeLastBinsFromStorage = useBinStore((s) => s.removeLastBinsFromStorage)
   const  locationSystems  = useLocationSystemStore((s) => s.locationSystems);
 
   const [editorOpen, setEditorOpen] = useState(false);
@@ -42,41 +44,38 @@ export const ConfigMenu = ({ open, onOpenChange }: MenuProps) => {
   const maxBins = racksPerColumn * maxColumns;
   const columnsCount = Math.max(1, Math.ceil(storageBins.length / racksPerColumn));
 
-  const handleAddBin = () => {
+  const handleAddBin = async () => {
     if (!storage) return;
     try {
-      createBinInStorage(storage.id);
+      await createBinInStorage(storage.id);
     } catch (error) {
       console.error("Failed to create bin:", error);
     }
   };
 
-  const handleRemoveBin = () => {
+  const handleRemoveBin = async () => {
     if (!storage) return;
     try {
-      removeLastBinFromStorage(storage.id);
+      await removeLastBinFromStorage(storage.id);
     } catch (error) {
       console.error("Failed to remove bin:", error);
     }
   };
 
-  const handleAddColumn = () => {
+  const handleAddColumn = async () => {
     if (!storage) return;
     try {
-      for (let i = 0; i < racksPerColumn; i++) {
-        createBinInStorage(storage.id);
-      }
+      // One request for the whole column instead of racksPerColumn sequential ones.
+      await createBinsInStorage(storage.id, racksPerColumn);
     } catch (error) {
       console.error("Failed to add column:", error);
     }
   };
 
-  const handleRemoveColumn = () => {
+  const handleRemoveColumn = async () => {
     if (!storage) return;
     try {
-      for (let i = 0; i < racksPerColumn; i++) {
-        removeLastBinFromStorage(storage.id);
-      }
+      await removeLastBinsFromStorage(storage.id, racksPerColumn);
     } catch (error) {
       console.error("Failed to remove column:", error);
     }

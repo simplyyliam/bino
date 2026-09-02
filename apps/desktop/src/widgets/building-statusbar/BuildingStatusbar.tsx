@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Pill } from "@/shared/components"
 import { useStorageStore, useBinStore, useItemStore } from "@bino/store";
 import { useParams } from "react-router-dom";
@@ -14,25 +15,35 @@ export const BuildingStatusbar = () => {
 
   const storage = storages.find((storage) => storage.buildingId === buildingId)
 
-  if (!storage) return null
+  // Pre-compute per-bin item count/quantity once per binItems change instead of
+  // filtering the full binItems array for every bin in getBinStats.
+  const binItemStatsById = useMemo(() => {
+    const stats = new Map<string, { count: number; totalQuantity: number }>()
+    for (const bi of binItems) {
+      const existing = stats.get(bi.binId)
+      if (existing) {
+        existing.count += 1
+        existing.totalQuantity += bi.quantity
+      } else {
+        stats.set(bi.binId, { count: 1, totalQuantity: bi.quantity })
+      }
+    }
+    return stats
+  }, [binItems])
 
-  const getBinItemCount = (binId: string) => {
-    return binItems.filter(bi => bi.binId === binId).length;
-  };
+  const stats = useMemo(() => {
+    if (!storage) return null
+    return getBinStats(
+      bins,
+      storage.id,
+      (binId) => binItemStatsById.get(binId)?.count ?? 0,
+      (binId) => binItemStatsById.get(binId)?.totalQuantity ?? 0
+    )
+  }, [bins, storage, binItemStatsById])
 
-  const getTotalBinItemQuantity = (binId: string) => {
-    return binItems
-      .filter(bi => bi.binId === binId)
-      .reduce((sum, bi) => sum + bi.quantity, 0);
-  };
+  if (!storage || !stats) return null
 
-  const {
-    total,
-    empty,
-    stocked,
-    outOfStock,
-    outOfService,
-  } = getBinStats(bins, storage.id, getBinItemCount, getTotalBinItemQuantity);
+  const { total, empty, stocked, outOfStock, outOfService } = stats;
 
 
   return (

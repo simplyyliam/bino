@@ -33,6 +33,7 @@ interface ItemStore {
   addItemToBin: (binId: string, itemId: string, quantity: number, icnId?: string, notes?: string) => Promise<void>;
   removeItemFromBin: (binItemId: string) => Promise<void>;
   updateBinItemQuantity: (binItemId: string, quantity: number) => Promise<void>;
+  markBinOutOfStock: (binId: string) => Promise<void>;
 
   // Search across bins for an item or ICN
   findItemLocations: (itemId: string) => { binId: string; quantity: number; binItem: BinItem }[];
@@ -219,6 +220,29 @@ export const useItemStore = create<ItemStore>()((set, get) => ({
         summary: `"${item?.name || "Unknown Item"}"${icn ? ` (${icn.value})` : ""} quantity changed: ${oldQuantity} → ${quantity}`,
       });
     }
+  },
+
+  markBinOutOfStock: async (binId) => {
+    const binItemsForBin = get().binItems.filter((bi) => bi.binId === binId);
+
+    await Promise.all(
+      binItemsForBin.map((bi) => api.patch(`/api/bin-items/${bi.id}`, { quantity: 0 }))
+    );
+
+    set((state) => ({
+      binItems: state.binItems.map((bi) =>
+        bi.binId === binId
+          ? { ...bi, quantity: 0, lastModified: new Date().toISOString() }
+          : bi
+      ),
+    }));
+
+    // Record history
+    await useMovementHistoryStore.getState().addHistoryEvent({
+      eventType: "marked_out_of_stock",
+      binId,
+      summary: `Bin marked out of stock (${binItemsForBin.length} ${binItemsForBin.length === 1 ? 'item' : 'items'} set to quantity 0)`,
+    });
   },
 
   findItemLocations: (itemId) => {
