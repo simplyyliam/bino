@@ -12,6 +12,9 @@
     },
     "./*": "./dist/*.js"
   },
+  "scripts": {
+    "build": "tsc -b"
+  },
   "dependencies": {
     "@bino/types": "workspace:*"
   }

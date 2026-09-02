@@ -13,6 +13,10 @@
     "declaration": false,
     "sourceMap": true
   },
+  "references": [
+    { "path": "../../packages/data" },
+    { "path": "../../packages/types" }
+  ],
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }
