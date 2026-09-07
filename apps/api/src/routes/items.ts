@@ -103,7 +103,7 @@ router.post(
         eventType: "icn_created",
         icnId: icn.id,
         itemId,
-        summary: `ICN ${value} created for "${item?.name || "Unknown Item"}"`,
+        summary: `${value} created for "${item?.name || "Unknown Item"}"`,
       },
     });
 

@@ -47,8 +47,30 @@ router.patch(
 router.delete(
   "/:id",
   asyncHandler(async (req, res) => {
-    // Storages -> Bins -> BinItems/MovementHistory cascade via Prisma onDelete rules.
-    await prisma.building.delete({ where: { id: req.params.id } });
+    const buildingId = req.params.id;
+
+    await prisma.$transaction(async (tx) => {
+      const bins = await tx.bin.findMany({
+        where: { storage: { buildingId } },
+        select: { id: true },
+      });
+      const binIds = bins.map((bin) => bin.id);
+
+      if (binIds.length > 0) {
+        await tx.movementHistory.deleteMany({
+          where: {
+            OR: [
+              { binId: { in: binIds } },
+              { fromBinId: { in: binIds } },
+              { toBinId: { in: binIds } },
+            ],
+          },
+        });
+      }
+
+      await tx.building.delete({ where: { id: buildingId } });
+    });
+
     res.status(204).send();
   })
 );
