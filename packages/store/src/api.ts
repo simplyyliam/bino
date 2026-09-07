@@ -11,12 +11,13 @@ function resolveApiBaseUrl(): string {
     // import.meta not available in this runtime (e.g. some RN environments)
   }
 
-  // Only check process.env when process is defined (Node/Expo environments)
-  if (typeof process !== "undefined" && process.env?.EXPO_PUBLIC_API_URL) {
-    return process.env.EXPO_PUBLIC_API_URL;
-  }
+  const expoApiUrl = (
+    globalThis as typeof globalThis & {
+      process?: { env?: Record<string, string | undefined> };
+    }
+  ).process?.env?.EXPO_PUBLIC_API_URL;
 
-  return "http://localhost:3001";
+  return expoApiUrl ?? "http://localhost:3001";
 }
 
 export const API_BASE_URL = resolveApiBaseUrl();
