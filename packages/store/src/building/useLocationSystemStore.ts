@@ -10,6 +10,7 @@ type LocationSystemState = {
   // Actions
   fetchLocationSystems: () => Promise<void>
   setSelectedLocationSystemId: (id: string | null) => void
+  setLocationSystems: (systems: LocationSystem[]) => void
   addLocationSystem: (system: Omit<LocationSystem, "id">) => Promise<LocationSystem>
   updateLocationSystem: (id: string, updateFields: Partial<Omit<LocationSystem, "id">>) => Promise<void>
   deleteLocationSystem: (id: string) => Promise<void>
@@ -36,6 +37,8 @@ export const useLocationSystemStore = create<LocationSystemState>()((set, get) =
   },
 
   setSelectedLocationSystemId: (id) => set({ selectedLocationSystemId: id }),
+
+  setLocationSystems: (systems) => set({ locationSystems: systems }),
 
   addLocationSystem: async (newSystem) => {
     const system = await api.post<LocationSystem>("/api/location-systems", newSystem);

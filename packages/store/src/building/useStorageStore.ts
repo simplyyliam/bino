@@ -10,6 +10,7 @@ type StorageState = {
   // Actions
   fetchStorages: () => Promise<void>
   setSelectedStorageId: (id: string | null) => void
+  setStorages: (storages: Storage[]) => void
   addStorage: (storage: { buildingId: string; name: string; locationSystemId: string; maxLevel?: number; maxRow?: number; maxColumn?: number }) => Promise<Storage>
   updateStorage: (id: string, updateFields: Partial<Omit<Storage, "id">>) => Promise<void>
   deleteStorage: (id: string) => Promise<void>
@@ -36,6 +37,8 @@ export const useStorageStore = create<StorageState>()((set, get) => ({
   },
 
   setSelectedStorageId: (id) => set({ selectedStorageId: id }),
+
+  setStorages: (storages) => set({ storages }),
 
   addStorage: async (newStorage) => {
     const storage = await api.post<Storage>("/api/storages", newStorage);

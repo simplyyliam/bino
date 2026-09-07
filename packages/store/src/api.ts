@@ -1,7 +1,6 @@
 // Shared API client for all stores. Points at the Express backend.
 // Vite exposes env vars prefixed VITE_; Expo exposes EXPO_PUBLIC_ prefixed ones.
 // Fall back to localhost for local dev when neither is set.
-declare const importMetaEnv: Record<string, string | undefined> | undefined;
 
 function resolveApiBaseUrl(): string {
   try {
@@ -12,6 +11,7 @@ function resolveApiBaseUrl(): string {
     // import.meta not available in this runtime (e.g. some RN environments)
   }
 
+  // Only check process.env when process is defined (Node/Expo environments)
   if (typeof process !== "undefined" && process.env?.EXPO_PUBLIC_API_URL) {
     return process.env.EXPO_PUBLIC_API_URL;
   }

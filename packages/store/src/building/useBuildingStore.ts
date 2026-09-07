@@ -14,6 +14,7 @@ type BuildingState = {
   // Actions
   fetchBuildings: () => Promise<void>
   setSelectedBuildingId: (id: string | null) => void
+  setBuildings: (buildings: Building[]) => void
   addBuilding: (building: { name: string; buildingNumber: string }) => Promise<Building>
   updateBuilding: (id: string, updateFields: Partial<Omit<Building, "id">>) => Promise<void>
   deleteBuilding: (id: string) => Promise<void>
@@ -39,6 +40,8 @@ export const useBuildingStore = create<BuildingState>()((set, get) => ({
   },
 
   setSelectedBuildingId: (id) => set({ selectedBuildingId: id }),
+
+  setBuildings: (buildings) => set({ buildings }),
 
   addBuilding: async (newBuilding) => {
     const building = await api.post<Building>("/api/buildings", newBuilding);
