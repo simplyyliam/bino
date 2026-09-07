@@ -64,5 +64,5 @@ export const TimelineDataTable = ({
     </div>
   );
 
-  return <DataTable columns={columns} data={rows} emptyState={emptyState} />
+  return <DataTable columns={columns} data={rows} emptyState={emptyState} />;
 }
