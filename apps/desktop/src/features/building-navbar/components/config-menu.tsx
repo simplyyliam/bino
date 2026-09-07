@@ -42,7 +42,24 @@ export const ConfigMenu = ({ open, onOpenChange }: MenuProps) => {
   const racksPerColumn = locationSystem?.gridConfig?.racksPerColumn ?? 5;
   const maxColumns = locationSystem?.gridConfig?.maxColumns ?? 18;
   const maxBins = racksPerColumn * maxColumns;
-  const columnsCount = Math.max(1, Math.ceil(storageBins.length / racksPerColumn));
+  const columnsCount = Math.ceil(storageBins.length / racksPerColumn);
+
+  const updateBinCount = async (nextCount: number, errorMessage: string) => {
+    if (!storage) return;
+
+    const delta = nextCount - storageBins.length;
+    if (delta === 0) return;
+
+    try {
+      if (delta > 0) {
+        await createBinsInStorage(storage.id, delta);
+      } else {
+        await removeLastBinsFromStorage(storage.id, Math.abs(delta));
+      }
+    } catch (error) {
+      console.error(errorMessage, error);
+    }
+  };
 
   const handleAddBin = async () => {
     if (!storage) return;
@@ -116,6 +133,9 @@ export const ConfigMenu = ({ open, onOpenChange }: MenuProps) => {
               value={storageBins.length}
               onIncrement={handleAddBin}
               onDecrement={handleRemoveBin}
+              onValueChange={(nextValue) =>
+                updateBinCount(nextValue, "Failed to update bin count:")
+              }
               min={0}
               max={maxBins}
             />
@@ -124,7 +144,13 @@ export const ConfigMenu = ({ open, onOpenChange }: MenuProps) => {
               value={columnsCount}
               onIncrement={handleAddColumn}
               onDecrement={handleRemoveColumn}
-              min={1}
+              onValueChange={(nextValue) =>
+                updateBinCount(
+                  nextValue * racksPerColumn,
+                  "Failed to update column count:"
+                )
+              }
+              min={0}
               max={maxColumns}
             />
             <ConfigSetting
