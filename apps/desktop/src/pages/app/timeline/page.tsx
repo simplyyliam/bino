@@ -10,8 +10,10 @@ import { TimelineDataTable } from "@/features/timeline";
 
 export default function TimelinePage() {
   const selectedBuildingId = useTimelineFilterStore((s) => s.selectedBuildingId);
+  const setSelectedBuildingId = useTimelineFilterStore((s) => s.setSelectedBuildingId);
 
   const history = useMovementHistoryStore((s) => s.history);
+  const deleteHistoryEvents = useMovementHistoryStore((s) => s.deleteHistoryEvents);
   const bins = useBinStore((s) => s.bins);
   const storages = useStorageStore((s) => s.storages);
   const buildings = useBuildingStore((s) => s.buildings);
@@ -48,6 +50,12 @@ export default function TimelinePage() {
         bins={bins}
         storages={storages}
         getBuildingName={selectedBuildingId ? undefined : (id) => buildingNameById.get(id)}
+        buildings={buildings}
+        selectedBuildingId={selectedBuildingId}
+        onSelectedBuildingChange={setSelectedBuildingId}
+        onDeleteEvents={(eventsToDelete) =>
+          deleteHistoryEvents(eventsToDelete.map((e) => e.id))
+        }
       />
     </div>
   );

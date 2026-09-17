@@ -71,4 +71,22 @@ router.post(
   })
 );
 
+router.delete(
+  "/",
+  asyncHandler(async (req, res) => {
+    const { ids } = req.body as { ids?: unknown };
+
+    if (!Array.isArray(ids) || ids.length === 0 || !ids.every((id) => typeof id === "string")) {
+      res.status(400).json({ error: "ids must be a non-empty array of strings" });
+      return;
+    }
+
+    await prisma.movementHistory.deleteMany({
+      where: { id: { in: ids } },
+    });
+
+    res.status(204).send();
+  })
+);
+
 export default router;

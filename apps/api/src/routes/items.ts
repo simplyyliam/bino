@@ -98,7 +98,7 @@ router.post(
     });
 
     const item = await prisma.item.findUnique({ where: { id: itemId } });
-    await prisma.movementHistory.create({
+    const historyEvent = await prisma.movementHistory.create({
       data: {
         eventType: "icn_created",
         icnId: icn.id,
@@ -107,7 +107,7 @@ router.post(
       },
     });
 
-    res.status(201).json(icn);
+    res.status(201).json({ icn, historyEvent });
   })
 );
 

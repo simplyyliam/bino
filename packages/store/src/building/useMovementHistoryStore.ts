@@ -12,6 +12,9 @@ interface MovementHistoryStore {
   // Add a new history event
   addHistoryEvent: (event: Omit<MovementHistoryEvent, "id" | "timestamp">) => Promise<void>;
 
+  // Delete history events by id (does delete from the DB)
+  deleteHistoryEvents: (ids: string[]) => Promise<void>;
+
   // Query history (operates on whatever is currently loaded in state)
   getHistoryForBin: (binId: string, limit?: number) => MovementHistoryEvent[];
   getHistoryForItem: (itemId: string, limit?: number) => MovementHistoryEvent[];
@@ -50,6 +53,13 @@ export const useMovementHistoryStore = create<MovementHistoryStore>()((set, get)
     const newEvent = await api.post<MovementHistoryEvent>("/api/movement-history", event);
     set((state) => ({
       history: [newEvent, ...state.history], // Newest first
+    }));
+  },
+
+  deleteHistoryEvents: async (ids) => {
+    await api.delete<void>("/api/movement-history", { ids });
+    set((state) => ({
+      history: state.history.filter((event) => !ids.includes(event.id)),
     }));
   },
 

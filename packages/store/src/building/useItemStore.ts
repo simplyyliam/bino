@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { Item, ICN, BinItem } from "@bino/types";
+import type { Item, ICN, BinItem, MovementHistoryEvent } from "@bino/types";
 import { api } from "../api";
 import { useMovementHistoryStore } from "./useMovementHistoryStore";
 
@@ -129,8 +129,32 @@ export const useItemStore = create<ItemStore>()((set, get) => ({
   },
 
   createICN: async ({ itemId, metadata }) => {
-    const icn = await api.post<ICN>(`/api/items/${itemId}/icns`, { metadata });
+    // The API historically returned a bare ICN; newer versions return
+    // `{ icn, historyEvent }`. Accept both so the client works against either.
+    const response = await api.post<ICN | { icn: ICN; historyEvent?: MovementHistoryEvent }>(
+      `/api/items/${itemId}/icns`,
+      { metadata }
+    );
+
+    const icn = "icn" in response ? response.icn : response;
+    const historyEvent = "icn" in response ? response.historyEvent : undefined;
+
+    if (!icn?.id) {
+      throw new Error("createICN: API did not return an ICN");
+    }
+
     set((state) => ({ icns: [...state.icns, icn] }));
+
+    if (historyEvent) {
+      useMovementHistoryStore.setState((state) => ({
+        history: [historyEvent, ...state.history],
+      }));
+    } else {
+      // Older API creates the history row server-side without returning it,
+      // so pull it in rather than leaving the timeline stale until a refresh.
+      void useMovementHistoryStore.getState().fetchHistory();
+    }
+
     return icn.id;
   },
 
@@ -154,45 +178,48 @@ export const useItemStore = create<ItemStore>()((set, get) => ({
   },
 
   addItemToBin: async (binId, itemId, quantity, icnId, notes) => {
-    const binItem = await api.post<BinItem>(`/api/bins/${binId}/items`, {
+    // Accept both the legacy bare BinItem response and `{ binItem, historyEvent }`.
+    const response = await api.post<
+      BinItem | { binItem: BinItem; historyEvent?: MovementHistoryEvent }
+    >(`/api/bins/${binId}/items`, {
       itemId,
       icnId,
       quantity,
       notes
     });
+
+    const binItem = "binItem" in response ? response.binItem : response;
+    const historyEvent = "binItem" in response ? response.historyEvent : undefined;
+
+    if (!binItem?.id) {
+      throw new Error("addItemToBin: API did not return a bin item");
+    }
+
     set((state) => ({ binItems: [...state.binItems, binItem] }));
+
+    if (historyEvent) {
+      useMovementHistoryStore.setState((state) => ({
+        history: [historyEvent, ...state.history],
+      }));
+    } else {
+      void useMovementHistoryStore.getState().fetchHistory();
+    }
   },
 
   removeItemFromBin: async (binItemId) => {
-    const binItem = get().binItems.find((bi) => bi.id === binItemId);
+    await api.delete(`/api/bin-items/${binItemId}`);
 
-    if (binItem) {
-      const item = get().items.find((i) => i.id === binItem.itemId);
-      const icn = binItem.icnId ? get().icns.find((i) => i.id === binItem.icnId) : undefined;
-
-      await api.delete(`/api/bin-items/${binItemId}`);
-
-      // Record history locally
-      useMovementHistoryStore.getState().addHistoryEvent({
-        eventType: "item_removed_from_bin",
-        binId: binItem.binId,
-        itemId: binItem.itemId,
-        icnId: binItem.icnId,
-        binItemId,
-        quantityBefore: binItem.quantity,
-        summary: `"${item?.name || "Unknown Item"}"${icn ? ` (${icn.value})` : ""} removed from bin`,
-      });
-    }
-
+    // Remove locally first so the UI updates without waiting on a refetch.
     set((state) => ({
       binItems: state.binItems.filter((bi) => bi.id !== binItemId),
     }));
+
+    // The API already records the `item_removed_from_bin` event, so pull it in
+    // rather than POSTing a second, duplicate event from the client.
+    void useMovementHistoryStore.getState().fetchHistory();
   },
 
   updateBinItemQuantity: async (binItemId, quantity) => {
-    const binItem = get().binItems.find((bi) => bi.id === binItemId);
-    const oldQuantity = binItem?.quantity ?? 0;
-
     await api.patch(`/api/bin-items/${binItemId}`, { quantity });
 
     set((state) => ({
@@ -203,23 +230,9 @@ export const useItemStore = create<ItemStore>()((set, get) => ({
       ),
     }));
 
-    // Record history locally
-    if (binItem) {
-      const item = get().items.find((i) => i.id === binItem.itemId);
-      const icn = binItem.icnId ? get().icns.find((i) => i.id === binItem.icnId) : undefined;
-      const eventType = quantity > oldQuantity ? "quantity_increased" : "quantity_decreased";
-
-      useMovementHistoryStore.getState().addHistoryEvent({
-        eventType,
-        binId: binItem.binId,
-        itemId: binItem.itemId,
-        icnId: binItem.icnId,
-        binItemId,
-        quantityBefore: oldQuantity,
-        quantityAfter: quantity,
-        summary: `"${item?.name || "Unknown Item"}"${icn ? ` (${icn.value})` : ""} quantity changed: ${oldQuantity} → ${quantity}`,
-      });
-    }
+    // The API already records the quantity_increased/decreased event, so pull it
+    // in rather than POSTing a second, duplicate event from the client.
+    void useMovementHistoryStore.getState().fetchHistory();
   },
 
   markBinOutOfStock: async (binId) => {

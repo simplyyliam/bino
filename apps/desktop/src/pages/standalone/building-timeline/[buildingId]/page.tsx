@@ -15,6 +15,7 @@ export default function BuildingTimelinePage() {
   const navigate = useNavigate();
 
   const history = useMovementHistoryStore((s) => s.history);
+  const deleteHistoryEvents = useMovementHistoryStore((s) => s.deleteHistoryEvents);
   const bins = useBinStore((s) => s.bins);
   const storages = useStorageStore((s) => s.storages);
   const buildings = useBuildingStore((s) => s.buildings);
@@ -44,7 +45,14 @@ export default function BuildingTimelinePage() {
           </p>
         </div>
 
-        <TimelineDataTable events={events} bins={bins} storages={storages} />
+        <TimelineDataTable
+          events={events}
+          bins={bins}
+          storages={storages}
+          onDeleteEvents={(eventsToDelete) =>
+            deleteHistoryEvents(eventsToDelete.map((e) => e.id))
+          }
+        />
       </div>
     </div>
   );

@@ -241,7 +241,7 @@ router.post(
     const item = await prisma.item.findUnique({ where: { id: itemId } });
     const icn = icnId ? await prisma.iCN.findUnique({ where: { id: icnId } }) : null;
 
-    await prisma.movementHistory.create({
+    const historyEvent = await prisma.movementHistory.create({
       data: {
         eventType: "item_added_to_bin",
         binId,
@@ -253,7 +253,7 @@ router.post(
       },
     });
 
-    res.status(201).json(binItem);
+    res.status(201).json({ binItem, historyEvent });
   })
 );
 

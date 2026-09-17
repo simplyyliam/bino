@@ -1,5 +1,12 @@
 import { createColumnHelper } from "@tanstack/react-table";
 import type { MovementHistoryEvent } from "@bino/types";
+import { Button, Checkbox } from "@bino/ui";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  ArrowUpDownIcon,
+  SortByUp02Icon,
+  SortByDown02Icon,
+} from "@hugeicons/core-free-icons";
 
 import { type DataTableFeatures } from "./data-table-features";
 
@@ -60,9 +67,60 @@ const columnHelper = createColumnHelper<DataTableFeatures, TimelineEvent>();
 
 export const createTimelineColumns = (includeBuilding: boolean) =>
   columnHelper.columns([
+    columnHelper.display({
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={table.getIsAllPageRowsSelected()}
+          indeterminate={
+            table.getIsSomePageRowsSelected() &&
+            !table.getIsAllPageRowsSelected()
+          }
+          onCheckedChange={(checked) =>
+            table.toggleAllPageRowsSelected(checked)
+          }
+          aria-label="Select all rows on this page"
+          className="translate-y-px"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          disabled={!row.getCanSelect()}
+          onCheckedChange={(checked) => row.toggleSelected(checked)}
+          aria-label="Select row"
+          className="translate-y-px"
+        />
+      ),
+      enableSorting: false,
+      enableGlobalFilter: false,
+    }),
+
     columnHelper.accessor((row) => new Date(row.event.timestamp).getTime(), {
       id: "timestamp",
-      header: "Timestamp",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="-ml-2 h-6 px-2 text-xs font-medium text-muted-foreground hover:text-foreground"
+          onClick={column.getToggleSortingHandler()}
+        >
+          Timestamp
+          <HugeiconsIcon
+            icon={
+              column.getIsSorted() === "asc"
+                ? SortByUp02Icon
+                : column.getIsSorted() === "desc"
+                  ? SortByDown02Icon
+                  : ArrowUpDownIcon
+            }
+            size={12}
+            strokeWidth={2}
+            data-icon="inline-end"
+          />
+        </Button>
+      ),
+      enableGlobalFilter: false,
       cell: ({ row }) => (
         <div className="text-sm text-muted-foreground">
           {formatFullTimestamp(row.original.event.timestamp)}
