@@ -65,11 +65,9 @@ router.delete(
     const item = await prisma.item.findUnique({ where: { id: existing.itemId } });
     const icn = existing.icnId ? await prisma.iCN.findUnique({ where: { id: existing.icnId } }) : null;
 
-    // The history row must be written BEFORE the bin item is deleted. Writing it
-    // afterwards violates the MovementHistory_binItemId_fkey constraint (P2003),
-    // which previously left the bin item deleted but returned a 500 — so clients
-    // never applied the change locally. The relation is `onDelete: SetNull`, so
-    // deleting the bin item below simply nulls this reference.
+    // Write the history row BEFORE deleting the bin item. Doing it afterwards
+    // violates the MovementHistory_binItemId_fkey constraint (P2003). The relation
+    // uses `onDelete: SetNull`, so deleting the bin item simply nulls the reference.
     await prisma.$transaction([
       prisma.movementHistory.create({
         data: {
