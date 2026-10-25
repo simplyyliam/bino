@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import { CircleSlashIcon, PackageOpenIcon, WrenchIcon, XIcon } from "lucide-react";
 import type { Building } from "@bino/types";
 import { useBinStore, useItemStore, useMovementHistoryStore } from "@bino/store";
-import { Button, toast } from "@bino/ui";
+import { Button, Tooltip, TooltipContent, TooltipTrigger, toast } from "@bino/ui";
+import { copyText } from "@/lib/clipboard";
 import { LocationTag } from "@/components/LocationTag";
 import { StatusBadge } from "@/components/StatusBadge";
 import type { BinSummary, Inventory } from "@/lib/inventory";
@@ -92,7 +93,16 @@ export function BinInspector({ summary, building, inv, onClose }: BinInspectorPr
     >
       <div className="flex flex-col gap-4 p-5 pb-4">
         <div className="flex items-center gap-2">
-          <LocationTag code={bin.locationCode} />
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <button type="button" onClick={() => copyText(bin.locationCode)} className="rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring" aria-label={`Copy code ${bin.locationCode}`}>
+                  <LocationTag code={bin.locationCode} className="transition-colors hover:bg-accent" />
+                </button>
+              }
+            />
+            <TooltipContent>Copy code</TooltipContent>
+          </Tooltip>
           <StatusBadge status={status} />
           <Button variant="ghost" size="icon-sm" className="ml-auto -mr-1.5 text-muted-foreground" onClick={onClose} aria-label="Close bin">
             <XIcon />

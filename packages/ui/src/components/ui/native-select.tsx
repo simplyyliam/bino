@@ -7,8 +7,8 @@ const tones = {
   // Inside white containers: a soft filled field.
   field:
     "rounded-xl border border-transparent bg-field hover:bg-[color-mix(in_oklch,var(--field),var(--foreground)_3%)] focus-visible:border-input focus-visible:bg-background",
-  // On the grey canvas: a white pill, so it doesn't vanish into the background.
-  canvas: "rounded-full bg-card shadow-pill",
+  // Toolbar filters.
+  pill: "rounded-full border border-transparent bg-field hover:bg-[color-mix(in_oklch,var(--field),var(--foreground)_3%)] focus-visible:border-input focus-visible:bg-background",
 }
 
 type NativeSelectProps = React.ComponentProps<"select"> & { tone?: keyof typeof tones }
@@ -21,7 +21,7 @@ function NativeSelect({ className, children, tone = "field", ...props }: NativeS
       <select
         data-slot="native-select"
         className={cn(
-          "h-9 w-full appearance-none pr-8 pl-3.5 text-[13px] text-foreground outline-none transition-[background-color,border-color,box-shadow] duration-150 focus-visible:ring-3 focus-visible:ring-ring/30 disabled:opacity-50",
+          "h-8 w-full appearance-none pr-8 pl-3.5 text-[13px] text-foreground outline-none transition-[background-color,border-color,box-shadow] duration-150 focus-visible:ring-3 focus-visible:ring-ring/30 disabled:opacity-50",
           tones[tone]
         )}
         {...props}

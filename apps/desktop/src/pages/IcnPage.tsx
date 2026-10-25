@@ -1,9 +1,10 @@
 import { useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowRightIcon, ChevronLeftIcon, MapPinOffIcon } from "lucide-react";
+import { ArrowRightIcon, MapPinOffIcon } from "lucide-react";
 import { useMovementHistoryStore } from "@bino/store";
 import { Button } from "@bino/ui";
-import { Page } from "@/components/PageHeader";
+import { Page } from "@/components/Page";
+import { TopBar } from "@/components/TopBar";
 import { LocationTag } from "@/components/LocationTag";
 import { StatusBadge } from "@/components/StatusBadge";
 import { binLink, binTitle, useInventory } from "@/lib/inventory";
@@ -43,11 +44,10 @@ export default function IcnPage() {
   ].filter(([, v]) => v) as [string, string][];
 
   return (
+    <>
+    <TopBar crumbs={[{ label: "Items", to: "/items" }, { label: icn.value }]} />
     <Page className="max-w-3xl">
       <div className="flex flex-col gap-1">
-        <Link to="/items" className="flex w-fit items-center gap-0.5 text-xs font-medium text-muted-foreground hover:text-foreground">
-          <ChevronLeftIcon className="size-3.5" /> Items
-        </Link>
         <h1 className="font-mono text-2xl font-medium tracking-tight">{icn.value}</h1>
         <p className="text-[13px] text-muted-foreground">{item.name}</p>
       </div>
@@ -55,7 +55,7 @@ export default function IcnPage() {
       <section className="flex flex-col gap-3">
         <h2 className="text-sm font-medium">Where it is</h2>
         {summary && building && line ? (
-          <div className="flex flex-wrap items-center gap-4 rounded-[20px] bg-card p-4 shadow-card">
+          <div className="flex flex-wrap items-center gap-4 rounded-2xl bg-card p-4 shadow-card">
             <LocationTag code={summary.bin.locationCode} />
             <div className="flex min-w-0 flex-1 flex-col">
               <span className="truncate text-[13px] font-medium">{binTitle(summary.bin)}</span>
@@ -71,7 +71,7 @@ export default function IcnPage() {
             </Button>
           </div>
         ) : (
-          <div className="flex items-center gap-3 rounded-[20px] bg-card p-4 text-[13px] text-muted-foreground shadow-card">
+          <div className="flex items-center gap-3 rounded-2xl bg-card p-4 text-[13px] text-muted-foreground shadow-card">
             <MapPinOffIcon className="size-4" /> Not in any bin right now.
           </div>
         )}
@@ -79,9 +79,9 @@ export default function IcnPage() {
 
       <section className="flex flex-col gap-3">
         <h2 className="text-sm font-medium">Details</h2>
-        <dl className="flex flex-col rounded-[20px] bg-card p-1.5 shadow-card">
+        <dl className="flex flex-col rounded-2xl bg-card p-1.5 shadow-card">
           {details.map(([label, v]) => (
-            <div key={label} className="flex gap-4 rounded-[14px] px-3.5 py-2.5 text-[13px]">
+            <div key={label} className="flex gap-4 rounded-xl px-3.5 py-2.5 text-[13px]">
               <dt className="w-32 shrink-0 text-muted-foreground">{label}</dt>
               <dd className="min-w-0 flex-1">{v}</dd>
             </div>
@@ -104,5 +104,6 @@ export default function IcnPage() {
         </section>
       )}
     </Page>
+    </>
   );
 }
