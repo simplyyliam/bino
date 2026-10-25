@@ -3,7 +3,6 @@ import { IconButton, MenubarGroup, Pill } from "@/shared/components"
 import { useNavigate, useParams } from "react-router-dom"
 import { ConfigMenu } from "@/features/building-navbar/components"
 import { useState } from "react"
-import { SearchField } from "@/features/app-navbar"
 import { useBuildingStore } from "@bino/store"
 import { Clock03Icon } from "@hugeicons/core-free-icons"
 
@@ -22,7 +21,6 @@ export const BuildingMenu = () => {
         <Pill label={currentBuilding?.name ?? buildingId ?? "Unknown"} />
       </MenubarGroup>
       <MenubarGroup>
-        <SearchField />
         <IconButton Label="Timeline" Icon={Clock03Icon} onClick={() => navigate(`/building-timeline/${buildingId}`)} />
         <ConfigMenu open={open} onOpenChange={setOpen} />
       </MenubarGroup>
