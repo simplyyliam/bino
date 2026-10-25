@@ -7,6 +7,7 @@ import { useInventory } from "@/lib/inventory";
 import { useAlerts } from "@/lib/alerts";
 import { modKey } from "@/lib/format";
 import { BuildingDialog } from "@/features/buildings/BuildingDialog";
+import { BuildingContextMenu } from "@/features/buildings/BuildingActions";
 import { BuildingGlyph } from "./BuildingGlyph";
 import { LogoMark } from "./Logo";
 import { ThemeToggle } from "./ThemeToggle";
@@ -96,13 +97,15 @@ export function Sidebar() {
             const active = location.pathname === `/buildings/${b.id}`;
             const count = attentionByBuilding.get(b.id) ?? 0;
             return (
-              <NavLink key={b.id} to={`/buildings/${b.id}`} className={itemClass(active)}>
-                <BuildingGlyph id={b.id} name={b.name} />
-                <span className="truncate">{b.name}</span>
-                {count > 0 && (
-                  <span className="ml-auto size-1.5 shrink-0 rounded-full bg-bin-out-fg" title={`${count} need attention`} />
-                )}
-              </NavLink>
+              <BuildingContextMenu key={b.id} building={b} className="[&[data-popup-open]>a]:bg-sidebar-accent/70 [&[data-popup-open]>a]:text-foreground">
+                <NavLink to={`/buildings/${b.id}`} className={itemClass(active)}>
+                  <BuildingGlyph id={b.id} name={b.name} />
+                  <span className="truncate">{b.name}</span>
+                  {count > 0 && (
+                    <span className="ml-auto size-1.5 shrink-0 rounded-full bg-bin-out-fg" title={`${count} need attention`} />
+                  )}
+                </NavLink>
+              </BuildingContextMenu>
             );
           })}
         </div>
