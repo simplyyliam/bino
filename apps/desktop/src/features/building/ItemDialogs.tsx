@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { SearchIcon } from "lucide-react";
 import type { Bin, BinItem } from "@bino/types";
 import { useItemStore } from "@bino/store";
@@ -29,13 +29,19 @@ type LineDialogProps = {
   itemName: string;
 };
 
-export function LowStockDialog({ open, onOpenChange, line, itemName }: LineDialogProps) {
-  const updateBinItem = useItemStore((s) => s.updateBinItem);
-  const [value, setValue] = useState("");
+export function LowStockDialog(props: LineDialogProps) {
+  return (
+    <Dialog open={props.open} onOpenChange={props.onOpenChange}>
+      <DialogContent className="sm:max-w-sm">
+        <LowStockForm {...props} />
+      </DialogContent>
+    </Dialog>
+  );
+}
 
-  useEffect(() => {
-    if (open) setValue(line.minQuantity != null ? String(line.minQuantity) : "");
-  }, [open, line.minQuantity]);
+function LowStockForm({ onOpenChange, line, itemName }: LineDialogProps) {
+  const updateBinItem = useItemStore((s) => s.updateBinItem);
+  const [value, setValue] = useState(line.minQuantity != null ? String(line.minQuantity) : "");
 
   const save = async (minQuantity: number | null) => {
     try {
@@ -48,8 +54,7 @@ export function LowStockDialog({ open, onOpenChange, line, itemName }: LineDialo
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-sm">
+    <>
         <form
           className="flex flex-col gap-5"
           onSubmit={(e) => {
@@ -85,18 +90,23 @@ export function LowStockDialog({ open, onOpenChange, line, itemName }: LineDialo
             <Button type="submit" disabled={!value}>Save</Button>
           </DialogFooter>
         </form>
+    </>
+  );
+}
+
+export function NoteDialog(props: LineDialogProps) {
+  return (
+    <Dialog open={props.open} onOpenChange={props.onOpenChange}>
+      <DialogContent className="sm:max-w-sm">
+        <NoteForm {...props} />
       </DialogContent>
     </Dialog>
   );
 }
 
-export function NoteDialog({ open, onOpenChange, line, itemName }: LineDialogProps) {
+function NoteForm({ onOpenChange, line, itemName }: LineDialogProps) {
   const updateBinItem = useItemStore((s) => s.updateBinItem);
-  const [value, setValue] = useState("");
-
-  useEffect(() => {
-    if (open) setValue(line.notes ?? "");
-  }, [open, line.notes]);
+  const [value, setValue] = useState(line.notes ?? "");
 
   const save = async () => {
     try {
@@ -108,8 +118,7 @@ export function NoteDialog({ open, onOpenChange, line, itemName }: LineDialogPro
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-sm">
+    <>
         <DialogHeader>
           <DialogTitle>Note</DialogTitle>
           <DialogDescription>Anything worth remembering about the {itemName} in this bin.</DialogDescription>
@@ -119,25 +128,27 @@ export function NoteDialog({ open, onOpenChange, line, itemName }: LineDialogPro
           <DialogClose render={<Button variant="outline" />}>Cancel</DialogClose>
           <Button onClick={() => void save()}>Save</Button>
         </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    </>
   );
 }
 
 type MoveItemDialogProps = LineDialogProps & { fromBin: Bin; inv: Inventory };
 
-export function MoveItemDialog({ open, onOpenChange, line, itemName, fromBin, inv }: MoveItemDialogProps) {
+export function MoveItemDialog(props: MoveItemDialogProps) {
+  return (
+    <Dialog open={props.open} onOpenChange={props.onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <MoveItemForm {...props} />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function MoveItemForm({ onOpenChange, line, itemName, fromBin, inv }: MoveItemDialogProps) {
   const moveBinItem = useItemStore((s) => s.moveBinItem);
   const [query, setQuery] = useState("");
   const [targetId, setTargetId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    if (open) {
-      setQuery("");
-      setTargetId(null);
-    }
-  }, [open]);
 
   // Bins in the same building first, then everything else.
   const options = useMemo(() => {
@@ -175,8 +186,7 @@ export function MoveItemDialog({ open, onOpenChange, line, itemName, fromBin, in
   };
 
   return (
-    <Dialog open={open} onOpenChange={(o) => !saving && onOpenChange(o)}>
-      <DialogContent className="sm:max-w-md">
+    <>
         <DialogHeader>
           <DialogTitle>Move {itemName}</DialogTitle>
           <DialogDescription>
@@ -218,7 +228,6 @@ export function MoveItemDialog({ open, onOpenChange, line, itemName, fromBin, in
             {saving ? "Moving…" : "Move Here"}
           </Button>
         </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    </>
   );
 }

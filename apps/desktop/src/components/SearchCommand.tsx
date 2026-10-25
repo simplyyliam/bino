@@ -135,18 +135,12 @@ export function SearchCommand() {
     return () => window.removeEventListener("keydown", onKey);
   }, [setOpen]);
 
-  useEffect(() => {
-    if (!open) setQuery("");
-  }, [open]);
-
   const results = useMemo(() => {
     const q = query.trim();
     if (!q) return index.buildings;
     const found = index.fuse.search(q, { limit: 40 }).map((r) => r.item);
     return GROUP_ORDER.flatMap((group) => found.filter((r) => r.group === group));
   }, [query, index]);
-
-  useEffect(() => setActive(0), [results]);
 
   useEffect(() => {
     listRef.current?.querySelector(`[data-index="${active}"]`)?.scrollIntoView({ block: "nearest" });
@@ -155,11 +149,22 @@ export function SearchCommand() {
   const go = (result?: Result) => {
     if (!result) return;
     setOpen(false);
+    setQuery("");
+    setActive(0);
     navigate(result.href);
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (!next) {
+          setQuery("");
+          setActive(0);
+        }
+      }}
+    >
       <DialogContent showCloseButton={false} className="top-[18%] translate-y-0 gap-0 overflow-hidden p-0 sm:max-w-xl">
         <DialogTitle className="sr-only">Search</DialogTitle>
         <div className="flex items-center gap-3 border-b border-border px-4">
@@ -167,7 +172,10 @@ export function SearchCommand() {
           <input
             autoFocus
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setActive(0);
+            }}
             onKeyDown={(e) => {
               if (e.key === "ArrowDown") {
                 e.preventDefault();

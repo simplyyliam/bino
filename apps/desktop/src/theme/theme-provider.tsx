@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
 type Theme = 'light' | 'dark' | 'system';
@@ -44,8 +43,11 @@ function ThemeProvider({
   storageKey = 'bino-theme',
 }: ThemeProviderProps) {
   const [theme, setThemeState] = useState<Theme>(() => {
-    const storedTheme = localStorage.getItem(storageKey) as Theme | null;
-    return storedTheme ?? defaultTheme;
+    try {
+      return (localStorage.getItem(storageKey) as Theme | null) ?? defaultTheme;
+    } catch {
+      return defaultTheme; // storage can be blocked (private mode etc.)
+    }
   });
   const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() =>
     theme === 'system' ? getSystemTheme() : theme
@@ -72,7 +74,11 @@ function ThemeProvider({
       theme,
       resolvedTheme,
       setTheme: (nextTheme: Theme) => {
-        localStorage.setItem(storageKey, nextTheme);
+        try {
+          localStorage.setItem(storageKey, nextTheme);
+        } catch {
+          // Not fatal, the choice just won't stick between visits.
+        }
         setThemeState(nextTheme);
       },
     }),

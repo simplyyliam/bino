@@ -17,26 +17,19 @@ interface ItemStore {
   isLoading: boolean;
 
   // Fetch operations
-  fetchItems: (search?: string) => Promise<void>;
+  fetchItems: () => Promise<void>;
   fetchICNs: (itemId?: string) => Promise<void>;
   fetchBinItems: (binId?: string) => Promise<void>;
 
   // Item operations
-  getItem: (itemId: string) => Item | undefined;
-  searchItems: (query: string) => Item[];
   createItem: (item: { name: string; description?: string; category?: string }) => Promise<string>;
   updateItem: (id: string, updates: Partial<Omit<Item, "id">>) => Promise<void>;
   deleteItem: (id: string) => Promise<void>;
 
   // ICN operations
-  getICN: (icnId: string) => ICN | undefined;
-  getICNByValue: (value: string) => ICN | undefined;
-  getICNsByItem: (itemId: string) => ICN[];
   createICN: (icn: { itemId: string; metadata?: Record<string, any> }) => Promise<string>;
 
   // BinItem operations
-  getBinItems: (binId: string) => BinItem[];
-  getItemsByBin: (binId: string) => { item: Item; icn?: ICN; binItem: BinItem }[];
   addItemToBin: (binId: string, itemId: string, options?: AddItemOptions) => Promise<{ binItem: BinItem; merged: boolean }>;
   removeItemFromBin: (binItemId: string) => Promise<BinItem | undefined>;
   restoreBinItem: (binItem: BinItem) => Promise<void>;
@@ -45,10 +38,6 @@ interface ItemStore {
   moveBinItem: (binItemId: string, toBinId: string) => Promise<void>;
   markBinOutOfStock: (binId: string) => Promise<void>;
   removeBinItemsForBins: (binIds: Set<string>) => void;
-
-  // Search across bins for an item or ICN
-  findItemLocations: (itemId: string) => { binId: string; quantity: number; binItem: BinItem }[];
-  findICNLocation: (icnValue: string) => { binId: string; quantity: number; binItem: BinItem } | undefined;
 }
 
 const pushEvent = (event?: MovementHistoryEvent | null) =>
@@ -60,11 +49,10 @@ export const useItemStore = create<ItemStore>()((set, get) => ({
   binItems: [],
   isLoading: false,
 
-  fetchItems: async (search) => {
+  fetchItems: async () => {
     set({ isLoading: true });
     try {
-      const path = search ? `/api/items?search=${encodeURIComponent(search)}` : "/api/items";
-      const items = await api.get<Item[]>(path);
+      const items = await api.get<Item[]>("/api/items");
       set({ items, isLoading: false });
     } catch (err) {
       set({ isLoading: false });
@@ -94,20 +82,6 @@ export const useItemStore = create<ItemStore>()((set, get) => ({
       set({ isLoading: false });
       throw err;
     }
-  },
-
-  getItem: (itemId) => {
-    return get().items.find((item) => item.id === itemId);
-  },
-
-  searchItems: (query) => {
-    const lowerQuery = query.toLowerCase();
-    return get().items.filter(
-      (item) =>
-        item.name.toLowerCase().includes(lowerQuery) ||
-        item.description?.toLowerCase().includes(lowerQuery) ||
-        item.category?.toLowerCase().includes(lowerQuery)
-    );
   },
 
   createItem: async ({ name, description, category }) => {
@@ -140,19 +114,6 @@ export const useItemStore = create<ItemStore>()((set, get) => ({
     }));
   },
 
-  getICN: (icnId) => {
-    return get().icns.find((icn) => icn.id === icnId);
-  },
-
-  getICNByValue: (value) => {
-    const normalized = value.trim().toUpperCase();
-    return get().icns.find((icn) => icn.value.toUpperCase() === normalized);
-  },
-
-  getICNsByItem: (itemId) => {
-    return get().icns.filter((icn) => icn.itemId === itemId);
-  },
-
   createICN: async ({ itemId, metadata }) => {
     const { icn, historyEvent } = await api.post<{ icn: ICN; historyEvent?: MovementHistoryEvent }>(
       `/api/items/${itemId}/icns`,
@@ -161,25 +122,6 @@ export const useItemStore = create<ItemStore>()((set, get) => ({
     set((state) => ({ icns: [...state.icns, icn] }));
     pushEvent(historyEvent);
     return icn.id;
-  },
-
-  getBinItems: (binId) => {
-    return get().binItems.filter((bi) => bi.binId === binId);
-  },
-
-  getItemsByBin: (binId) => {
-    const binItems = get().getBinItems(binId);
-    return binItems
-      .map((binItem) => {
-        const item = get().getItem(binItem.itemId);
-        const icn = binItem.icnId ? get().getICN(binItem.icnId) : undefined;
-        return {
-          item: item!,
-          icn,
-          binItem,
-        };
-      })
-      .filter(({ item }) => item !== undefined);
   },
 
   addItemToBin: async (binId, itemId, options = {}) => {
@@ -309,29 +251,5 @@ export const useItemStore = create<ItemStore>()((set, get) => ({
   removeBinItemsForBins: (binIds) => {
     if (binIds.size === 0) return;
     set((state) => ({ binItems: state.binItems.filter((bi) => !binIds.has(bi.binId)) }));
-  },
-
-  findItemLocations: (itemId) => {
-    return get().binItems
-      .filter((bi) => bi.itemId === itemId)
-      .map((binItem) => ({
-        binId: binItem.binId,
-        quantity: binItem.quantity,
-        binItem,
-      }));
-  },
-
-  findICNLocation: (icnValue) => {
-    const icn = get().getICNByValue(icnValue);
-    if (!icn) return undefined;
-
-    const binItem = get().binItems.find((bi) => bi.icnId === icn.id);
-    if (!binItem) return undefined;
-
-    return {
-      binId: binItem.binId,
-      quantity: binItem.quantity,
-      binItem,
-    };
   },
 }));

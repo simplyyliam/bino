@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { CircleSlashIcon, PackageOpenIcon, WrenchIcon, XIcon } from "lucide-react";
 import type { Building } from "@bino/types";
@@ -22,8 +22,6 @@ type BinInspectorProps = {
 function LabelField({ binId, name, placeholder }: { binId: string; name: string; placeholder: string }) {
   const updateBin = useBinStore((s) => s.updateBin);
   const [draft, setDraft] = useState(name);
-
-  useEffect(() => setDraft(name), [name, binId]);
 
   const save = () => {
     const next = draft.trim();
@@ -103,7 +101,7 @@ export function BinInspector({ summary, building, inv, onClose }: BinInspectorPr
         <div className="flex items-center gap-3">
           <IconPicker binId={bin.id} icon={bin.icon} />
           <div className="flex min-w-0 flex-1 flex-col">
-            <LabelField binId={bin.id} name={bin.name} placeholder="Add a label" />
+            <LabelField key={`${bin.id}:${bin.name}`} binId={bin.id} name={bin.name} placeholder="Add a label" />
             <span className="text-xs text-muted-foreground">{building.name}</span>
           </div>
         </div>

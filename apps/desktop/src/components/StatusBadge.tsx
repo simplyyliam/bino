@@ -1,14 +1,6 @@
 import { cn } from "@bino/ui";
 import { statusLabel, type BinStatus } from "@/lib/inventory";
 
-export const statusSwatch: Record<BinStatus, string> = {
-  empty: "border border-dashed border-bin-empty bg-transparent",
-  stocked: "bg-bin-stocked",
-  low: "bg-bin-low",
-  out: "bg-bin-out",
-  service: "bg-bin-service bg-hatch text-bin-service-fg",
-};
-
 const badgeTone: Record<BinStatus, string> = {
   empty: "bg-muted text-muted-foreground",
   stocked: "bg-muted text-foreground",

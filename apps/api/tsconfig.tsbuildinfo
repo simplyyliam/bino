@@ -1,1 +1,0 @@
-{"root":["./src/db.ts","./src/index.ts","./src/routes/bin-items.ts","./src/routes/bins.ts","./src/routes/buildings.ts","./src/routes/icns.ts","./src/routes/items.ts","./src/routes/location-systems.ts","./src/routes/movement-history.ts","./src/routes/storages.ts","./src/utils/errors.ts"],"version":"6.0.3"}

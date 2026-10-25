@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type { Item } from "@bino/types";
 import { useItemStore } from "@bino/store";
 import {
@@ -24,24 +24,26 @@ type ItemDialogProps = {
   item?: Item;
 };
 
-export function ItemDialog({ open, onOpenChange, item }: ItemDialogProps) {
+export function ItemDialog(props: ItemDialogProps) {
+  return (
+    <Dialog open={props.open} onOpenChange={props.onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <ItemForm {...props} />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ItemForm({ onOpenChange, item }: ItemDialogProps) {
   const items = useItemStore((s) => s.items);
   const createItem = useItemStore((s) => s.createItem);
   const updateItem = useItemStore((s) => s.updateItem);
 
-  const [name, setName] = useState("");
-  const [category, setCategory] = useState("");
-  const [description, setDescription] = useState("");
+  const [name, setName] = useState(item?.name ?? "");
+  const [category, setCategory] = useState(item?.category ?? "");
+  const [description, setDescription] = useState(item?.description ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    setName(item?.name ?? "");
-    setCategory(item?.category ?? "");
-    setDescription(item?.description ?? "");
-    setError(null);
-  }, [open, item]);
 
   const categories = useMemo(
     () => [...new Set(items.map((i) => i.category).filter(Boolean) as string[])].sort(),
@@ -71,8 +73,7 @@ export function ItemDialog({ open, onOpenChange, item }: ItemDialogProps) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={(o) => !saving && onOpenChange(o)}>
-      <DialogContent className="sm:max-w-md">
+    <>
         <form onSubmit={submit} className="flex flex-col gap-5">
           <DialogHeader>
             <DialogTitle>{item ? "Edit Item" : "New Item"}</DialogTitle>
@@ -101,7 +102,6 @@ export function ItemDialog({ open, onOpenChange, item }: ItemDialogProps) {
             <Button type="submit" disabled={saving || !name.trim()}>{saving ? "Saving…" : item ? "Save" : "Add Item"}</Button>
           </DialogFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+    </>
   );
 }

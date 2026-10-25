@@ -160,32 +160,3 @@ export function expandStorage(
     maxColumn: Math.max(storage.maxColumn, newLocation.column)
   };
 }
-
-/**
- * Helper function to organize bins into a 2D grid structure
- * for rendering purposes.
- *
- * @param bins - All bins to organize
- * @param rows - Number of rows in the grid
- * @param columns - Number of columns in the grid
- * @returns 2D array of bins organized by [row][column]
- */
-export function organizeBinsIntoGrid(
-  bins: Bin[],
-  rows: number,
-  columns: number
-): (Bin | null)[][] {
-  // Initialize empty grid
-  const grid: (Bin | null)[][] = Array.from({ length: rows }, () =>
-    Array.from({ length: columns }, () => null)
-  );
-
-  // Place each bin in its canonical position
-  for (const bin of bins) {
-    if (bin.row < rows && bin.column < columns) {
-      grid[bin.row][bin.column] = bin;
-    }
-  }
-
-  return grid;
-}
