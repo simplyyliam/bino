@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowRightIcon, MapPinOffIcon } from "lucide-react";
+import { ArrowRightIcon, MapPinOffIcon, SmartphoneIcon } from "lucide-react";
 import { useMovementHistoryStore } from "@bino/store";
 import { Button } from "@bino/ui";
 import { Page } from "@/components/Page";
@@ -9,7 +9,7 @@ import { LocationTag } from "@/components/LocationTag";
 import { StatusBadge } from "@/components/StatusBadge";
 import { binLink, binTitle, useInventory } from "@/lib/inventory";
 import { formatDate, formatNumber, formatRelative } from "@/lib/format";
-import NotFoundPage from "./NotFoundPage";
+import NotFound from "@/components/NotFound";
 
 const METADATA_LABELS: Record<string, string> = {
   manufacturer: "Manufacturer",
@@ -32,7 +32,7 @@ export default function IcnPage() {
   const events = useMemo(() => (icn ? history.filter((e) => e.icnId === icn.id).slice(0, 10) : []), [history, icn]);
 
   if (!icn || !item) {
-    return <NotFoundPage title={`No ICN called “${value}”`} description="Check the number on the tag and try again." />;
+    return <NotFound title={`No ICN called “${value}”`} description="Check the number on the tag and try again." />;
   }
 
   const details = [
@@ -45,7 +45,14 @@ export default function IcnPage() {
 
   return (
     <>
-    <TopBar crumbs={[{ label: "Items", to: "/items" }, { label: icn.value }]} />
+    <TopBar
+      crumbs={[{ label: "Items", to: "/items" }, { label: icn.value }]}
+      actions={
+        <Button variant="ghost" size="sm" nativeButton={false} render={<Link to={`/tag/${encodeURIComponent(icn.value)}`} />}>
+          <SmartphoneIcon /> Tag View
+        </Button>
+      }
+    />
     <Page className="max-w-3xl">
       <div className="flex flex-col gap-1">
         <h1 className="font-mono text-2xl font-medium tracking-tight">{icn.value}</h1>
