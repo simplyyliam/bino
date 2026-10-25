@@ -21,6 +21,8 @@ import { LocationTag } from "@/components/LocationTag";
 import { StatusSwatch } from "@/components/StatusBadge";
 import { binTitle, type Inventory } from "@/lib/inventory";
 import { errorMessage } from "@/lib/format";
+import { emptyIcn, icnPayload, useIcnCheck } from "@/lib/icn";
+import { IcnFields } from "./IcnFields";
 
 type LineDialogProps = {
   open: boolean;
@@ -229,5 +231,53 @@ function MoveItemForm({ onOpenChange, line, itemName, fromBin, inv }: MoveItemDi
           </Button>
         </DialogFooter>
     </>
+  );
+}
+
+export function AddIcnDialog(props: LineDialogProps & { binCode: string }) {
+  return (
+    <Dialog open={props.open} onOpenChange={props.onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <AddIcnForm {...props} />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function AddIcnForm({ onOpenChange, line, itemName, binCode }: LineDialogProps & { binCode: string }) {
+  const createICN = useItemStore((s) => s.createICN);
+  const [draft, setDraft] = useState(emptyIcn);
+  const [saving, setSaving] = useState(false);
+  const check = useIcnCheck(draft);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (check.problem) return;
+    setSaving(true);
+    try {
+      await createICN({ itemId: line.itemId, binItemId: line.id, ...icnPayload(draft, check.value) });
+      toast.success(`${itemName} now has ${check.value ?? check.next}`);
+      onOpenChange(false);
+    } catch (err) {
+      toast.error(errorMessage(err, "Couldn't add the ICN."));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <form className="flex flex-col gap-5" onSubmit={submit}>
+      <DialogHeader>
+        <DialogTitle>Add ICN</DialogTitle>
+        <DialogDescription>
+          Give the {itemName} in bin {binCode} its own tracking number.
+        </DialogDescription>
+      </DialogHeader>
+      <IcnFields draft={draft} onChange={setDraft} next={check.next} problem={check.problem} autoFocus />
+      <DialogFooter>
+        <DialogClose render={<Button type="button" variant="outline" disabled={saving} />}>Cancel</DialogClose>
+        <Button type="submit" disabled={saving || !!check.problem}>{saving ? "Adding…" : "Add ICN"}</Button>
+      </DialogFooter>
+    </form>
   );
 }
