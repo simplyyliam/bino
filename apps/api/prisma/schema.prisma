@@ -86,6 +86,7 @@ model BinItem {
   icnId        String?
   icn          ICN?              @relation(fields: [icnId], references: [id], onDelete: SetNull)
   quantity     Int
+  minQuantity  Int?
   notes        String?
   addedAt      DateTime          @default(now())
   lastModified DateTime          @updatedAt

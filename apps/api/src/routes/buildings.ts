@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { prisma } from "../db.js";
-import { asyncHandler, notFound } from "../utils/errors.js";
+import { asyncHandler, notFound, optionalString, requireString } from "../utils/errors.js";
 
 const router = Router();
 
@@ -24,7 +24,8 @@ router.get(
 router.post(
   "/",
   asyncHandler(async (req, res) => {
-    const { name, buildingNumber } = req.body;
+    const name = requireString(req.body.name, "name");
+    const buildingNumber = optionalString(req.body.buildingNumber) ?? "";
     const building = await prisma.building.create({
       data: { name, buildingNumber },
     });
@@ -35,7 +36,8 @@ router.post(
 router.patch(
   "/:id",
   asyncHandler(async (req, res) => {
-    const { name, buildingNumber } = req.body;
+    const name = req.body.name === undefined ? undefined : requireString(req.body.name, "name");
+    const buildingNumber = optionalString(req.body.buildingNumber);
     const building = await prisma.building.update({
       where: { id: req.params.id },
       data: { name, buildingNumber },

@@ -5,9 +5,22 @@ import {
   generateLocationCode,
   getNextBinLocation,
 } from "@bino/data";
-import { asyncHandler, notFound } from "../utils/errors.js";
+import {
+  asyncHandler,
+  badRequest,
+  notFound,
+  optionalQuantity,
+  optionalString,
+  requireString,
+} from "../utils/errors.js";
 
 const router = Router();
+
+// Upper bound for a single batch create, so a typo ("5000") can't flood a storage.
+const MAX_BATCH = 200;
+
+const binLabel = (bin: { name: string; locationCode: string }) =>
+  bin.name ? `${bin.name} (${bin.locationCode})` : bin.locationCode;
 
 router.get(
   "/",
@@ -33,7 +46,8 @@ router.get(
 router.post(
   "/",
   asyncHandler(async (req, res) => {
-    const { storageId, name } = req.body;
+    const storageId = requireString(req.body.storageId, "storageId");
+    const name = optionalString(req.body.name) ?? "";
 
     // Pull the storage together with its locationSystem in one query (a
     // join, not a second round-trip), and the existing bins in parallel.
@@ -62,7 +76,7 @@ router.post(
       prisma.bin.create({
         data: {
           storageId,
-          name: name || `Bin ${existingBins.length + 1}`,
+          name,
           locationCode,
           level: nextLocation.level,
           row: nextLocation.row,
@@ -91,18 +105,9 @@ router.post(
 router.patch(
   "/:id",
   asyncHandler(async (req, res) => {
-    const {
-      name,
-      locationCode,
-      itemId,
-      quantity,
-      isOutOfService,
-      icon,
-      level,
-      row,
-      column,
-      position,
-    } = req.body;
+    const { locationCode, itemId, isOutOfService, icon, level, row, column, position } = req.body;
+    const name = optionalString(req.body.name);
+    const quantity = optionalQuantity(req.body.quantity);
 
     const bin = await prisma.bin.update({
       where: { id: req.params.id },
@@ -123,6 +128,79 @@ router.patch(
   })
 );
 
+// Toggle a bin in/out of service and record it on the timeline.
+router.post(
+  "/:id/service",
+  asyncHandler(async (req, res) => {
+    const { isOutOfService } = req.body;
+    if (typeof isOutOfService !== "boolean") {
+      throw badRequest("isOutOfService must be true or false");
+    }
+    const reason = optionalString(req.body.reason);
+
+    const existing = await prisma.bin.findUnique({ where: { id: req.params.id } });
+    if (!existing) throw notFound("Bin");
+
+    if (existing.isOutOfService === isOutOfService) {
+      res.json({ bin: existing, historyEvent: null });
+      return;
+    }
+
+    const [bin, historyEvent] = await prisma.$transaction([
+      prisma.bin.update({ where: { id: existing.id }, data: { isOutOfService } }),
+      prisma.movementHistory.create({
+        data: {
+          eventType: isOutOfService ? "marked_out_of_service" : "marked_serviceable",
+          binId: existing.id,
+          reason,
+          summary: isOutOfService
+            ? `Bin ${binLabel(existing)} marked out of service`
+            : `Bin ${binLabel(existing)} back in service`,
+        },
+      }),
+    ]);
+
+    res.json({ bin, historyEvent });
+  })
+);
+
+// Zero every item in a bin in one transaction with a single timeline event,
+// instead of the client patching each item (which logged N+1 events).
+router.post(
+  "/:id/out-of-stock",
+  asyncHandler(async (req, res) => {
+    const existing = await prisma.bin.findUnique({
+      where: { id: req.params.id },
+      include: { binItems: true },
+    });
+    if (!existing) throw notFound("Bin");
+
+    const stocked = existing.binItems.filter((bi) => bi.quantity > 0);
+    if (stocked.length === 0) {
+      res.json({ binItems: existing.binItems, historyEvent: null });
+      return;
+    }
+
+    const [, historyEvent] = await prisma.$transaction([
+      prisma.binItem.updateMany({ where: { binId: existing.id }, data: { quantity: 0 } }),
+      prisma.movementHistory.create({
+        data: {
+          eventType: "marked_out_of_stock",
+          binId: existing.id,
+          quantityBefore: stocked.reduce((sum, bi) => sum + bi.quantity, 0),
+          quantityAfter: 0,
+          summary: `Bin ${binLabel(existing)} marked out of stock (${stocked.length} ${
+            stocked.length === 1 ? "item" : "items"
+          } set to 0)`,
+        },
+      }),
+    ]);
+
+    const binItems = await prisma.binItem.findMany({ where: { binId: existing.id } });
+    res.json({ binItems, historyEvent });
+  })
+);
+
 router.delete(
   "/:id",
   asyncHandler(async (req, res) => {
@@ -136,8 +214,9 @@ router.delete(
 router.post(
   "/batch",
   asyncHandler(async (req, res) => {
-    const { storageId, count, name } = req.body;
-    const n = Math.max(1, Number(count) || 1);
+    const storageId = requireString(req.body.storageId, "storageId");
+    const name = optionalString(req.body.name) ?? "";
+    const n = Math.min(MAX_BATCH, Math.max(1, Math.floor(Number(req.body.count)) || 1));
 
     const storage = await prisma.storage.findUnique({ where: { id: storageId } });
     if (!storage) throw notFound("Storage");
@@ -160,7 +239,7 @@ router.post(
       const locationCode = generateLocationCode(nextLocation, locationSystem as any);
       const newBin = {
         storageId,
-        name: name || `Bin ${existingBins.length + i + 1}`,
+        name,
         locationCode,
         level: nextLocation.level,
         row: nextLocation.row,
@@ -194,13 +273,15 @@ router.post(
 router.post(
   "/batch-delete",
   asyncHandler(async (req, res) => {
-    const { storageId, ids } = req.body;
+    const storageId = requireString(req.body.storageId, "storageId");
+    const { ids } = req.body;
     if (!Array.isArray(ids) || ids.length === 0) {
       res.json({ storage: null });
       return;
     }
 
-    await prisma.bin.deleteMany({ where: { id: { in: ids } } });
+    // Scope the delete to the storage so a stale client can't remove bins elsewhere.
+    await prisma.bin.deleteMany({ where: { id: { in: ids.map(String) }, storageId } });
 
     const remainingBins = await prisma.bin.findMany({ where: { storageId } });
     const maxLevel = remainingBins.length > 0 ? Math.max(...remainingBins.map((b) => b.level)) : 0;
@@ -232,14 +313,54 @@ router.post(
   "/:binId/items",
   asyncHandler(async (req, res) => {
     const { binId } = req.params;
-    const { itemId, icnId, quantity, notes } = req.body;
+    const itemId = requireString(req.body.itemId, "itemId");
+    const icnId = optionalString(req.body.icnId) || null;
+    const quantity = optionalQuantity(req.body.quantity) ?? 1;
+    const minQuantity = optionalQuantity(req.body.minQuantity, "minQuantity") ?? null;
+    const notes = optionalString(req.body.notes) || null;
 
-    const binItem = await prisma.binItem.create({
-      data: { binId, itemId, icnId, quantity, notes },
+    const [bin, item, icn] = await Promise.all([
+      prisma.bin.findUnique({ where: { id: binId } }),
+      prisma.item.findUnique({ where: { id: itemId } }),
+      icnId ? prisma.iCN.findUnique({ where: { id: icnId } }) : Promise.resolve(null),
+    ]);
+    if (!bin) throw notFound("Bin");
+    if (!item) throw notFound("Item");
+    if (icnId && !icn) throw notFound("ICN");
+
+    // Adding an item that's already in the bin tops up the existing row
+    // instead of creating a confusing duplicate line.
+    const existing = await prisma.binItem.findFirst({
+      where: { binId, itemId, icnId },
     });
 
-    const item = await prisma.item.findUnique({ where: { id: itemId } });
-    const icn = icnId ? await prisma.iCN.findUnique({ where: { id: icnId } }) : null;
+    if (existing) {
+      const nextQuantity = existing.quantity + quantity;
+      const [binItem, historyEvent] = await prisma.$transaction([
+        prisma.binItem.update({
+          where: { id: existing.id },
+          data: { quantity: nextQuantity },
+        }),
+        prisma.movementHistory.create({
+          data: {
+            eventType: "quantity_increased",
+            binId,
+            itemId,
+            icnId,
+            binItemId: existing.id,
+            quantityBefore: existing.quantity,
+            quantityAfter: nextQuantity,
+            summary: `"${item.name}" quantity changed: ${existing.quantity} → ${nextQuantity}`,
+          },
+        }),
+      ]);
+      res.status(200).json({ binItem, historyEvent, merged: true });
+      return;
+    }
+
+    const binItem = await prisma.binItem.create({
+      data: { binId, itemId, icnId, quantity, minQuantity, notes },
+    });
 
     const historyEvent = await prisma.movementHistory.create({
       data: {
@@ -249,11 +370,11 @@ router.post(
         icnId,
         binItemId: binItem.id,
         quantityAfter: quantity,
-        summary: `"${item?.name || "Unknown Item"}"${icn ? ` (${icn.value})` : ""} added to bin with quantity ${quantity}`,
+        summary: `"${item.name}"${icn ? ` (${icn.value})` : ""} added to bin ${binLabel(bin)} with quantity ${quantity}`,
       },
     });
 
-    res.status(201).json({ binItem, historyEvent });
+    res.status(201).json({ binItem, historyEvent, merged: false });
   })
 );
 
