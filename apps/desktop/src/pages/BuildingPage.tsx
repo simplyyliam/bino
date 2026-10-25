@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import { BoxesIcon, ChevronLeftIcon, EllipsisIcon, LayoutGridIcon, SearchIcon, XIcon } from "lucide-react";
+import { BoxesIcon, ChevronLeftIcon, EllipsisIcon, LayoutGridIcon } from "lucide-react";
 import { useLocationSystemStore, useStorageStore } from "@bino/store";
 import { Button, toast } from "@bino/ui";
 import { EmptyState } from "@/components/EmptyState";
+import { SearchField } from "@/components/SearchField";
 import { BuildingActions } from "@/features/buildings/BuildingActions";
 import { BinGrid } from "@/features/building/BinGrid";
 import { BinInspector } from "@/features/building/BinInspector";
@@ -153,27 +154,7 @@ export default function BuildingPage() {
           {bins.length > 0 && (
             <div className="flex flex-wrap items-center justify-between gap-3">
               <StatusFilter counts={counts} total={bins.length} value={filter} onChange={setFilter} />
-              <div className="relative w-64">
-                <SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === "Escape" && setQuery("")}
-                  placeholder="Find in this building"
-                  aria-label="Find in this building"
-                  className="h-9 w-full rounded-lg border border-input bg-card pr-8 pl-9 text-[13px] shadow-[0_1px_2px_oklch(0_0_0/0.03)] outline-none transition-[border-color,box-shadow] duration-150 placeholder:text-muted-foreground/80 focus:border-primary focus:ring-3 focus:ring-ring/40 dark:bg-input/20"
-                />
-                {query && (
-                  <button
-                    type="button"
-                    onClick={() => setQuery("")}
-                    aria-label="Clear"
-                    className="absolute top-1/2 right-2 flex size-5 -translate-y-1/2 items-center justify-center rounded text-muted-foreground hover:text-foreground"
-                  >
-                    <XIcon className="size-3.5" />
-                  </button>
-                )}
-              </div>
+              <SearchField value={query} onChange={setQuery} placeholder="Find in this building" />
             </div>
           )}
           {matches && (
