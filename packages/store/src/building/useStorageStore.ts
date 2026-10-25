@@ -6,6 +6,8 @@ type NewStorage = {
   buildingId: string
   name: string
   locationSystemId: string
+  // Leave out (or null) and the API picks the next free store number.
+  storeNumber?: number | null
 }
 
 type StorageState = {

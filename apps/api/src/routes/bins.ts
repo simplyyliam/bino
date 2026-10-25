@@ -67,7 +67,7 @@ router.post(
       existingBins as any,
       locationSystem as any
     );
-    const locationCode = generateLocationCode(nextLocation, locationSystem as any);
+    const locationCode = generateLocationCode(nextLocation, locationSystem as any, storage.storeNumber);
     const expanded = expandStorage(storage as any, nextLocation);
 
     // Create the bin and update the storage's dimensions together in one
@@ -236,7 +236,7 @@ router.post(
     const toCreate = [];
     for (let i = 0; i < n; i++) {
       const nextLocation = getNextBinLocation(storage as any, runningBins as any, locationSystem as any);
-      const locationCode = generateLocationCode(nextLocation, locationSystem as any);
+      const locationCode = generateLocationCode(nextLocation, locationSystem as any, storage.storeNumber);
       const newBin = {
         storageId,
         name,

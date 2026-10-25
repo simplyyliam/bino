@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-10-26 · Unique codes for every store
+
+- **New buildings get their own store number.** The second store on the `Group / Store / Row / Rack / Bin` format now starts at `06/11/01/01/01` instead of repeating `06/10/…`, and the `Aisle / Shelf / Bay` format numbers its aisles the same way. The next free number is filled in for you and you can change it.
+- Bino won't let two buildings on the same format share a store number, and tells you which building already has it.
+- Change a building's store number later in **Edit Layout → Change bin code format**. Every bin gets its new code.
+- A format without a store part can get one with **Add a Store Part**.
+- Existing buildings keep the codes they have today.
+- Fixed: the building switcher in the breadcrumb crashed the page.
+- Crashes now show a friendly screen with Try Again instead of a developer error page.
+
 ## 2026-10-25 · The big redesign
 
 A ground-up pass over the whole app: new design, fixed bugs, and the features you need for everyday upkeep.

@@ -46,6 +46,8 @@ src/
 
 **Data.** Everything loads once on startup (`useAppStore.load`). Screens read through `useInventory()` in `lib/inventory.ts`, which indexes stores into maps and works out each bin's status. Don't filter raw store arrays inside render loops.
 
+**Bin codes** come from `generateLocationCode(location, format, storeNumber)` in `@bino/data`. Each storage's `storeNumber` fills the format's store part, so buildings sharing a format still get unique codes. Always pass the storage's `storeNumber` when generating codes.
+
 **Bin status** is derived, never stored: `service` (out of service) → `empty` (no items) → `out` (everything at 0) → `low` (any item at 0 or at/below its alert) → `stocked`.
 
 **Mutations** are optimistic with rollback where it's safe. The API returns the history event it recorded and the store pushes it with `pushEvent`, so the timeline never needs a refetch.
