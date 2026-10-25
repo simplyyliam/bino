@@ -8,24 +8,16 @@ import { useItemStore } from "./useItemStore";
 
 type BuildingState = {
   buildings: Building[]
-  selectedBuildingId: string | null
   isLoading: boolean
 
-  // Actions
   fetchBuildings: () => Promise<void>
-  setSelectedBuildingId: (id: string | null) => void
-  setBuildings: (buildings: Building[]) => void
   addBuilding: (building: { name: string; buildingNumber: string }) => Promise<Building>
   updateBuilding: (id: string, updateFields: Partial<Omit<Building, "id">>) => Promise<void>
   deleteBuilding: (id: string) => Promise<void>
-
-  // Helper
-  getSelectedBuilding: () => Building | undefined
 }
 
 export const useBuildingStore = create<BuildingState>()((set, get) => ({
   buildings: [],
-  selectedBuildingId: null,
   isLoading: false,
 
   fetchBuildings: async () => {
@@ -38,10 +30,6 @@ export const useBuildingStore = create<BuildingState>()((set, get) => ({
       throw err;
     }
   },
-
-  setSelectedBuildingId: (id) => set({ selectedBuildingId: id }),
-
-  setBuildings: (buildings) => set({ buildings }),
 
   addBuilding: async (newBuilding) => {
     const building = await api.post<Building>("/api/buildings", newBuilding);
@@ -68,52 +56,22 @@ export const useBuildingStore = create<BuildingState>()((set, get) => ({
   deleteBuilding: async (id) => {
     await api.delete(`/api/buildings/${id}`);
 
-    // The API cascades storages/bins/history via Prisma onDelete rules.
-    // Mirror that locally so the UI updates without a refetch.
-    const storagesToRemove = useStorageStore.getState().storages.filter(
-      (storage) => storage.buildingId === id
+    // The server cascades storages, bins and their history. Do the same
+    // locally so the UI catches up without refetching everything.
+    const storageIds = new Set(
+      useStorageStore.getState().storages.filter((s) => s.buildingId === id).map((s) => s.id)
     );
-    const storageIds = new Set(storagesToRemove.map((storage) => storage.id));
-
-    const binsToRemove = useBinStore.getState().bins.filter(
-      (bin) => storageIds.has(bin.storageId)
+    const binIds = new Set(
+      useBinStore.getState().bins.filter((b) => storageIds.has(b.storageId)).map((b) => b.id)
     );
-    const binIds = new Set(binsToRemove.map((bin) => bin.id));
+    const touchesBin = (binId?: string) => !!binId && binIds.has(binId);
 
-    if (binIds.size > 0) {
-      useItemStore.getState().removeBinItemsForBins(binIds);
-      useMovementHistoryStore.setState((state) => ({
-        history: state.history.filter(
-          (event) =>
-            !(
-              (event.binId && binIds.has(event.binId)) ||
-              (event.fromBinId && binIds.has(event.fromBinId)) ||
-              (event.toBinId && binIds.has(event.toBinId))
-            )
-        )
-      }));
-
-      useBinStore.setState((state) => ({
-        bins: state.bins.filter((bin) => !binIds.has(bin.id)),
-        selectedBinId: binIds.has(state.selectedBinId ?? "") ? null : state.selectedBinId
-      }));
-    }
-
-    if (storageIds.size > 0) {
-      useStorageStore.setState((state) => ({
-        storages: state.storages.filter((storage) => !storageIds.has(storage.id)),
-        selectedStorageId: storageIds.has(state.selectedStorageId ?? "") ? null : state.selectedStorageId
-      }));
-    }
-
-    set((state) => ({
-      buildings: state.buildings.filter((building) => building.id !== id),
-      selectedBuildingId: state.selectedBuildingId === id ? null : state.selectedBuildingId
+    useItemStore.getState().removeBinItemsForBins(binIds);
+    useMovementHistoryStore.setState((state) => ({
+      history: state.history.filter((e) => !(touchesBin(e.binId) || touchesBin(e.fromBinId) || touchesBin(e.toBinId)))
     }));
+    useBinStore.setState((state) => ({ bins: state.bins.filter((b) => !binIds.has(b.id)) }));
+    useStorageStore.setState((state) => ({ storages: state.storages.filter((s) => !storageIds.has(s.id)) }));
+    set((state) => ({ buildings: state.buildings.filter((b) => b.id !== id) }));
   },
-
-  getSelectedBuilding: () => {
-    const { buildings, selectedBuildingId } = get()
-    return buildings.find((building) => building.id === selectedBuildingId)
-  }
 }))

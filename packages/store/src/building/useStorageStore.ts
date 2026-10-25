@@ -2,27 +2,23 @@ import type { Storage } from "@bino/types";
 import { create } from "zustand";
 import { api } from "../api";
 
-type StorageState = {
-  storages: Storage[]
-  selectedStorageId: string | null
-  isLoading: boolean
-
-  // Actions
-  fetchStorages: () => Promise<void>
-  setSelectedStorageId: (id: string | null) => void
-  setStorages: (storages: Storage[]) => void
-  addStorage: (storage: { buildingId: string; name: string; locationSystemId: string; maxLevel?: number; maxRow?: number; maxColumn?: number }) => Promise<Storage>
-  updateStorage: (id: string, updateFields: Partial<Omit<Storage, "id">>) => Promise<void>
-  deleteStorage: (id: string) => Promise<void>
-
-  // Helpers
-  getSelectedStorage: () => Storage | undefined
-  getStoragesByBuilding: (buildingId: string) => Storage[]
+type NewStorage = {
+  buildingId: string
+  name: string
+  locationSystemId: string
 }
 
-export const useStorageStore = create<StorageState>()((set, get) => ({
+type StorageState = {
+  storages: Storage[]
+  isLoading: boolean
+
+  fetchStorages: () => Promise<void>
+  addStorage: (storage: NewStorage) => Promise<Storage>
+  updateStorage: (id: string, updateFields: Partial<Omit<Storage, "id">>) => Promise<void>
+}
+
+export const useStorageStore = create<StorageState>()((set) => ({
   storages: [],
-  selectedStorageId: null,
   isLoading: false,
 
   fetchStorages: async () => {
@@ -36,10 +32,6 @@ export const useStorageStore = create<StorageState>()((set, get) => ({
     }
   },
 
-  setSelectedStorageId: (id) => set({ selectedStorageId: id }),
-
-  setStorages: (storages) => set({ storages }),
-
   addStorage: async (newStorage) => {
     const storage = await api.post<Storage>("/api/storages", newStorage);
     set((state) => ({ storages: [...state.storages, storage] }));
@@ -47,26 +39,13 @@ export const useStorageStore = create<StorageState>()((set, get) => ({
   },
 
   updateStorage: async (id, updateFields) => {
-    const storage = await api.patch<Storage>(`/api/storages/${id}`, updateFields);
+    // The API may tack on updatedBinCount; it isn't part of the storage itself.
+    const { updatedBinCount: _count, ...storage } = await api.patch<Storage & { updatedBinCount?: number }>(
+      `/api/storages/${id}`,
+      updateFields
+    );
     set((state) => ({
       storages: state.storages.map((s) => (s.id === id ? storage : s))
     }));
   },
-
-  deleteStorage: async (id) => {
-    await api.delete(`/api/storages/${id}`);
-    set((state) => ({
-      storages: state.storages.filter((storage) => storage.id !== id),
-      selectedStorageId: state.selectedStorageId === id ? null : state.selectedStorageId
-    }));
-  },
-
-  getSelectedStorage: () => {
-    const { storages, selectedStorageId } = get()
-    return storages.find((storage) => storage.id === selectedStorageId)
-  },
-  getStoragesByBuilding: (buildingId) => {
-    const { storages } = get()
-    return storages.filter((storage) => storage.buildingId === buildingId)
-  }
 }))

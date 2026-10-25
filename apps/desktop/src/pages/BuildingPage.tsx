@@ -11,7 +11,7 @@ import { BinInspector } from "@/features/building/BinInspector";
 import { BuildingSwitcher } from "@/features/building/BuildingSwitcher";
 import { LayoutDialog } from "@/features/building/LayoutDialog";
 import { StatusFilter } from "@/features/building/StatusFilter";
-import { LocationSystemEditorDialog } from "@/features/building/components/LocationSystemEditorDialog";
+import { CodeFormatDialog } from "@/features/building/CodeFormatDialog";
 import { countStatuses, useInventory, type BinStatus, type BinSummary } from "@/lib/inventory";
 import { errorMessage, plural } from "@/lib/format";
 import NotFoundPage from "./NotFoundPage";
@@ -215,7 +215,16 @@ export default function BuildingPage() {
         />
       )}
       {storage && system && (
-        <LocationSystemEditorDialog open={codesOpen} onOpenChange={setCodesOpen} systemId={system.id} storageId={storage.id} />
+        <CodeFormatDialog
+          open={codesOpen}
+          onOpenChange={setCodesOpen}
+          system={system}
+          storage={storage}
+          building={building}
+          sharedWith={inv.buildings.filter(
+            (b) => b.id !== building.id && inv.storageByBuilding.get(b.id)?.locationSystemId === system.id
+          )}
+        />
       )}
     </div>
   );
