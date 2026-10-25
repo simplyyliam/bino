@@ -4,6 +4,13 @@ Why things are the way they are. Newest first. Add to this when you make a call 
 
 ---
 
+### 2026-10-25 · Custom ICNs are limited to Code 39 characters
+
+ICNs can now be typed in, because parts often arrive with their own number already on a tag. Typed values are trimmed, uppercased and limited to letters, digits, `-` and `.` (max 32). That's what the ICN screen's Code 39 barcode can print and what sits cleanly in a `/icn/…` URL (no `/`). The rule lives in `@bino/data` (`normalizeIcn`, `icnProblem`, `nextIcnValue`) so the dialog and the API agree.
+
+- Automatic numbering only counts values shaped exactly like `ICN-000123`, so custom ICNs in other shapes don't throw the count off.
+- Adding an ICN to an existing bin row goes through the same create route with a `binItemId`, using a nested `connect` so the ICN and the row update together.
+
 ### 2026-10-26 · Store numbers live on the storage, not the format
 
 New stores kept getting the same codes (`06/10/…`) because the store part was a fixed value inside the shared format. Instead of copying the whole format for every building, each storage now has an optional `storeNumber` that fills in the format's store part. Formats stay shared, codes stay unique.

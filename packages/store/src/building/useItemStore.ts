@@ -27,7 +27,8 @@ interface ItemStore {
   deleteItem: (id: string) => Promise<void>;
 
   // ICN operations
-  createICN: (icn: { itemId: string; metadata?: Record<string, any> }) => Promise<string>;
+  // Leave `value` out to get the next ICN-000123. Pass `binItemId` to attach it to a row already in a bin.
+  createICN: (icn: { itemId: string; value?: string; binItemId?: string; metadata?: Record<string, any> }) => Promise<string>;
 
   // BinItem operations
   addItemToBin: (binId: string, itemId: string, options?: AddItemOptions) => Promise<{ binItem: BinItem; merged: boolean }>;
@@ -114,12 +115,16 @@ export const useItemStore = create<ItemStore>()((set, get) => ({
     }));
   },
 
-  createICN: async ({ itemId, metadata }) => {
-    const { icn, historyEvent } = await api.post<{ icn: ICN; historyEvent?: MovementHistoryEvent }>(
-      `/api/items/${itemId}/icns`,
-      { metadata }
-    );
-    set((state) => ({ icns: [...state.icns, icn] }));
+  createICN: async ({ itemId, value, binItemId, metadata }) => {
+    const { icn, binItem, historyEvent } = await api.post<{
+      icn: ICN;
+      binItem?: BinItem | null;
+      historyEvent?: MovementHistoryEvent;
+    }>(`/api/items/${itemId}/icns`, { value, binItemId, metadata });
+    set((state) => ({
+      icns: [...state.icns, icn],
+      binItems: binItem ? state.binItems.map((bi) => (bi.id === binItem.id ? binItem : bi)) : state.binItems,
+    }));
     pushEvent(historyEvent);
     return icn.id;
   },

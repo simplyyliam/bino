@@ -17,6 +17,8 @@ import {
 } from "@bino/ui";
 import { QuantityStepper } from "@/components/QuantityStepper";
 import { errorMessage } from "@/lib/format";
+import { emptyIcn, icnPayload, useIcnCheck } from "@/lib/icn";
+import { IcnFields } from "./IcnFields";
 
 type CreateItemDialogProps = {
   open: boolean;
@@ -25,7 +27,7 @@ type CreateItemDialogProps = {
   bin: Bin;
 };
 
-const empty = { category: "", description: "", alert: "", manufacturer: "", partNumber: "", serialNumber: "" };
+const empty = { category: "", description: "", alert: "" };
 
 export function CreateItemDialog(props: CreateItemDialogProps) {
   return (
@@ -41,12 +43,15 @@ function CreateItemForm({ onOpenChange, initialName, bin }: CreateItemDialogProp
   const items = useItemStore((s) => s.items);
   const createItem = useItemStore((s) => s.createItem);
   const createICN = useItemStore((s) => s.createICN);
+  const deleteItem = useItemStore((s) => s.deleteItem);
   const addItemToBin = useItemStore((s) => s.addItemToBin);
 
   const [name, setName] = useState(initialName);
   const [fields, setFields] = useState(empty);
   const [quantity, setQuantity] = useState(1);
   const [withIcn, setWithIcn] = useState(false);
+  const [icnDraft, setIcnDraft] = useState(emptyIcn);
+  const icnCheck = useIcnCheck(icnDraft);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -62,6 +67,7 @@ function CreateItemForm({ onOpenChange, initialName, bin }: CreateItemDialogProp
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return setError("Give the item a name.");
+    if (withIcn && icnCheck.problem) return setError(icnCheck.problem);
     setSaving(true);
     setError(null);
     try {
@@ -70,12 +76,16 @@ function CreateItemForm({ onOpenChange, initialName, bin }: CreateItemDialogProp
         category: fields.category.trim() || undefined,
         description: fields.description.trim() || undefined,
       });
-      const icnId = withIcn
-        ? await createICN({
-            itemId,
-            metadata: { manufacturer: fields.manufacturer, partNumber: fields.partNumber, serialNumber: fields.serialNumber },
-          })
-        : undefined;
+      let icnId: string | undefined;
+      if (withIcn) {
+        try {
+          icnId = await createICN({ itemId, ...icnPayload(icnDraft, icnCheck.value) });
+        } catch (err) {
+          // Don't leave a half-made item behind, or trying again makes a duplicate.
+          await deleteItem(itemId).catch(() => undefined);
+          throw err;
+        }
+      }
       const alert = Number.parseInt(fields.alert, 10);
       await addItemToBin(bin.id, itemId, {
         quantity,
@@ -144,14 +154,12 @@ function CreateItemForm({ onOpenChange, initialName, bin }: CreateItemDialogProp
               <Checkbox checked={withIcn} onCheckedChange={(v) => setWithIcn(!!v)} className="mt-0.5" />
               <span className="flex flex-col">
                 <span className="text-[13px] font-medium">Give it an ICN</span>
-                <span className="text-xs text-muted-foreground">A unique tracking number for one specific part, like ICN-000042.</span>
+                <span className="text-xs text-muted-foreground">A unique tracking number for one specific part. Use your own or get the next one.</span>
               </span>
             </label>
             {withIcn && (
-              <div className="grid grid-cols-2 gap-3 animate-in fade-in-0 duration-150">
-                <Input aria-label="Manufacturer" value={fields.manufacturer} onChange={set("manufacturer")} placeholder="Manufacturer" />
-                <Input aria-label="Part number" value={fields.partNumber} onChange={set("partNumber")} placeholder="Part number" />
-                <Input aria-label="Serial number" value={fields.serialNumber} onChange={set("serialNumber")} placeholder="Serial number" className="col-span-2" />
+              <div className="animate-in fade-in-0 duration-150">
+                <IcnFields draft={icnDraft} onChange={setIcnDraft} next={icnCheck.next} problem={icnCheck.problem} />
               </div>
             )}
           </div>
@@ -160,7 +168,7 @@ function CreateItemForm({ onOpenChange, initialName, bin }: CreateItemDialogProp
 
           <DialogFooter>
             <DialogClose render={<Button type="button" variant="outline" disabled={saving} />}>Cancel</DialogClose>
-            <Button type="submit" disabled={saving || !name.trim()}>{saving ? "Adding…" : "Add to Bin"}</Button>
+            <Button type="submit" disabled={saving || !name.trim() || (withIcn && !!icnCheck.problem)}>{saving ? "Adding…" : "Add to Bin"}</Button>
           </DialogFooter>
         </form>
     </>

@@ -16,7 +16,7 @@ import {
 import { QuantityStepper } from "@/components/QuantityStepper";
 import { isLow, type Inventory } from "@/lib/inventory";
 import { errorMessage, formatNumber } from "@/lib/format";
-import { LowStockDialog, MoveItemDialog, NoteDialog } from "./ItemDialogs";
+import { AddIcnDialog, LowStockDialog, MoveItemDialog, NoteDialog } from "./ItemDialogs";
 
 type BinItemRowProps = {
   line: BinItem;
@@ -29,7 +29,7 @@ export function BinItemRow({ line, bin, inv }: BinItemRowProps) {
   const updateQuantity = useItemStore((s) => s.updateBinItemQuantity);
   const removeItem = useItemStore((s) => s.removeItemFromBin);
   const restoreItem = useItemStore((s) => s.restoreBinItem);
-  const [dialog, setDialog] = useState<"alert" | "note" | "move" | null>(null);
+  const [dialog, setDialog] = useState<"alert" | "note" | "move" | "icn" | null>(null);
 
   const item = inv.itemsById.get(line.itemId);
   const icn = line.icnId ? inv.icnsById.get(line.icnId) : undefined;
@@ -97,9 +97,13 @@ export function BinItemRow({ line, bin, inv }: BinItemRowProps) {
           <DropdownMenuItem onClick={() => setDialog("note")}>
             <StickyNoteIcon /> {line.notes ? "Edit Note…" : "Add Note…"}
           </DropdownMenuItem>
-          {icn && (
+          {icn ? (
             <DropdownMenuItem onClick={() => navigate(`/icn/${encodeURIComponent(icn.value)}`)}>
               <TagIcon /> View {icn.value}
+            </DropdownMenuItem>
+          ) : (
+            <DropdownMenuItem onClick={() => setDialog("icn")}>
+              <TagIcon /> Add ICN…
             </DropdownMenuItem>
           )}
           <DropdownMenuSeparator />
@@ -111,6 +115,7 @@ export function BinItemRow({ line, bin, inv }: BinItemRowProps) {
 
       <LowStockDialog open={dialog === "alert"} onOpenChange={(o) => setDialog(o ? "alert" : null)} line={line} itemName={name} />
       <NoteDialog open={dialog === "note"} onOpenChange={(o) => setDialog(o ? "note" : null)} line={line} itemName={name} />
+      <AddIcnDialog open={dialog === "icn"} onOpenChange={(o) => setDialog(o ? "icn" : null)} line={line} itemName={name} binCode={bin.locationCode} />
       <MoveItemDialog open={dialog === "move"} onOpenChange={(o) => setDialog(o ? "move" : null)} line={line} fromBin={bin} itemName={name} inv={inv} />
     </li>
   );

@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-25 · Your own ICNs
+
+- **Type your own ICN.** When you give an item an ICN, there's now an ICN box. Type the number that's already on the part's tag, or leave it blank to get the next number as before.
+- **Add an ICN to something already in a bin.** Open the item's **···** menu and pick **Add ICN…**.
+- ICNs are saved in capitals and can use letters, numbers, dashes and dots, so the barcode on the ICN screen always scans.
+- Bino tells you straight away if an ICN is already taken, and by which item.
+
 ## 2026-10-26 · A proper ICN screen
 
 - The ICN number arrives large in the centre, then settles into the header while the details fade in one after another. It plays once per tag per visit, and not at all with reduced motion.
