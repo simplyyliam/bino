@@ -3,6 +3,7 @@ import type { ComponentType } from "react";
 import { AppLayout } from "./pages/app";
 import { StandaloneLayout } from "./pages/standalone";
 import NotFound from "./components/NotFound";
+import RouteError from "./components/RouteError";
 
 // File-based routes, grouped by layout:
 //   pages/app/**/page.tsx         → inside the app shell (sidebar, search, shortcuts)
@@ -32,10 +33,12 @@ export const Router = createBrowserRouter([
   {
     path: "/",
     element: <AppLayout />,
+    errorElement: <RouteError />,
     children: [...groups.app, { path: "*", element: <NotFound /> }],
   },
   {
     element: <StandaloneLayout />,
+    errorElement: <RouteError />,
     children: groups.standalone,
   },
 ]);
