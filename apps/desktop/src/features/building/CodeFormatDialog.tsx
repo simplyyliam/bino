@@ -184,7 +184,7 @@ export function CodeFormatDialog({ open, onOpenChange, system, storage, building
           <Button
             variant="ghost"
             size="sm"
-            className="self-start text-primary hover:text-primary"
+            className="self-start text-accent-blue hover:text-accent-blue"
             onClick={() => setSegments((list) => [...list, { id: `lvl-${Date.now()}`, name: "", part: "fixed", value: 1 }])}
           >
             <PlusIcon /> Add a Part
@@ -234,7 +234,7 @@ export function CodeFormatDialog({ open, onOpenChange, system, storage, building
             </p>
             {(["this", "all"] as const).map((value) => (
               <label key={value} className={cn("flex cursor-pointer items-center gap-2.5 text-[13px]")}>
-                <input type="radio" name="scope" checked={scope === value} onChange={() => setScope(value)} className="size-4 accent-(--primary)" />
+                <input type="radio" name="scope" checked={scope === value} onChange={() => setScope(value)} className="size-4 accent-(--accent-blue)" />
                 {value === "this" ? `Just ${building.name}` : `All ${plural(sharedWith.length + 1, "building")}`}
               </label>
             ))}

@@ -48,21 +48,21 @@ export default function IcnPage() {
         <Link to="/items" className="flex w-fit items-center gap-0.5 text-xs font-medium text-muted-foreground hover:text-foreground">
           <ChevronLeftIcon className="size-3.5" /> Items
         </Link>
-        <h1 className="font-mono text-2xl font-semibold tracking-tight">{icn.value}</h1>
+        <h1 className="font-mono text-2xl font-medium tracking-tight">{icn.value}</h1>
         <p className="text-[13px] text-muted-foreground">{item.name}</p>
       </div>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-semibold">Where it is</h2>
+        <h2 className="text-sm font-medium">Where it is</h2>
         {summary && building && line ? (
-          <div className="flex flex-wrap items-center gap-4 rounded-xl bg-card p-4 shadow-card">
+          <div className="flex flex-wrap items-center gap-4 rounded-[20px] bg-card p-4 shadow-card">
             <LocationTag code={summary.bin.locationCode} />
             <div className="flex min-w-0 flex-1 flex-col">
               <span className="truncate text-[13px] font-medium">{binTitle(summary.bin)}</span>
               <span className="text-xs text-muted-foreground">{building.name}</span>
             </div>
             <div className="flex flex-col items-end">
-              <span className="text-lg font-semibold tabular-nums">{formatNumber(line.quantity)}</span>
+              <span className="text-lg font-medium tabular-nums">{formatNumber(line.quantity)}</span>
               <span className="text-xs text-muted-foreground">in the bin</span>
             </div>
             <StatusBadge status={summary.status} />
@@ -71,17 +71,17 @@ export default function IcnPage() {
             </Button>
           </div>
         ) : (
-          <div className="flex items-center gap-3 rounded-xl border border-dashed border-border p-4 text-[13px] text-muted-foreground">
+          <div className="flex items-center gap-3 rounded-[20px] bg-card p-4 text-[13px] text-muted-foreground shadow-card">
             <MapPinOffIcon className="size-4" /> Not in any bin right now.
           </div>
         )}
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-semibold">Details</h2>
-        <dl className="divide-y divide-border rounded-xl bg-card shadow-card">
+        <h2 className="text-sm font-medium">Details</h2>
+        <dl className="flex flex-col rounded-[20px] bg-card p-1.5 shadow-card">
           {details.map(([label, v]) => (
-            <div key={label} className="flex gap-4 px-4 py-3 text-[13px]">
+            <div key={label} className="flex gap-4 rounded-[14px] px-3.5 py-2.5 text-[13px]">
               <dt className="w-32 shrink-0 text-muted-foreground">{label}</dt>
               <dd className="min-w-0 flex-1">{v}</dd>
             </div>
@@ -91,7 +91,7 @@ export default function IcnPage() {
 
       {events.length > 0 && (
         <section className="flex flex-col gap-3">
-          <h2 className="text-sm font-semibold">History</h2>
+          <h2 className="text-sm font-medium">History</h2>
           <ol className="flex flex-col gap-2.5">
             {events.map((e) => (
               <li key={e.id} className="flex gap-3 text-[13px]">

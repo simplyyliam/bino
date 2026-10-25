@@ -35,7 +35,7 @@ function PopoverContent({
           data-slot="popover-content"
           initialFocus={initialFocus}
           className={cn(
-            "z-50 max-h-(--available-height) w-72 origin-(--transform-origin) overflow-y-auto rounded-xl bg-popover p-1 text-[13px] text-popover-foreground shadow-raised outline-none duration-150 scrollbar-thin data-open:animate-in data-open:fade-in-0 data-open:zoom-in-[0.97] data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-[0.98]",
+            "z-50 max-h-(--available-height) w-72 origin-(--transform-origin) overflow-y-auto rounded-2xl bg-popover p-1.5 text-[13px] text-popover-foreground shadow-raised outline-none duration-150 scrollbar-thin data-open:animate-in data-open:fade-in-0 data-open:zoom-in-[0.97] data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-[0.98]",
             className
           )}
           {...props}

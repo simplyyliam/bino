@@ -18,7 +18,7 @@ export function BuildingSwitcher({ current, buildings }: { current: Building; bu
         render={
           <button
             type="button"
-            className="-ml-2 flex items-center gap-1.5 rounded-lg px-2 py-1 text-2xl font-semibold tracking-tight outline-none transition-colors duration-150 hover:bg-accent focus-visible:ring-3 focus-visible:ring-ring aria-expanded:bg-accent"
+            className="-ml-2 flex items-center gap-1.5 rounded-lg px-2 py-1 text-2xl font-medium tracking-tight outline-none transition-colors duration-150 hover:bg-accent focus-visible:ring-3 focus-visible:ring-ring aria-expanded:bg-accent"
           >
             {current.name}
             <ChevronsUpDownIcon className="size-4 text-muted-foreground" />

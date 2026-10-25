@@ -80,7 +80,7 @@ export function IconPicker({ binId, icon }: { binId: string; icon?: string | nul
                     aria-label={name}
                     className={cn(
                       "flex aspect-square items-center justify-center rounded-lg text-foreground/80 transition-colors duration-100 hover:bg-accent hover:text-foreground",
-                      icon === name && "bg-primary/10 text-primary"
+                      icon === name && "bg-accent-blue/10 text-accent-blue"
                     )}
                   >
                     <BinIcon iconName={name} size={18} />

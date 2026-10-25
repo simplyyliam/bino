@@ -67,7 +67,7 @@ export function BinGrid({
   };
 
   return (
-    <div className="flex min-w-full p-6 pt-4">
+    <div className="flex min-w-full p-6">
       <div
         role="grid"
         aria-label="Bins"

@@ -122,11 +122,11 @@ export default function ActivityPage() {
       <div className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center gap-2">
           <SearchField value={query} onChange={setQuery} placeholder="Search activity" />
-          <NativeSelect value={buildingId} onChange={(e) => setBuilding(e.target.value)} aria-label="Building" className="w-48">
+          <NativeSelect tone="canvas" value={buildingId} onChange={(e) => setBuilding(e.target.value)} aria-label="Building" className="w-48">
             <option value="">All buildings</option>
             {inv.buildings.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
           </NativeSelect>
-          <NativeSelect value={kind} onChange={(e) => setKind(e.target.value as EventKind | "")} aria-label="Type of change" className="w-52">
+          <NativeSelect tone="canvas" value={kind} onChange={(e) => setKind(e.target.value as EventKind | "")} aria-label="Type of change" className="w-52">
             <option value="">All changes</option>
             {EVENT_KINDS.map((k) => <option key={k.value} value={k.value}>{k.label}</option>)}
           </NativeSelect>
@@ -141,7 +141,7 @@ export default function ActivityPage() {
         </div>
 
         {filtered.length === 0 ? (
-          <div className="rounded-2xl bg-card shadow-card">
+          <div className="rounded-[22px] bg-card shadow-card">
             <EmptyState
               icon={HistoryIcon}
               title={history.length ? "No activity matches" : "No activity yet"}
@@ -154,7 +154,7 @@ export default function ActivityPage() {
               <h2 className="px-1 text-xs font-medium text-muted-foreground">
                 {group.label}
               </h2>
-              <ol className="overflow-hidden rounded-xl bg-card shadow-card">
+              <ol className="flex flex-col rounded-[20px] bg-card p-1.5 shadow-card">
                 {group.events.map((e) => {
                   const meta = eventMeta(e.eventType);
                   const Icon = meta.icon;
@@ -164,8 +164,8 @@ export default function ActivityPage() {
                     <li
                       key={e.id}
                       className={cn(
-                        "group flex items-center gap-3 border-b border-border px-4 py-3 last:border-0 transition-colors duration-150",
-                        isSelected ? "bg-primary/5" : "hover:bg-accent/40"
+                        "group flex items-center gap-3 rounded-[14px] px-3 py-2.5 transition-colors duration-150",
+                        isSelected ? "bg-accent-blue/8" : "hover:bg-surface"
                       )}
                     >
                       <Checkbox
@@ -174,7 +174,7 @@ export default function ActivityPage() {
                         aria-label="Select entry"
                         className={cn("transition-opacity", !isSelected && selected.size === 0 && "opacity-0 group-hover:opacity-100 focus-visible:opacity-100")}
                       />
-                      <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-surface text-muted-foreground">
+                      <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-surface text-muted-foreground">
                         <Icon className="size-4" strokeWidth={1.75} />
                       </span>
                       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
@@ -191,7 +191,7 @@ export default function ActivityPage() {
                       </div>
                       {e.quantityBefore != null && e.quantityAfter != null && (
                         <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
-                          {formatNumber(e.quantityBefore)} → <span className="font-semibold text-foreground">{formatNumber(e.quantityAfter)}</span>
+                          {formatNumber(e.quantityBefore)} → <span className="font-medium text-foreground">{formatNumber(e.quantityAfter)}</span>
                         </span>
                       )}
                       {place && (

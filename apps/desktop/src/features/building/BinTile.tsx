@@ -46,11 +46,11 @@ export const BinTile = forwardRef<HTMLButtonElement, BinTileProps>(function BinT
             aria-label={`${binTitle(bin)}, ${statusLabel(status)}${total ? `, ${total} items` : ""}`}
             aria-pressed={selected}
             className={cn(
-              "relative flex size-14 items-center justify-center rounded-xl text-[13px] font-semibold tabular-nums outline-none transition-[opacity,box-shadow,scale] duration-150 ease-out focus-visible:ring-3 focus-visible:ring-ring active:scale-[0.95]",
+              "relative flex size-14 items-center justify-center rounded-[15px] text-[13px] font-medium tabular-nums outline-none transition-[opacity,box-shadow,scale] duration-150 ease-out focus-visible:ring-3 focus-visible:ring-ring active:scale-[0.95]",
               tone[status],
               dimmed && "opacity-20 hover:opacity-60",
-              highlighted && "ring-2 ring-primary/60 ring-offset-2 ring-offset-background",
-              selected && "ring-2 ring-primary ring-offset-2 ring-offset-background"
+              highlighted && "ring-2 ring-accent-blue/50 ring-offset-2 ring-offset-background",
+              selected && "ring-2 ring-accent-blue ring-offset-2 ring-offset-background"
             )}
           >
             {hasIcon ? (
@@ -61,7 +61,7 @@ export const BinTile = forwardRef<HTMLButtonElement, BinTileProps>(function BinT
               formatNumber(total)
             ) : null}
             {hasIcon && summary.items.length > 0 && (
-              <span className="absolute right-1.5 bottom-1 text-[10px] font-semibold leading-none opacity-80">
+              <span className="absolute right-1.5 bottom-1 text-[10px] font-medium leading-none opacity-80">
                 {formatNumber(total)}
               </span>
             )}
@@ -73,7 +73,7 @@ export const BinTile = forwardRef<HTMLButtonElement, BinTileProps>(function BinT
       />
       <TooltipContent side="top" className="flex-col items-start gap-0.5 px-3 py-2">
         <span className="font-mono text-[11px] opacity-70">{bin.locationCode}</span>
-        {bin.name && <span className="text-[13px] font-semibold">{bin.name}</span>}
+        {bin.name && <span className="text-[13px] font-medium">{bin.name}</span>}
         {itemNames.length > 0 ? (
           <span className="max-w-56 truncate text-xs font-normal opacity-80">
             {itemNames.slice(0, 3).join(", ")}

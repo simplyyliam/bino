@@ -119,9 +119,8 @@ export default function BuildingPage() {
   };
 
   return (
-    <div className="flex min-h-0 flex-1">
-      <div className="flex min-w-0 flex-1 flex-col">
-        <div className="flex flex-col gap-4 px-6 pt-6 pb-3 lg:px-8">
+    <div className="flex min-h-0 flex-1 flex-col">
+        <div className="flex flex-col gap-4 px-6 pt-6 pb-4 lg:px-8">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="flex min-w-0 flex-col gap-0.5">
               <Link to="/" className="flex w-fit items-center gap-0.5 text-xs font-medium text-muted-foreground hover:text-foreground">
@@ -164,7 +163,8 @@ export default function BuildingPage() {
           )}
         </div>
 
-        <div className="min-h-0 flex-1 overflow-auto scrollbar-thin">
+      <div className="mx-4 mb-4 flex min-h-0 flex-1 overflow-hidden rounded-[20px] bg-background shadow-card lg:mx-6 lg:mb-6">
+        <div className="min-h-0 min-w-0 flex-1 overflow-auto scrollbar-thin">
           {!storage ? (
             <EmptyState
               icon={BoxesIcon}
@@ -194,11 +194,11 @@ export default function BuildingPage() {
             />
           )}
         </div>
-      </div>
 
-      {selectedHere && (
-        <BinInspector summary={selectedHere} building={building} inv={inv} onClose={() => select(null)} />
-      )}
+        {selectedHere && (
+          <BinInspector summary={selectedHere} building={building} inv={inv} onClose={() => select(null)} />
+        )}
+      </div>
 
       {storage && (
         <LayoutDialog

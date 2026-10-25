@@ -53,7 +53,7 @@ export function AddItemButton({ bin }: { bin: Bin }) {
       <Popover open={open} onOpenChange={(o) => (o ? setOpen(true) : close())}>
         <PopoverTrigger
           render={
-            <Button variant="ghost" size="xs" className="-mr-2 text-primary hover:text-primary">
+            <Button variant="ghost" size="xs" className="-mr-2 text-accent-blue hover:text-accent-blue">
               <PlusIcon /> Add Item
             </Button>
           }
@@ -116,7 +116,7 @@ export function AddItemButton({ bin }: { bin: Bin }) {
               onMouseMove={() => setActive(results.length)}
               onClick={startCreate}
               className={cn(
-                "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-[13px] font-medium text-primary",
+                "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-[13px] font-medium text-accent-blue",
                 active === results.length && "bg-accent"
               )}
             >

@@ -48,7 +48,7 @@ function LabelField({ binId, name, placeholder }: { binId: string; name: string;
       }}
       placeholder={placeholder}
       aria-label="Bin label"
-      className="-mx-1.5 w-full min-w-0 rounded-md bg-transparent px-1.5 py-0.5 text-lg font-semibold tracking-tight outline-none transition-colors duration-150 placeholder:text-muted-foreground/70 hover:bg-accent focus:bg-accent"
+      className="-mx-1.5 w-full min-w-0 rounded-md bg-transparent px-1.5 py-0.5 text-lg font-medium tracking-tight outline-none transition-colors duration-150 placeholder:text-muted-foreground/70 hover:bg-accent focus:bg-accent"
     />
   );
 }
@@ -90,7 +90,7 @@ export function BinInspector({ summary, building, inv, onClose }: BinInspectorPr
   return (
     <aside
       aria-label={`Bin ${bin.locationCode}`}
-      className="flex h-full w-[23rem] shrink-0 flex-col border-l border-border bg-card animate-in fade-in-0 slide-in-from-right-4 duration-200"
+      className="flex h-full w-[23rem] shrink-0 flex-col border-l border-border bg-background animate-in fade-in-0 slide-in-from-right-2 duration-200"
     >
       <div className="flex flex-col gap-4 p-5 pb-4">
         <div className="flex items-center gap-2">
@@ -112,14 +112,14 @@ export function BinInspector({ summary, building, inv, onClose }: BinInspectorPr
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto scrollbar-thin">
         <section className="flex flex-col gap-2 px-5">
           <div className="flex items-center justify-between">
-            <h3 className="text-[13px] font-semibold">
+            <h3 className="text-[13px] font-medium">
               Items <span className="font-normal text-muted-foreground tabular-nums">{items.length || ""}</span>
             </h3>
             <AddItemButton bin={bin} />
           </div>
 
           {items.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-border px-4 py-8 text-center">
+            <div className="flex flex-col items-center gap-2 rounded-2xl bg-surface px-4 py-8 text-center">
               <PackageOpenIcon className="size-5 text-muted-foreground" strokeWidth={1.75} />
               <p className="text-[13px] text-muted-foreground">Nothing in this bin yet.</p>
             </div>
@@ -135,7 +135,7 @@ export function BinInspector({ summary, building, inv, onClose }: BinInspectorPr
         {recent.length > 0 && (
           <section className="mt-6 flex flex-col gap-2 px-5 pb-5">
             <div className="flex items-center justify-between">
-              <h3 className="text-[13px] font-semibold">Recent Activity</h3>
+              <h3 className="text-[13px] font-medium">Recent Activity</h3>
               <Link to={`/activity?building=${building.id}`} className="text-xs font-medium text-muted-foreground hover:text-foreground">
                 View all
               </Link>
@@ -155,7 +155,7 @@ export function BinInspector({ summary, building, inv, onClose }: BinInspectorPr
         )}
       </div>
 
-      <div className="flex gap-2 border-t border-border p-4">
+      <div className="flex gap-2 p-4">
         <Button variant="outline" size="sm" className="flex-1" onClick={zeroAll} disabled={!hasStock}>
           <CircleSlashIcon /> Set All to 0
         </Button>

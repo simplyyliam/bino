@@ -66,22 +66,22 @@ function NeedsAttention({ alerts }: { alerts: Alert[] }) {
   return (
     <section className="flex flex-col gap-3">
       <div className="flex items-baseline justify-between">
-        <h2 className="text-sm font-semibold">Needs Attention</h2>
+        <h2 className="text-[13px] font-medium text-muted-foreground">Needs Attention</h2>
         {alerts.length > 0 && <span className="text-xs text-muted-foreground tabular-nums">{alerts.length}</span>}
       </div>
       {alerts.length === 0 ? (
-        <div className="flex items-center gap-3 rounded-xl bg-card px-4 py-3.5 text-[13px] text-muted-foreground shadow-card">
+        <div className="flex items-center gap-3 rounded-[20px] bg-card px-5 py-4 text-[13px] text-muted-foreground shadow-card">
           <CheckCircle2Icon className="size-4 text-foreground/60" />
           Nothing's low, empty or out of service. All good.
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl bg-card shadow-card">
-          <ul className="divide-y divide-border">
+        <div className="rounded-[20px] bg-card p-1.5 shadow-card">
+          <ul className="flex flex-col">
             {shown.map((a) => (
               <li key={a.key}>
                 <Link
                   to={a.href}
-                  className="flex items-center gap-3 px-4 py-2.5 transition-colors duration-150 outline-none hover:bg-accent/60 focus-visible:bg-accent"
+                  className="flex items-center gap-3 rounded-[14px] px-3.5 py-2.5 transition-colors duration-150 outline-none hover:bg-surface focus-visible:bg-surface"
                 >
                   <StatusSwatch status={a.status} />
                   <span className="min-w-0 flex-1 truncate text-[13px] font-medium">{a.title}</span>
@@ -96,7 +96,7 @@ function NeedsAttention({ alerts }: { alerts: Alert[] }) {
             <button
               type="button"
               onClick={() => setExpanded((v) => !v)}
-              className="w-full border-t border-border px-4 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground"
+              className="mt-0.5 w-full rounded-[14px] px-3.5 py-2 text-left text-xs font-medium text-muted-foreground transition-colors hover:bg-surface hover:text-foreground"
             >
               {expanded ? "Show less" : `Show all ${alerts.length}`}
             </button>
@@ -118,15 +118,15 @@ function BuildingCard({ building, inv }: { building: Building; inv: Inventory })
   const attention = counts.low + counts.out + counts.service;
 
   return (
-    <div className="group relative flex flex-col gap-5 rounded-2xl bg-card p-5 shadow-card transition-shadow duration-200 hover:shadow-raised">
+    <div className="group relative flex flex-col gap-5 rounded-[22px] bg-card p-5 shadow-card transition-shadow duration-200 hover:shadow-raised">
       <Link
         to={`/buildings/${building.id}`}
-        className="absolute inset-0 rounded-2xl outline-none focus-visible:ring-3 focus-visible:ring-ring"
+        className="absolute inset-0 rounded-[22px] outline-none focus-visible:ring-3 focus-visible:ring-ring"
         aria-label={`Open ${building.name}`}
       />
       <div className="flex items-start justify-between gap-2">
         <div className="flex min-w-0 flex-col">
-          <h3 className="truncate text-[15px] font-semibold">{building.name}</h3>
+          <h3 className="truncate text-[15px] font-medium">{building.name}</h3>
           <span className="text-xs text-muted-foreground">
             {building.buildingNumber ? `Building ${building.buildingNumber} · ` : ""}
             {plural(bins.length, "bin")}
@@ -142,7 +142,7 @@ function BuildingCard({ building, inv }: { building: Building; inv: Inventory })
         />
       </div>
 
-      <div className="pointer-events-none flex h-24 items-center overflow-hidden rounded-lg bg-surface px-3">
+      <div className="pointer-events-none flex h-24 items-center overflow-hidden rounded-2xl bg-surface px-3.5">
         {bins.length > 0 ? (
           <MiniBinMap bins={bins} summaries={inv.summaries} rows={rows} />
         ) : (
@@ -153,15 +153,15 @@ function BuildingCard({ building, inv }: { building: Building; inv: Inventory })
       <dl className="pointer-events-none grid grid-cols-3 gap-2 text-xs">
         <div>
           <dt className="text-muted-foreground">In use</dt>
-          <dd className="text-sm font-semibold tabular-nums">{formatNumber(counts.stocked + counts.low + counts.out)}</dd>
+          <dd className="text-sm font-medium tabular-nums">{formatNumber(counts.stocked + counts.low + counts.out)}</dd>
         </div>
         <div>
           <dt className="text-muted-foreground">Empty</dt>
-          <dd className="text-sm font-semibold tabular-nums">{formatNumber(counts.empty)}</dd>
+          <dd className="text-sm font-medium tabular-nums">{formatNumber(counts.empty)}</dd>
         </div>
         <div>
           <dt className="text-muted-foreground">Attention</dt>
-          <dd className={attention ? "text-sm font-semibold text-bin-out-fg tabular-nums" : "text-sm font-semibold tabular-nums"}>
+          <dd className={attention ? "text-sm font-medium text-bin-out-fg tabular-nums" : "text-sm font-medium tabular-nums"}>
             {formatNumber(attention)}
           </dd>
         </div>
@@ -194,7 +194,7 @@ export default function OverviewPage() {
       />
 
       {inv.buildings.length === 0 ? (
-        <div className="rounded-2xl bg-card shadow-card">
+        <div className="rounded-[22px] bg-card shadow-card">
           <EmptyState
             icon={Building2Icon}
             title="Set up your first building"
@@ -206,7 +206,7 @@ export default function OverviewPage() {
         <>
           <NeedsAttention alerts={alerts} />
           <section className="flex flex-col gap-3">
-            <h2 className="text-sm font-semibold">Buildings</h2>
+            <h2 className="text-[13px] font-medium text-muted-foreground">Buildings</h2>
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {inv.buildings.map((b) => (
                 <BuildingCard key={b.id} building={b} inv={inv} />
