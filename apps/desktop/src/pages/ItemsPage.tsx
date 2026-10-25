@@ -137,7 +137,7 @@ export default function ItemsPage() {
             icon={PackageIcon}
             title="No items yet"
             description="Open a building and click a bin to start adding what's in it."
-            action={<Button variant="outline" render={<Link to="/" />}>Go to Overview</Button>}
+            action={<Button variant="outline" nativeButton={false} render={<Link to="/" />}>Go to Overview</Button>}
           />
         </div>
       ) : (

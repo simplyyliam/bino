@@ -10,7 +10,7 @@ export default function NotFoundPage({ title = "Page not found", description = "
         icon={MapPinOffIcon}
         title={title}
         description={description}
-        action={<Button render={<Link to="/" />}>Back to Overview</Button>}
+        action={<Button nativeButton={false} render={<Link to="/" />}>Back to Overview</Button>}
       />
     </div>
   );
