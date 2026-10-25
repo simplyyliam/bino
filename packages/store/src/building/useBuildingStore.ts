@@ -5,7 +5,6 @@ import { useStorageStore } from "./useStorageStore";
 import { useBinStore } from "./useBinStore";
 import { useMovementHistoryStore } from "./useMovementHistoryStore";
 import { useItemStore } from "./useItemStore";
-import { useTimelineFilterStore } from "../ui/useTimelineFilterStore";
 
 type BuildingState = {
   buildings: Building[]
@@ -105,10 +104,6 @@ export const useBuildingStore = create<BuildingState>()((set, get) => ({
         storages: state.storages.filter((storage) => !storageIds.has(storage.id)),
         selectedStorageId: storageIds.has(state.selectedStorageId ?? "") ? null : state.selectedStorageId
       }));
-    }
-
-    if (useTimelineFilterStore.getState().selectedBuildingId === id) {
-      useTimelineFilterStore.getState().setSelectedBuildingId(null);
     }
 
     set((state) => ({
