@@ -4,6 +4,15 @@ Why things are the way they are. Newest first. Add to this when you make a call 
 
 ---
 
+### 2026-10-26 · Store numbers live on the storage, not the format
+
+New stores kept getting the same codes (`06/10/…`) because the store part was a fixed value inside the shared format. Instead of copying the whole format for every building, each storage now has an optional `storeNumber` that fills in the format's store part. Formats stay shared, codes stay unique.
+
+- The store part is a rule flagged `storeNumber: true`. Older formats aren't flagged, so a fixed part named Store/Aisle/Building/etc. counts as the store part.
+- `storeNumber = null` means "use the format's fixed value". That's every building made before this, so none of the existing codes change.
+- New buildings get the highest store number in use on that format + 1. The API refuses a number another building on the same format already shows (409).
+- Needs migration `20261026090000_storage_store_number` in production.
+
 ### 2026-10-25 · Keep file-based routing with app and standalone layouts
 
 Routes come from `pages/app/**/page.tsx` and `pages/standalone/**/page.tsx`. I briefly swapped this for an explicit route list during the redesign, which was a mistake: the layout groups are a deliberate part of the architecture. Standalone pages are for screens that shouldn't carry the app shell. The first one is `/tag/:icn`, the page a scanned part label opens on a phone.

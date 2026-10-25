@@ -80,9 +80,10 @@ router.patch(
     // every bin that uses it — not only the storage the editor was opened from.
     const bins = await prisma.bin.findMany({
       where: { storage: { locationSystemId: system.id } },
+      include: { storage: { select: { storeNumber: true } } },
     });
     const updates = bins
-      .map((bin) => ({ bin, code: generateLocationCode(bin, system as any) }))
+      .map((bin) => ({ bin, code: generateLocationCode(bin, system as any, bin.storage.storeNumber) }))
       .filter(({ bin, code }) => code !== bin.locationCode)
       .map(({ bin, code }) =>
         prisma.bin.update({ where: { id: bin.id }, data: { locationCode: code } })

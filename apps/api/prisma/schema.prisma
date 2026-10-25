@@ -24,6 +24,7 @@ model Storage {
   name             String
   locationSystemId String
   locationSystem   LocationSystem @relation(fields: [locationSystemId], references: [id])
+  storeNumber      Int?
   maxLevel         Int
   maxRow           Int
   maxColumn        Int

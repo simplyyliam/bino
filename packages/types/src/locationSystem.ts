@@ -5,6 +5,8 @@ export type LocationMappingRule = {
   canonicalField: 'level' | 'row' | 'column' | 'position'
   startValue: number
   fixedValue?: number
+  // Marks the part that tells stores apart; each building fills in its own number.
+  storeNumber?: boolean
 }
 
 export type LocationGridConfig = {

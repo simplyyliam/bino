@@ -56,34 +56,71 @@ export function getNextBinLocation(
   return { level: 0, row: 0, column: 0, position: 0 };
 }
 
+// Formats made before store parts were marked still have one, it's just not
+// flagged. Fall back to a fixed part with a store-ish name.
+const STORE_NAMES = /^(store|shop|aisle|building|warehouse|site)$/i;
+
+/**
+ * Index of the rule that identifies the store/building, or -1 if the format has none.
+ */
+export function storeRuleIndex(system: LocationSystem): number {
+  const flagged = system.mappingRules.findIndex((r) => r.storeNumber);
+  if (flagged !== -1) return flagged;
+  return system.mappingRules.findIndex((rule) => {
+    if (rule.fixedValue === undefined || rule.fixedValue === null) return false;
+    const level = system.levels.find((l) => l.id === rule.levelId);
+    return !!level && STORE_NAMES.test(level.name.trim());
+  });
+}
+
+/**
+ * The store number a format uses when a building hasn't picked its own.
+ */
+export function defaultStoreNumber(system: LocationSystem): number | null {
+  const i = storeRuleIndex(system);
+  if (i === -1) return null;
+  const rule = system.mappingRules[i];
+  return rule.fixedValue ?? rule.startValue ?? 1;
+}
+
+/**
+ * Next free store number for a new building on this format, given the
+ * storages already using it. null if the format has no store part.
+ */
+export function nextStoreNumber(system: LocationSystem, storages: { storeNumber?: number | null }[]): number | null {
+  if (storeRuleIndex(system) === -1) return null;
+  const start = defaultStoreNumber(system) ?? 1;
+  if (storages.length === 0) return start;
+  const used = storages.map((s) => s.storeNumber ?? start);
+  return Math.max(start, ...used) + 1;
+}
+
 /**
  * Generates a customer-facing location code from a canonical location
  * using the specified location system's rules.
  *
  * @param location - The canonical location
  * @param system - The location system with mapping rules
+ * @param storeNumber - This building's number for the store part, if it has one
  * @returns The generated location code (e.g., "01/02" or "06/10/01/01/01")
  */
 export function generateLocationCode(
   location: CanonicalLocation,
-  system: LocationSystem
+  system: LocationSystem,
+  storeNumber?: number | null
 ): string {
-  const parts: string[] = [];
+  const storeIndex = storeNumber === undefined || storeNumber === null ? -1 : storeRuleIndex(system);
 
-  // Process each level in order according to mapping rules
-  for (const rule of system.mappingRules) {
-    // If fixedValue is specified, use it directly (e.g., fixed Group, Store, Row prefixes)
-    const displayValue = rule.fixedValue !== undefined
-      ? rule.fixedValue
-      : location[rule.canonicalField] + rule.startValue;
+  const parts = system.mappingRules.map((rule, i) => {
+    const displayValue =
+      i === storeIndex
+        ? storeNumber!
+        : rule.fixedValue !== undefined && rule.fixedValue !== null
+          ? rule.fixedValue
+          : location[rule.canonicalField] + rule.startValue;
+    return String(displayValue).padStart(system.paddingWidth, "0");
+  });
 
-    // Pad according to system configuration
-    const paddedValue = String(displayValue).padStart(system.paddingWidth, '0');
-
-    parts.push(paddedValue);
-  }
-
-  // Join with the system's separator
   return parts.join(system.separator);
 }
 
