@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { prisma } from "../db.js";
+import { generateLocationCode } from "@bino/data";
 import { asyncHandler, notFound, optionalString, requireString } from "../utils/errors.js";
 
 const router = Router();
@@ -53,8 +54,22 @@ router.patch(
     const storage = await prisma.storage.update({
       where: { id: req.params.id },
       data: { name, locationSystemId, maxLevel, maxRow, maxColumn },
+      include: { locationSystem: true, bins: true },
     });
-    res.json(storage);
+
+    // Switching code formats means every bin in here needs a new code.
+    let updatedBinCount = 0;
+    if (locationSystemId) {
+      const updates = storage.bins
+        .map((bin) => ({ bin, code: generateLocationCode(bin, storage.locationSystem as any) }))
+        .filter(({ bin, code }) => code !== bin.locationCode)
+        .map(({ bin, code }) => prisma.bin.update({ where: { id: bin.id }, data: { locationCode: code } }));
+      if (updates.length > 0) await prisma.$transaction(updates);
+      updatedBinCount = updates.length;
+    }
+
+    const { bins: _bins, locationSystem: _system, ...rest } = storage;
+    res.json({ ...rest, updatedBinCount });
   })
 );
 

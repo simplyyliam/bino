@@ -8,11 +8,9 @@ import { useMovementHistoryStore } from "./useMovementHistoryStore";
 
 type BinStore = {
   bins: Bin[]
-  selectedBinId: string | null
   isLoading: boolean
 
   fetchBins: (storageId?: string) => Promise<void>
-  setSelectedBinId: (id: string | null) => void
   updateBin: (id: string, updateFields: Partial<Omit<Bin, "id">>) => Promise<void>
   setBinOutOfService: (id: string, value: boolean) => Promise<void>
   setBinIcon: (binId: string, icon: IconName | null) => Promise<void>
@@ -44,7 +42,6 @@ export const sortBinsLastFirst = (bins: Bin[]) =>
 
 export const useBinStore = create<BinStore>()((set, get) => ({
   bins: [],
-  selectedBinId: null,
   isLoading: false,
 
   fetchBins: async (storageId) => {
@@ -58,8 +55,6 @@ export const useBinStore = create<BinStore>()((set, get) => ({
       throw err;
     }
   },
-
-  setSelectedBinId: (id) => set({ selectedBinId: id }),
 
   updateBin: async (id, updateFields) => {
     const previous = get().bins;
@@ -116,10 +111,7 @@ export const useBinStore = create<BinStore>()((set, get) => ({
 
     const removed = new Set(ids);
     forgetBinsLocally(removed);
-    set((state) => ({
-      bins: state.bins.filter((bin) => !removed.has(bin.id)),
-      selectedBinId: removed.has(state.selectedBinId ?? "") ? null : state.selectedBinId,
-    }));
+    set((state) => ({ bins: state.bins.filter((bin) => !removed.has(bin.id)) }));
     replaceStorage(storage);
   },
 
