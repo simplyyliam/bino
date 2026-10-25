@@ -6,7 +6,7 @@ export type Bin = {
   itemId?: string
   quantity: number
   isOutOfService: boolean
-  icon?: string
+  icon?: string | null
   // Canonical location fields
   level: number;
   row: number;
