@@ -16,11 +16,11 @@ export function AppHeader() {
   const setSearchOpen = useSearchStore((s) => s.setOpen);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur-md">
+    <header className="sticky top-0 z-40 bg-canvas/85 backdrop-blur-md">
       <div className="flex h-14 items-center gap-6 px-4 lg:px-6">
         <Link to="/" className="flex items-center gap-2 rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring">
           <LogoMark />
-          <span className="text-[15px] font-semibold tracking-tight">Bino</span>
+          <span className="text-[15px] font-medium tracking-tight">Bino</span>
         </Link>
 
         <nav aria-label="Main" className="flex items-center gap-1">
@@ -31,8 +31,8 @@ export function AppHeader() {
               end={item.end}
               className={({ isActive }) =>
                 cn(
-                  "rounded-md px-3 py-1.5 text-[13px] font-medium text-muted-foreground transition-colors duration-150 outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring",
-                  isActive && "bg-accent text-foreground"
+                  "rounded-full px-3.5 py-1.5 text-[13px] font-medium text-muted-foreground transition-[color,background-color,box-shadow] duration-150 outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring",
+                  isActive && "bg-card text-foreground shadow-pill"
                 )
               }
             >
@@ -45,7 +45,7 @@ export function AppHeader() {
           <button
             type="button"
             onClick={() => setSearchOpen(true)}
-            className="flex h-8 w-64 items-center gap-2 rounded-lg border border-input bg-card px-2.5 text-[13px] text-muted-foreground shadow-[0_1px_2px_oklch(0_0_0/0.03)] transition-colors duration-150 outline-none hover:border-foreground/20 focus-visible:ring-3 focus-visible:ring-ring dark:bg-input/20"
+            className="flex h-8 w-64 items-center gap-2 rounded-full bg-card pr-1.5 pl-3 text-[13px] text-faint-foreground shadow-pill transition-colors duration-150 outline-none hover:text-muted-foreground focus-visible:ring-3 focus-visible:ring-ring"
           >
             <SearchIcon className="size-4" />
             Search

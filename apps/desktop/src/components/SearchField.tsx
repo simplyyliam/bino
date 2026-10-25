@@ -21,7 +21,7 @@ export function SearchField({ value, onChange, placeholder, className, autoFocus
         onKeyDown={(e) => e.key === "Escape" && value && (e.stopPropagation(), onChange(""))}
         placeholder={placeholder}
         aria-label={placeholder}
-        className="h-9 w-full rounded-lg border border-input bg-card pr-8 pl-9 text-[13px] shadow-[0_1px_2px_oklch(0_0_0/0.03)] outline-none transition-[border-color,box-shadow] duration-150 placeholder:text-muted-foreground/80 focus:border-primary focus:ring-3 focus:ring-ring/40 dark:bg-input/20 [&::-webkit-search-cancel-button]:hidden"
+        className="h-9 w-full rounded-full bg-card pr-8 pl-9 text-[13px] shadow-pill outline-none transition-shadow duration-150 placeholder:text-faint-foreground focus:ring-3 focus:ring-ring/30 [&::-webkit-search-cancel-button]:hidden"
       />
       {value && (
         <button

@@ -113,8 +113,8 @@ export function BuildingDialog({ open, onOpenChange, building }: BuildingDialogP
                       <label
                         key={system.id}
                         className={cn(
-                          "flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2.5 transition-[border-color,background-color] duration-150",
-                          selected ? "border-primary bg-primary/5" : "border-border hover:bg-accent/60"
+                          "flex cursor-pointer items-center gap-3 rounded-2xl px-3.5 py-2.5 transition-[background-color,box-shadow] duration-150",
+                          selected ? "bg-accent-blue/8 ring-1 ring-accent-blue/40" : "bg-field hover:bg-[color-mix(in_oklch,var(--field),var(--foreground)_3%)]"
                         )}
                       >
                         <input
@@ -123,7 +123,7 @@ export function BuildingDialog({ open, onOpenChange, building }: BuildingDialogP
                           value={system.id}
                           checked={selected}
                           onChange={() => setSystemId(system.id)}
-                          className="size-4 accent-(--primary)"
+                          className="size-4 accent-(--accent-blue)"
                         />
                         <span className="flex min-w-0 flex-1 flex-col">
                           <span className="truncate text-[13px] font-medium">{system.name}</span>

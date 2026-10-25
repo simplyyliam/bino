@@ -201,7 +201,7 @@ export function MoveItemDialog({ open, onOpenChange, line, itemName, fromBin, in
               onDoubleClick={() => void move(summary.bin.id)}
               className={cn(
                 "flex items-center gap-3 rounded-lg px-2.5 py-2 text-left transition-colors duration-100",
-                targetId === summary.bin.id ? "bg-primary/10" : "hover:bg-accent"
+                targetId === summary.bin.id ? "bg-accent-blue/10" : "hover:bg-accent"
               )}
             >
               <StatusSwatch status={summary.status} />

@@ -57,7 +57,7 @@ export function BinItemRow({ line, bin, inv }: BinItemRowProps) {
   };
 
   return (
-    <li className="group flex items-center gap-3 rounded-lg px-2 py-2 transition-colors duration-150 hover:bg-accent/50">
+    <li className="group flex items-center gap-3 rounded-xl px-2 py-2 transition-colors duration-150 hover:bg-surface">
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="truncate text-[13px] font-medium">{name}</span>
         <span className="flex min-w-0 flex-wrap items-center gap-x-2 text-xs text-muted-foreground">

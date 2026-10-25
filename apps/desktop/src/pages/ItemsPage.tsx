@@ -132,7 +132,7 @@ export default function ItemsPage() {
       />
 
       {rows.length === 0 ? (
-        <div className="rounded-2xl bg-card shadow-card">
+        <div className="rounded-[22px] bg-card shadow-card">
           <EmptyState
             icon={PackageIcon}
             title="No items yet"
@@ -144,11 +144,11 @@ export default function ItemsPage() {
         <div className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center gap-2">
             <SearchField value={query} onChange={setQuery} placeholder="Search items" className="w-72" />
-            <NativeSelect value={category} onChange={(e) => setCategory(e.target.value)} aria-label="Category" className="w-48">
+            <NativeSelect tone="canvas" value={category} onChange={(e) => setCategory(e.target.value)} aria-label="Category" className="w-48">
               <option value="">All categories</option>
               {categories.map((c) => <option key={c} value={c}>{c}</option>)}
             </NativeSelect>
-            <NativeSelect value={show} onChange={(e) => setShow(e.target.value as Show)} aria-label="Show" className="w-48">
+            <NativeSelect tone="canvas" value={show} onChange={(e) => setShow(e.target.value as Show)} aria-label="Show" className="w-48">
               <option value="all">All items</option>
               <option value="attention">Low or out of stock</option>
               <option value="unplaced">Not in any bin</option>
@@ -158,7 +158,7 @@ export default function ItemsPage() {
             </span>
           </div>
 
-          <div className="overflow-hidden rounded-xl bg-card shadow-card">
+          <div className="overflow-hidden rounded-[20px] bg-card p-1.5 shadow-card">
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
@@ -218,7 +218,7 @@ export default function ItemsPage() {
                     <TableCell className="text-right">
                       <span
                         className={cn(
-                          "font-semibold tabular-nums",
+                          "font-medium tabular-nums",
                           row.state === "low" && "text-bin-low-fg",
                           row.state === "out" && "text-bin-out-fg"
                         )}

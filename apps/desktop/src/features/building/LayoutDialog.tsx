@@ -112,7 +112,7 @@ export function LayoutDialog({ open, onOpenChange, storage, bins, system, inv, o
         <button
           type="button"
           onClick={onEditCodes}
-          className="self-start text-[13px] font-medium text-primary underline-offset-4 hover:underline"
+          className="self-start text-[13px] font-medium text-accent-blue underline-offset-4 hover:underline"
         >
           Change bin code format…
         </button>
