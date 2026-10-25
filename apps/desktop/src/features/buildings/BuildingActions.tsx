@@ -35,10 +35,11 @@ export function BuildingActions({ building, trigger, align = "end" }: BuildingAc
   const itemLines = bins.reduce((n, bin) => n + (inv.summaries.get(bin.id)?.items.length ?? 0), 0);
 
   const remove = async () => {
+    // Leave the page first so it doesn't flash "not found" as the data goes.
+    navigate("/");
     try {
       await deleteBuilding(building.id);
       toast.success(`${building.name} deleted`);
-      navigate("/");
     } catch (err) {
       toast.error(errorMessage(err, "Couldn't delete the building."));
     }

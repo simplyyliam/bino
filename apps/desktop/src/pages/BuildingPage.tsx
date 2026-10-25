@@ -74,8 +74,9 @@ export default function BuildingPage() {
       const inField = e.target instanceof HTMLElement && e.target.closest("input, textarea, select, [role=dialog], [role=menu]");
       if (e.key === "Escape" && !inField) select(null);
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    // Capture phase, so a bin's tooltip can't swallow the Escape first.
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
   }, [selectedId, select]);
 
   const matches = useMemo(() => {

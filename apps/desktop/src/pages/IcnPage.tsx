@@ -66,7 +66,7 @@ export default function IcnPage() {
               <span className="text-xs text-muted-foreground">in the bin</span>
             </div>
             <StatusBadge status={summary.status} />
-            <Button variant="outline" render={<Link to={binLink(building.id, summary.bin.id)} />}>
+            <Button variant="outline" nativeButton={false} render={<Link to={binLink(building.id, summary.bin.id)} />}>
               Open Bin <ArrowRightIcon />
             </Button>
           </div>
