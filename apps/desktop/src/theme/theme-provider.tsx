@@ -41,7 +41,7 @@ function applyThemeClass(theme: Theme): ResolvedTheme {
 function ThemeProvider({
   children,
   defaultTheme = 'system',
-  storageKey = 'event-seating-theme',
+  storageKey = 'bino-theme',
 }: ThemeProviderProps) {
   const [theme, setThemeState] = useState<Theme>(() => {
     const storedTheme = localStorage.getItem(storageKey) as Theme | null;
