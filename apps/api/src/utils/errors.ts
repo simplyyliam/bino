@@ -36,7 +36,8 @@ export const optionalString = (value: unknown): string | undefined => {
 };
 
 export const optionalQuantity = (value: unknown, field = "quantity"): number | undefined => {
-  if (value === undefined) return undefined;
+  // null means "not given", not 0 (Number(null) is 0).
+  if (value === undefined || value === null) return undefined;
   const n = Number(value);
   if (!Number.isInteger(n) || n < 0) {
     throw badRequest(`${field} must be a whole number of 0 or more`);

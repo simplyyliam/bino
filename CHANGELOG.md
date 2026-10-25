@@ -6,6 +6,7 @@
 - **Add an ICN to something already in a bin.** Open the item's **···** menu and pick **Add ICN…**.
 - ICNs are saved in capitals and can use letters, numbers, dashes and dots, so the barcode on the ICN screen always scans.
 - Bino tells you straight away if an ICN is already taken, and by which item.
+- Fixed: items added with **New Item** got a low-stock alert of 0 even when the alert box was left empty.
 
 ## 2026-10-26 · A proper ICN screen
 
