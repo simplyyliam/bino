@@ -1,13 +1,12 @@
 import { create } from "zustand";
 
+// Open state for the global search (⌘K), so any screen can open it.
 type SearchState = {
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-  clearSearch: () => void;
+  open: boolean;
+  setOpen: (open: boolean) => void;
 };
 
 export const useSearchStore = create<SearchState>((set) => ({
-  searchQuery: "",
-  setSearchQuery: (query) => set({ searchQuery: query }),
-  clearSearch: () => set({ searchQuery: "" })
+  open: false,
+  setOpen: (open) => set({ open }),
 }));

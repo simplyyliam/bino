@@ -95,11 +95,11 @@
     --sidebar-ring: var(--ring);
 
     --bin-empty: oklch(0.82 0.008 250);
-    --bin-stocked: oklch(0.92 0.006 250);
+    --bin-stocked: oklch(0.905 0.008 250);
     --bin-stocked-fg: oklch(0.36 0.014 258);
-    --bin-low: oklch(0.93 0.07 85);
+    --bin-low: oklch(0.91 0.1 86);
     --bin-low-fg: oklch(0.47 0.11 70);
-    --bin-out: oklch(0.92 0.045 30);
+    --bin-out: oklch(0.9 0.07 28);
     --bin-out-fg: oklch(0.5 0.17 30);
     --bin-service: oklch(0.88 0.01 250);
     --bin-service-fg: oklch(0.45 0.014 258);

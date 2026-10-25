@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useRef, useEffect } from "react"
-import { useBinStore, useStorageStore, useLocationSystemStore, useSearchStore, useItemStore } from "@bino/store"
+import { useBinStore, useStorageStore, useLocationSystemStore, useItemStore } from "@bino/store"
 import { getBinState, organizeBinsIntoGrid } from "@bino/data"
 import { useParams } from "react-router-dom"
 import { BinDetailSheet } from "@/features/building/components/BinDetailSheet"
@@ -13,7 +13,7 @@ export default function Building() {
   const bins = useBinStore((s) => s.bins)
   const binItems = useItemStore((s) => s.binItems)
   const { locationSystems } = useLocationSystemStore()
-  const { searchQuery } = useSearchStore()
+  const searchQuery = ""
 
   const selectedBinId = useBinStore((s) => s.selectedBinId)
   const setSelectedBinId = useBinStore((s) => s.setSelectedBinId)
