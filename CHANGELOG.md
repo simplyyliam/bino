@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-25 · A new look for New Building
+
+- **New Building** now shows your building taking shape as you fill it in: its name, the first bin's label with each part of the code named (Group, Store, Row…), and a little grid of the starting bins.
+- Rename Building is unchanged.
+
 ## 2026-10-25 · Your own ICNs
 
 - **Type your own ICN.** When you give an item an ICN, there's now an ICN box. Type the number that's already on the part's tag, or leave it blank to get the next number as before.
