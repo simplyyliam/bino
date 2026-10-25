@@ -27,9 +27,7 @@ export const ConfigMenu = ({ open, onOpenChange }: MenuProps) => {
   const { buildingId } = useParams();
   const storages = useStorageStore((s) => s.storages)
   const bins = useBinStore((s) => s.bins)
-  const createBinInStorage = useBinStore((s) => s.createBinInStorage)
   const createBinsInStorage = useBinStore((s) => s.createBinsInStorage)
-  const removeLastBinFromStorage = useBinStore((s) => s.removeLastBinFromStorage)
   const removeLastBinsFromStorage = useBinStore((s) => s.removeLastBinsFromStorage)
   const  locationSystems  = useLocationSystemStore((s) => s.locationSystems);
 
@@ -64,7 +62,7 @@ export const ConfigMenu = ({ open, onOpenChange }: MenuProps) => {
   const handleAddBin = async () => {
     if (!storage) return;
     try {
-      await createBinInStorage(storage.id);
+      await createBinsInStorage(storage.id, 1);
     } catch (error) {
       console.error("Failed to create bin:", error);
     }
@@ -73,7 +71,7 @@ export const ConfigMenu = ({ open, onOpenChange }: MenuProps) => {
   const handleRemoveBin = async () => {
     if (!storage) return;
     try {
-      await removeLastBinFromStorage(storage.id);
+      await removeLastBinsFromStorage(storage.id, 1);
     } catch (error) {
       console.error("Failed to remove bin:", error);
     }

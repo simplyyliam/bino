@@ -56,7 +56,7 @@ export const CreateICNDialog = ({ open, onOpenChange, binId, onCreated }: Create
 
       // If a bin is specified, add the item to it
       if (binId) {
-        await addItemToBin(binId, itemId, quantity, icnId);
+        await addItemToBin(binId, itemId, { quantity, icnId });
       }
 
       // Call the callback

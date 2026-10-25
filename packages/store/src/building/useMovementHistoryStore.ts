@@ -9,6 +9,9 @@ interface MovementHistoryStore {
   // Fetch history from the API
   fetchHistory: (filters?: { binId?: string; itemId?: string; icnId?: string; limit?: number }) => Promise<void>;
 
+  // Prepend an event the API already recorded (returned alongside a mutation)
+  pushEvent: (event: MovementHistoryEvent | null | undefined) => void;
+
   // Add a new history event
   addHistoryEvent: (event: Omit<MovementHistoryEvent, "id" | "timestamp">) => Promise<void>;
 
@@ -49,17 +52,25 @@ export const useMovementHistoryStore = create<MovementHistoryStore>()((set, get)
     }
   },
 
+  pushEvent: (event) => {
+    if (!event) return;
+    set((state) =>
+      state.history.some((e) => e.id === event.id)
+        ? state
+        : { history: [event, ...state.history] } // Newest first
+    );
+  },
+
   addHistoryEvent: async (event) => {
     const newEvent = await api.post<MovementHistoryEvent>("/api/movement-history", event);
-    set((state) => ({
-      history: [newEvent, ...state.history], // Newest first
-    }));
+    get().pushEvent(newEvent);
   },
 
   deleteHistoryEvents: async (ids) => {
     await api.delete<void>("/api/movement-history", { ids });
+    const idSet = new Set(ids);
     set((state) => ({
-      history: state.history.filter((event) => !ids.includes(event.id)),
+      history: state.history.filter((event) => !idSet.has(event.id)),
     }));
   },
 

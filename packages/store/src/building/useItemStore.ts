@@ -3,6 +3,13 @@ import type { Item, ICN, BinItem, MovementHistoryEvent } from "@bino/types";
 import { api } from "../api";
 import { useMovementHistoryStore } from "./useMovementHistoryStore";
 
+type AddItemOptions = {
+  quantity?: number;
+  icnId?: string;
+  notes?: string;
+  minQuantity?: number | null;
+};
+
 interface ItemStore {
   items: Item[];
   icns: ICN[];
@@ -30,15 +37,22 @@ interface ItemStore {
   // BinItem operations
   getBinItems: (binId: string) => BinItem[];
   getItemsByBin: (binId: string) => { item: Item; icn?: ICN; binItem: BinItem }[];
-  addItemToBin: (binId: string, itemId: string, quantity: number, icnId?: string, notes?: string) => Promise<void>;
-  removeItemFromBin: (binItemId: string) => Promise<void>;
+  addItemToBin: (binId: string, itemId: string, options?: AddItemOptions) => Promise<{ binItem: BinItem; merged: boolean }>;
+  removeItemFromBin: (binItemId: string) => Promise<BinItem | undefined>;
+  restoreBinItem: (binItem: BinItem) => Promise<void>;
   updateBinItemQuantity: (binItemId: string, quantity: number) => Promise<void>;
+  updateBinItem: (binItemId: string, updates: { notes?: string | null; minQuantity?: number | null }) => Promise<void>;
+  moveBinItem: (binItemId: string, toBinId: string) => Promise<void>;
   markBinOutOfStock: (binId: string) => Promise<void>;
+  removeBinItemsForBins: (binIds: Set<string>) => void;
 
   // Search across bins for an item or ICN
   findItemLocations: (itemId: string) => { binId: string; quantity: number; binItem: BinItem }[];
   findICNLocation: (icnValue: string) => { binId: string; quantity: number; binItem: BinItem } | undefined;
 }
+
+const pushEvent = (event?: MovementHistoryEvent | null) =>
+  useMovementHistoryStore.getState().pushEvent(event);
 
 export const useItemStore = create<ItemStore>()((set, get) => ({
   items: [],
@@ -103,16 +117,26 @@ export const useItemStore = create<ItemStore>()((set, get) => ({
   },
 
   updateItem: async (id, updates) => {
-    const item = await api.patch<Item>(`/api/items/${id}`, updates);
+    const previous = get().items;
     set((state) => ({
-      items: state.items.map((i) => (i.id === id ? item : i))
+      items: state.items.map((i) => (i.id === id ? { ...i, ...updates } : i)),
     }));
+    try {
+      const item = await api.patch<Item>(`/api/items/${id}`, updates);
+      set((state) => ({ items: state.items.map((i) => (i.id === id ? item : i)) }));
+    } catch (err) {
+      set({ items: previous });
+      throw err;
+    }
   },
 
   deleteItem: async (id) => {
     await api.delete(`/api/items/${id}`);
+    // The API cascades ICNs and bin items for this item; mirror that locally.
     set((state) => ({
-      items: state.items.filter((item) => item.id !== id)
+      items: state.items.filter((item) => item.id !== id),
+      icns: state.icns.filter((icn) => icn.itemId !== id),
+      binItems: state.binItems.filter((bi) => bi.itemId !== id),
     }));
   },
 
@@ -121,7 +145,8 @@ export const useItemStore = create<ItemStore>()((set, get) => ({
   },
 
   getICNByValue: (value) => {
-    return get().icns.find((icn) => icn.value === value);
+    const normalized = value.trim().toUpperCase();
+    return get().icns.find((icn) => icn.value.toUpperCase() === normalized);
   },
 
   getICNsByItem: (itemId) => {
@@ -129,32 +154,12 @@ export const useItemStore = create<ItemStore>()((set, get) => ({
   },
 
   createICN: async ({ itemId, metadata }) => {
-    // The API historically returned a bare ICN; newer versions return
-    // `{ icn, historyEvent }`. Accept both so the client works against either.
-    const response = await api.post<ICN | { icn: ICN; historyEvent?: MovementHistoryEvent }>(
+    const { icn, historyEvent } = await api.post<{ icn: ICN; historyEvent?: MovementHistoryEvent }>(
       `/api/items/${itemId}/icns`,
       { metadata }
     );
-
-    const icn = "icn" in response ? response.icn : response;
-    const historyEvent = "icn" in response ? response.historyEvent : undefined;
-
-    if (!icn?.id) {
-      throw new Error("createICN: API did not return an ICN");
-    }
-
     set((state) => ({ icns: [...state.icns, icn] }));
-
-    if (historyEvent) {
-      useMovementHistoryStore.setState((state) => ({
-        history: [historyEvent, ...state.history],
-      }));
-    } else {
-      // Older API creates the history row server-side without returning it,
-      // so pull it in rather than leaving the timeline stale until a refresh.
-      void useMovementHistoryStore.getState().fetchHistory();
-    }
-
+    pushEvent(historyEvent);
     return icn.id;
   },
 
@@ -177,85 +182,133 @@ export const useItemStore = create<ItemStore>()((set, get) => ({
       .filter(({ item }) => item !== undefined);
   },
 
-  addItemToBin: async (binId, itemId, quantity, icnId, notes) => {
-    // Accept both the legacy bare BinItem response and `{ binItem, historyEvent }`.
-    const response = await api.post<
-      BinItem | { binItem: BinItem; historyEvent?: MovementHistoryEvent }
-    >(`/api/bins/${binId}/items`, {
+  addItemToBin: async (binId, itemId, options = {}) => {
+    const { binItem, historyEvent, merged } = await api.post<{
+      binItem: BinItem;
+      historyEvent?: MovementHistoryEvent;
+      merged: boolean;
+    }>(`/api/bins/${binId}/items`, {
       itemId,
-      icnId,
-      quantity,
-      notes
+      icnId: options.icnId,
+      quantity: options.quantity ?? 1,
+      notes: options.notes,
+      minQuantity: options.minQuantity,
     });
 
-    const binItem = "binItem" in response ? response.binItem : response;
-    const historyEvent = "binItem" in response ? response.historyEvent : undefined;
-
-    if (!binItem?.id) {
-      throw new Error("addItemToBin: API did not return a bin item");
-    }
-
-    set((state) => ({ binItems: [...state.binItems, binItem] }));
-
-    if (historyEvent) {
-      useMovementHistoryStore.setState((state) => ({
-        history: [historyEvent, ...state.history],
-      }));
-    } else {
-      void useMovementHistoryStore.getState().fetchHistory();
-    }
+    // The API tops up an existing row when the item is already in the bin.
+    set((state) => ({
+      binItems: merged
+        ? state.binItems.map((bi) => (bi.id === binItem.id ? binItem : bi))
+        : [...state.binItems, binItem],
+    }));
+    pushEvent(historyEvent);
+    return { binItem, merged };
   },
 
   removeItemFromBin: async (binItemId) => {
-    await api.delete(`/api/bin-items/${binItemId}`);
+    const removed = get().binItems.find((bi) => bi.id === binItemId);
+    // Optimistic: drop it from the list immediately, restore on failure.
+    set((state) => ({ binItems: state.binItems.filter((bi) => bi.id !== binItemId) }));
+    try {
+      const { historyEvent } = await api.delete<{ historyEvent?: MovementHistoryEvent }>(
+        `/api/bin-items/${binItemId}`
+      );
+      pushEvent(historyEvent);
+      return removed;
+    } catch (err) {
+      if (removed) set((state) => ({ binItems: [...state.binItems, removed] }));
+      throw err;
+    }
+  },
 
-    // Remove locally first so the UI updates without waiting on a refetch.
-    set((state) => ({
-      binItems: state.binItems.filter((bi) => bi.id !== binItemId),
-    }));
-
-    // The API already records the `item_removed_from_bin` event, so pull it in
-    // rather than POSTing a second, duplicate event from the client.
-    void useMovementHistoryStore.getState().fetchHistory();
+  restoreBinItem: async (binItem) => {
+    // Undo for a removal: re-add the same item with the same details.
+    await get().addItemToBin(binItem.binId, binItem.itemId, {
+      quantity: binItem.quantity,
+      icnId: binItem.icnId ?? undefined,
+      notes: binItem.notes ?? undefined,
+      minQuantity: binItem.minQuantity ?? null,
+    });
   },
 
   updateBinItemQuantity: async (binItemId, quantity) => {
-    await api.patch(`/api/bin-items/${binItemId}`, { quantity });
+    const clamped = Math.max(0, Math.floor(quantity));
+    const previous = get().binItems.find((bi) => bi.id === binItemId);
+    if (!previous || previous.quantity === clamped) return;
 
     set((state) => ({
       binItems: state.binItems.map((bi) =>
-        bi.id === binItemId
-          ? { ...bi, quantity, lastModified: new Date().toISOString() }
-          : bi
+        bi.id === binItemId ? { ...bi, quantity: clamped, lastModified: new Date().toISOString() } : bi
       ),
     }));
+    try {
+      const { binItem, historyEvent } = await api.patch<{
+        binItem: BinItem;
+        historyEvent?: MovementHistoryEvent;
+      }>(`/api/bin-items/${binItemId}`, { quantity: clamped });
+      set((state) => ({
+        binItems: state.binItems.map((bi) => (bi.id === binItemId ? binItem : bi)),
+      }));
+      pushEvent(historyEvent);
+    } catch (err) {
+      set((state) => ({
+        binItems: state.binItems.map((bi) => (bi.id === binItemId ? previous : bi)),
+      }));
+      throw err;
+    }
+  },
 
-    // The API already records the quantity_increased/decreased event, so pull it
-    // in rather than POSTing a second, duplicate event from the client.
-    void useMovementHistoryStore.getState().fetchHistory();
+  updateBinItem: async (binItemId, updates) => {
+    const previous = get().binItems.find((bi) => bi.id === binItemId);
+    if (!previous) return;
+    set((state) => ({
+      binItems: state.binItems.map((bi) => (bi.id === binItemId ? { ...bi, ...updates } as BinItem : bi)),
+    }));
+    try {
+      const { binItem } = await api.patch<{ binItem: BinItem }>(`/api/bin-items/${binItemId}`, updates);
+      set((state) => ({
+        binItems: state.binItems.map((bi) => (bi.id === binItemId ? binItem : bi)),
+      }));
+    } catch (err) {
+      set((state) => ({
+        binItems: state.binItems.map((bi) => (bi.id === binItemId ? previous : bi)),
+      }));
+      throw err;
+    }
+  },
+
+  moveBinItem: async (binItemId, toBinId) => {
+    const { binItem, removedBinItemId, historyEvent } = await api.post<{
+      binItem: BinItem;
+      removedBinItemId: string | null;
+      historyEvent?: MovementHistoryEvent;
+    }>(`/api/bin-items/${binItemId}/move`, { toBinId });
+
+    set((state) => {
+      const rest = state.binItems.filter(
+        (bi) => bi.id !== binItem.id && bi.id !== removedBinItemId
+      );
+      return { binItems: [...rest, binItem] };
+    });
+    pushEvent(historyEvent);
   },
 
   markBinOutOfStock: async (binId) => {
-    const binItemsForBin = get().binItems.filter((bi) => bi.binId === binId);
+    const { binItems, historyEvent } = await api.post<{
+      binItems: BinItem[];
+      historyEvent?: MovementHistoryEvent;
+    }>(`/api/bins/${binId}/out-of-stock`);
 
-    await Promise.all(
-      binItemsForBin.map((bi) => api.patch(`/api/bin-items/${bi.id}`, { quantity: 0 }))
-    );
-
+    const updated = new Map(binItems.map((bi) => [bi.id, bi]));
     set((state) => ({
-      binItems: state.binItems.map((bi) =>
-        bi.binId === binId
-          ? { ...bi, quantity: 0, lastModified: new Date().toISOString() }
-          : bi
-      ),
+      binItems: state.binItems.map((bi) => updated.get(bi.id) ?? bi),
     }));
+    pushEvent(historyEvent);
+  },
 
-    // Record history
-    await useMovementHistoryStore.getState().addHistoryEvent({
-      eventType: "marked_out_of_stock",
-      binId,
-      summary: `Bin marked out of stock (${binItemsForBin.length} ${binItemsForBin.length === 1 ? 'item' : 'items'} set to quantity 0)`,
-    });
+  removeBinItemsForBins: (binIds) => {
+    if (binIds.size === 0) return;
+    set((state) => ({ binItems: state.binItems.filter((bi) => !binIds.has(bi.binId)) }));
   },
 
   findItemLocations: (itemId) => {

@@ -36,7 +36,7 @@ export function LocationSystemEditorDialog({
   onSaved,
 }: LocationSystemEditorDialogProps) {
   const { locationSystems, updateLocationSystem, addLocationSystem } = useLocationSystemStore();
-  const recalculateStorageBinCodes = useBinStore((state) => state.recalculateStorageBinCodes);
+  const fetchBins = useBinStore((state) => state.fetchBins);
 
   const initialSystem = useMemo(() => {
     return (
@@ -209,7 +209,7 @@ export function LocationSystemEditorDialog({
 
       // Recalculate existing bins in the active storage if attached
       if (storageId) {
-        await recalculateStorageBinCodes(storageId, systemState);
+        await fetchBins();
       }
 
       onSaved?.(systemState);
