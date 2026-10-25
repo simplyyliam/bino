@@ -6,8 +6,9 @@
 
 ## 2026-10-25 · A new look for New Building
 
-- **New Building** now shows your building taking shape as you fill it in: its name, the first bin's label with each part of the code named (Group, Store, Row…), and a little grid of the starting bins.
-- Rename Building is unchanged.
+- **New Building** is now a short list of labelled lines (Name, Number, Codes, Store, Bins) instead of big option cards, so nothing gets cut off.
+- Pick the bin code format from a dropdown. The first bin's code shows next to the buttons and updates as you change things.
+- Rename Building uses the same tidy layout.
 
 ## 2026-10-25 · Your own ICNs
 

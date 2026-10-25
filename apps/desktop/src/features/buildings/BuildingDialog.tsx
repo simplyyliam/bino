@@ -14,13 +14,13 @@ import {
   DialogTitle,
   Input,
   Label,
+  NativeSelect,
   cn,
   toast,
 } from "@bino/ui";
 import { errorMessage } from "@/lib/format";
 import { LocationTag } from "@/components/LocationTag";
 import { QuantityStepper } from "@/components/QuantityStepper";
-import { BuildingPreview } from "./BuildingPreview";
 
 type BuildingDialogProps = {
   open: boolean;
@@ -32,7 +32,7 @@ type BuildingDialogProps = {
 export function BuildingDialog(props: BuildingDialogProps) {
   return (
     <Dialog open={props.open} onOpenChange={props.onOpenChange}>
-      <DialogContent className={props.building ? "sm:max-w-lg" : "gap-0 p-0 sm:max-w-3xl"}>
+      <DialogContent className="sm:max-w-[30rem]">
         <BuildingForm {...props} />
       </DialogContent>
     </Dialog>
@@ -117,116 +117,95 @@ function BuildingForm({ onOpenChange, building }: BuildingDialogProps) {
     }
   };
 
-  return (
-    <form onSubmit={submit} className={cn(!isEdit && "grid sm:grid-cols-[minmax(0,1fr)_19rem]")}>
-      <div className={cn("flex flex-col gap-5", !isEdit && "p-6")}>
-        <DialogHeader>
-          <DialogTitle>{isEdit ? "Rename Building" : "New Building"}</DialogTitle>
-          <DialogDescription>
-            {isEdit ? "Change how this building shows up in Bino." : "A building holds one grid of bins. You can add or remove bins later."}
-          </DialogDescription>
-        </DialogHeader>
+  const firstCode = system ? generateLocationCode(ORIGIN, system, chosenStore) : "";
 
-        <div className="grid grid-cols-[1fr_7rem] gap-3">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="building-name">Name</Label>
-            <Input id="building-name" autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder="Workshop" />
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="building-number">Number</Label>
-            <Input id="building-number" value={number} onChange={(e) => setNumber(e.target.value)} placeholder="Optional" />
-          </div>
-        </div>
+  return (
+    <form onSubmit={submit} className="flex flex-col gap-5">
+      <DialogHeader>
+        <DialogTitle>{isEdit ? "Rename Building" : "New Building"}</DialogTitle>
+        <DialogDescription>
+          {isEdit ? "Change how this building shows up in Bino." : "A building holds one grid of bins. You can change any of this later."}
+        </DialogDescription>
+      </DialogHeader>
+
+      <div className="flex flex-col gap-2">
+        <Row label="Name" htmlFor="building-name">
+          <Input id="building-name" autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder="Workshop" />
+        </Row>
+        <Row label="Number" htmlFor="building-number">
+          <Input id="building-number" value={number} onChange={(e) => setNumber(e.target.value)} placeholder="Optional" className="w-28" />
+        </Row>
 
         {!isEdit && (
           <>
-            <fieldset className="flex flex-col gap-2">
-              <legend className="mb-2 text-[13px] font-medium">Bin codes</legend>
-              <div className="flex flex-col gap-1.5">
-                {systems.map((sys) => {
-                  const selected = sys.id === systemId;
-                  const preview = generateLocationCode(ORIGIN, sys, selected ? chosenStore : nextNumbers.get(sys.id));
-                  return (
-                    <label
-                      key={sys.id}
-                      className={cn(
-                        "flex cursor-pointer items-center gap-3 rounded-2xl px-3.5 py-2.5 transition-[background-color,box-shadow] duration-150",
-                        selected ? "bg-accent-blue/8 ring-1 ring-accent-blue/40" : "bg-field hover:bg-[color-mix(in_oklch,var(--field),var(--foreground)_3%)]"
-                      )}
-                    >
-                      <input
-                        type="radio"
-                        name="system"
-                        value={sys.id}
-                        checked={selected}
-                        onChange={() => pickSystem(sys.id)}
-                        className="size-4 accent-(--accent-blue)"
-                      />
-                      <span className="flex min-w-0 flex-1 flex-col">
-                        <span className="truncate text-[13px] font-medium">{sys.name}</span>
-                        <span className="truncate text-xs text-muted-foreground">{sys.levels.map((l) => l.name).join(" · ")}</span>
-                      </span>
-                      <LocationTag code={preview} />
-                    </label>
-                  );
-                })}
-              </div>
-            </fieldset>
-
-            {hasStorePart ? (
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex flex-col">
-                  <Label htmlFor="store-number">Store number</Label>
-                  <span className="mt-1 text-xs text-muted-foreground">
-                    {clash ? <span className="text-destructive">Already used by {clash}</span> : "The next free number, so codes stay unique."}
+            <Row label="Codes" htmlFor="building-format">
+              <NativeSelect id="building-format" value={systemId} onChange={(e) => pickSystem(e.target.value)} className="min-w-0 flex-1">
+                {systems.map((sys) => (
+                  <option key={sys.id} value={sys.id}>
+                    {sys.name}
+                  </option>
+                ))}
+              </NativeSelect>
+            </Row>
+            <Row label="Store" htmlFor="store-number">
+              {hasStorePart ? (
+                <>
+                  <Input
+                    id="store-number"
+                    inputMode="numeric"
+                    value={storeNumber}
+                    onChange={(e) => setStoreNumber(e.target.value.replace(/[^\d]/g, ""))}
+                    aria-invalid={!!clash}
+                    aria-describedby="store-number-hint"
+                    className="w-16 text-center tabular-nums"
+                  />
+                  <span id="store-number-hint" className={cn("text-xs", clash ? "text-destructive" : "text-muted-foreground")}>
+                    {clash ? `Already used by ${clash}` : "Next free number, so codes stay unique"}
                   </span>
-                </div>
-                <Input
-                  id="store-number"
-                  inputMode="numeric"
-                  value={storeNumber}
-                  onChange={(e) => setStoreNumber(e.target.value.replace(/[^\d]/g, ""))}
-                  aria-invalid={!!clash}
-                  className="w-20 text-center tabular-nums"
-                />
-              </div>
-            ) : (
-              <p className="rounded-xl bg-surface px-3.5 py-2.5 text-xs text-muted-foreground">
-                This format has no store part, so its codes can match another building's. You can add one later in Bin Code Format.
-              </p>
-            )}
-
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex flex-col">
-                <span className="text-[13px] font-medium">Starting bins</span>
-                <span className="text-xs text-muted-foreground">You can change this any time.</span>
-              </div>
+                </>
+              ) : (
+                <span className="text-xs text-muted-foreground">This format has no store part, so codes can match another building's.</span>
+              )}
+            </Row>
+            <Row label="Bins">
               <QuantityStepper value={binCount} onChange={(n) => setBinCount(Math.min(n, 200))} label="Starting bins" />
-            </div>
+              <span className="text-xs text-muted-foreground">to start with</span>
+            </Row>
           </>
         )}
+      </div>
 
-        {error && <p role="alert" className="text-[13px] text-destructive">{error}</p>}
+      {error && <p role="alert" className="text-[13px] text-destructive">{error}</p>}
 
-        <DialogFooter>
+      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+        {!isEdit && firstCode ? (
+          <span className="flex min-w-0 items-center gap-2 text-xs whitespace-nowrap text-muted-foreground">
+            First bin
+            <LocationTag code={firstCode} />
+          </span>
+        ) : (
+          <span />
+        )}
+        <DialogFooter className="shrink-0">
           <DialogClose render={<Button variant="outline" type="button" disabled={saving} />}>Cancel</DialogClose>
           <Button type="submit" disabled={saving || !name.trim() || !!clash}>
             {saving ? "Saving…" : isEdit ? "Save" : "Create Building"}
           </Button>
         </DialogFooter>
       </div>
-
-      {!isEdit && (
-        <div className="hidden overflow-hidden rounded-r-[22px] sm:block">
-          <BuildingPreview
-            name={name}
-            number={number}
-            system={system}
-            firstCode={system ? generateLocationCode(ORIGIN, system, chosenStore) : ""}
-            binCount={binCount}
-          />
-        </div>
-      )}
     </form>
+  );
+}
+
+// One line of the form: a quiet label on the left, the controls on the right.
+function Row({ label, htmlFor, children }: { label: string; htmlFor?: string; children: React.ReactNode }) {
+  const Tag = htmlFor ? Label : "span";
+  return (
+    <div className="flex min-h-9 items-center gap-3">
+      <Tag htmlFor={htmlFor} className="w-16 shrink-0 text-[13px] font-normal text-muted-foreground">
+        {label}
+      </Tag>
+      <div className="flex min-w-0 flex-1 items-center gap-2.5">{children}</div>
+    </div>
   );
 }
