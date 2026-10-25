@@ -17,11 +17,11 @@ import { StatusFilter } from "@/features/building/StatusFilter";
 import { CodeFormatDialog } from "@/features/building/CodeFormatDialog";
 import { countStatuses, useInventory, type BinStatus, type BinSummary } from "@/lib/inventory";
 import { errorMessage, plural } from "@/lib/format";
-import NotFoundPage from "./NotFoundPage";
+import NotFound from "@/components/NotFound";
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
-export default function BuildingPage() {
+export function BuildingPage() {
   const { buildingId = "" } = useParams();
   const [params, setParams] = useSearchParams();
   const inv = useInventory();
@@ -98,7 +98,7 @@ export default function BuildingPage() {
   }, [query, summaries, inv]);
 
   if (!building) {
-    return <NotFoundPage title="Building not found" description="It may have been deleted." />;
+    return <NotFound title="Building not found" description="It may have been deleted." />;
   }
 
   const rows = Math.max(system?.gridConfig?.racksPerColumn ?? 5, ...bins.map((b) => b.row + 1));

@@ -1,12 +1,10 @@
 import { useNavigate, Outlet } from "react-router-dom";
-import { CloudOffIcon } from "lucide-react";
-import { Button } from "@bino/ui";
 import { useAppStore, useUiStore } from "@bino/store";
 import { useGoToShortcuts, useHotkey } from "@/lib/hotkeys";
-import { EmptyState } from "./EmptyState";
-import { SearchCommand } from "./SearchCommand";
-import { ShortcutsDialog } from "./ShortcutsDialog";
-import { Sidebar } from "./Sidebar";
+import { Offline } from "@/components/Offline";
+import { SearchCommand } from "@/components/SearchCommand";
+import { ShortcutsDialog } from "@/components/ShortcutsDialog";
+import { Sidebar } from "@/components/Sidebar";
 
 const bar = "rounded-md bg-surface";
 
@@ -35,21 +33,6 @@ function LoadingSkeleton() {
   );
 }
 
-function Offline() {
-  const error = useAppStore((s) => s.error);
-  const load = useAppStore((s) => s.load);
-  return (
-    <div className="flex h-full items-center justify-center">
-      <EmptyState
-        icon={CloudOffIcon}
-        title="Can't reach Bino"
-        description={<>Check your internet connection and try again.{error && <span className="mt-2 block text-xs">{error}</span>}</>}
-        action={<Button onClick={() => void load()}>Try Again</Button>}
-      />
-    </div>
-  );
-}
-
 function GlobalShortcuts() {
   const navigate = useNavigate();
   const toggleSidebar = useUiStore((s) => s.toggleSidebar);
@@ -61,7 +44,7 @@ function GlobalShortcuts() {
   return null;
 }
 
-export function AppLayout() {
+export default function AppLayout() {
   const status = useAppStore((s) => s.status);
   const sidebarOpen = useUiStore((s) => s.sidebarOpen);
   const ready = status === "ready";
