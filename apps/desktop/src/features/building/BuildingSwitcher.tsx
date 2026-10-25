@@ -4,6 +4,7 @@ import type { Building } from "@bino/types";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
@@ -28,14 +29,16 @@ export function BuildingSwitcher({ current, buildings }: { current: Building; bu
         }
       />
       <DropdownMenuContent align="start" className="w-60">
-        <DropdownMenuLabel>Switch building</DropdownMenuLabel>
-        {buildings.map((b) => (
-          <DropdownMenuItem key={b.id} onClick={() => navigate(`/buildings/${b.id}`)}>
-            <BuildingGlyph id={b.id} name={b.name} className="size-4 rounded text-[9px]" />
-            <span className="truncate">{b.name}</span>
-            {b.id === current.id && <CheckIcon className="ml-auto" />}
-          </DropdownMenuItem>
-        ))}
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>Switch building</DropdownMenuLabel>
+          {buildings.map((b) => (
+            <DropdownMenuItem key={b.id} onClick={() => navigate(`/buildings/${b.id}`)}>
+              <BuildingGlyph id={b.id} name={b.name} className="size-4 rounded text-[9px]" />
+              <span className="truncate">{b.name}</span>
+              {b.id === current.id && <CheckIcon className="ml-auto" />}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );
