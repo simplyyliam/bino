@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { prisma } from "../db.js";
-import { asyncHandler } from "../utils/errors.js";
+import { asyncHandler, requireString } from "../utils/errors.js";
 
 const router = Router();
 
@@ -8,7 +8,10 @@ router.get(
   "/",
   asyncHandler(async (req, res) => {
     const { binId, itemId, icnId, limit } = req.query;
-    const take = limit ? Number(limit) : 50;
+    // The timeline pages and filters client-side, so load a generous window
+    // by default (it used to stop at 50 events, silently hiding older history).
+    const requested = Number(limit);
+    const take = Number.isInteger(requested) && requested > 0 ? Math.min(requested, 5000) : 1000;
 
     const where = binId
       ? {
@@ -50,6 +53,8 @@ router.post(
       user,
       summary,
     } = req.body;
+    requireString(eventType, "eventType");
+    requireString(summary, "summary");
 
     const event = await prisma.movementHistory.create({
       data: {

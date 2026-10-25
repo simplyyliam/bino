@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { prisma } from "../db.js";
-import { asyncHandler, notFound } from "../utils/errors.js";
+import { asyncHandler, notFound, optionalString, requireString } from "../utils/errors.js";
+import { Prisma } from "@prisma/client";
 
 const router = Router();
 
@@ -42,7 +43,9 @@ router.get(
 router.post(
   "/",
   asyncHandler(async (req, res) => {
-    const { name, description, category } = req.body;
+    const name = requireString(req.body.name, "name");
+    const description = optionalString(req.body.description) || null;
+    const category = optionalString(req.body.category) || null;
     const item = await prisma.item.create({ data: { name, description, category } });
     res.status(201).json(item);
   })
@@ -51,7 +54,9 @@ router.post(
 router.patch(
   "/:id",
   asyncHandler(async (req, res) => {
-    const { name, description, category } = req.body;
+    const name = req.body.name === undefined ? undefined : requireString(req.body.name, "name");
+    const description = req.body.description === null ? null : optionalString(req.body.description);
+    const category = req.body.category === null ? null : optionalString(req.body.category);
     const item = await prisma.item.update({
       where: { id: req.params.id },
       data: { name, description, category },
@@ -84,26 +89,46 @@ router.post(
     const { itemId } = req.params;
     const { metadata } = req.body;
 
-    const lastIcns = await prisma.iCN.findMany({
-      select: { value: true },
-    });
-    const maxIcnNumber = lastIcns.reduce((max: number, icn: { value: string }) => {
-      const match = icn.value.match(/ICN-(\d+)/);
-      return match ? Math.max(max, parseInt(match[1], 10)) : max;
-    }, 0);
-    const value = `ICN-${String(maxIcnNumber + 1).padStart(6, "0")}`;
-
-    const icn = await prisma.iCN.create({
-      data: { value, itemId, metadata },
-    });
-
     const item = await prisma.item.findUnique({ where: { id: itemId } });
+    if (!item) throw notFound("Item");
+
+    // Drop empty metadata fields so the record only stores what was entered.
+    const cleanMetadata =
+      metadata && typeof metadata === "object"
+        ? (Object.fromEntries(
+            Object.entries(metadata).filter(([, v]) => typeof v === "string" && v.trim() !== "")
+          ) as Prisma.InputJsonObject)
+        : undefined;
+
+    const nextValue = async () => {
+      const lastIcns = await prisma.iCN.findMany({ select: { value: true } });
+      const maxIcnNumber = lastIcns.reduce((max: number, icn: { value: string }) => {
+        const match = icn.value.match(/ICN-(\d+)/);
+        return match ? Math.max(max, parseInt(match[1], 10)) : max;
+      }, 0);
+      return `ICN-${String(maxIcnNumber + 1).padStart(6, "0")}`;
+    };
+
+    // Two people creating ICNs at once can race to the same number; retry on the unique clash.
+    let icn;
+    for (let attempt = 0; ; attempt++) {
+      const value = await nextValue();
+      try {
+        icn = await prisma.iCN.create({ data: { value, itemId, metadata: cleanMetadata } });
+        break;
+      } catch (err) {
+        if (attempt < 3 && err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") continue;
+        throw err;
+      }
+    }
+    const value = icn.value;
+
     const historyEvent = await prisma.movementHistory.create({
       data: {
         eventType: "icn_created",
         icnId: icn.id,
         itemId,
-        summary: `${value} created for "${item?.name || "Unknown Item"}"`,
+        summary: `${value} created for "${item.name}"`,
       },
     });
 

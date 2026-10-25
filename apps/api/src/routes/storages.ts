@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { prisma } from "../db.js";
-import { asyncHandler, notFound } from "../utils/errors.js";
+import { asyncHandler, notFound, optionalString, requireString } from "../utils/errors.js";
 
 const router = Router();
 
@@ -28,7 +28,10 @@ router.get(
 router.post(
   "/",
   asyncHandler(async (req, res) => {
-    const { buildingId, name, locationSystemId, maxLevel, maxRow, maxColumn } = req.body;
+    const buildingId = requireString(req.body.buildingId, "buildingId");
+    const locationSystemId = requireString(req.body.locationSystemId, "locationSystemId");
+    const name = optionalString(req.body.name) || "Main Storage";
+    const { maxLevel, maxRow, maxColumn } = req.body;
     const storage = await prisma.storage.create({
       data: {
         buildingId,
