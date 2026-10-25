@@ -4,6 +4,7 @@ import OverviewPage from "./pages/OverviewPage";
 import BuildingPage from "./pages/BuildingPage";
 import ActivityPage from "./pages/ActivityPage";
 import IcnPage from "./pages/IcnPage";
+import ItemsPage from "./pages/ItemsPage";
 import NotFoundPage from "./pages/NotFoundPage";
 
 // Old links from before the redesign still work.
@@ -18,6 +19,7 @@ export const Router = createBrowserRouter([
     children: [
       { index: true, element: <OverviewPage /> },
       { path: "buildings/:buildingId", element: <BuildingPage /> },
+      { path: "items", element: <ItemsPage /> },
       { path: "activity", element: <ActivityPage /> },
       { path: "icn/:icnValue", element: <IcnPage /> },
       { path: "timeline", element: <Navigate to="/activity" replace /> },
