@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-25 · Right-click buildings in the sidebar
+
+- Right-click any building in the sidebar to **Open**, **Rename**, **View Activity**, **Export Inventory** or **Delete** it.
+
 ## 2026-10-25 · A new look for New Building
 
 - **New Building** now shows your building taking shape as you fill it in: its name, the first bin's label with each part of the code named (Group, Store, Row…), and a little grid of the starting bins.
