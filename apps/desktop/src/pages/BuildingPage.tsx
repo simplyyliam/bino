@@ -1,360 +1,241 @@
-import React, { useMemo, useState, useRef, useEffect } from "react"
-import { useBinStore, useStorageStore, useLocationSystemStore, useItemStore } from "@bino/store"
-import { getBinState, organizeBinsIntoGrid } from "@bino/data"
-import { useParams } from "react-router-dom"
-import { BinDetailSheet } from "@/features/building/components/BinDetailSheet"
-import { BinIcon } from "@/shared/components";
-import { isValidIconName } from "@/lib/icons"
-import { BuildingMenu, BuildingStatusbar } from "@/widgets"
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Link, useParams, useSearchParams } from "react-router-dom";
+import { BoxesIcon, ChevronLeftIcon, EllipsisIcon, LayoutGridIcon, SearchIcon, XIcon } from "lucide-react";
+import { useLocationSystemStore, useStorageStore } from "@bino/store";
+import { Button, toast } from "@bino/ui";
+import { EmptyState } from "@/components/EmptyState";
+import { BuildingActions } from "@/features/buildings/BuildingActions";
+import { BinGrid } from "@/features/building/BinGrid";
+import { BinInspector } from "@/features/building/BinInspector";
+import { BuildingSwitcher } from "@/features/building/BuildingSwitcher";
+import { LayoutDialog } from "@/features/building/LayoutDialog";
+import { StatusFilter } from "@/features/building/StatusFilter";
+import { LocationSystemEditorDialog } from "@/features/building/components/LocationSystemEditorDialog";
+import { countStatuses, useInventory, type BinStatus, type BinSummary } from "@/lib/inventory";
+import { errorMessage, plural } from "@/lib/format";
+import NotFoundPage from "./NotFoundPage";
 
-export default function Building() {
-  const { buildingId } = useParams()
-  const { storages } = useStorageStore()
-  const bins = useBinStore((s) => s.bins)
-  const binItems = useItemStore((s) => s.binItems)
-  const { locationSystems } = useLocationSystemStore()
-  const searchQuery = ""
+const pad = (n: number) => String(n).padStart(2, "0");
 
-  const selectedBinId = useBinStore((s) => s.selectedBinId)
-  const setSelectedBinId = useBinStore((s) => s.setSelectedBinId)
-  const activeBin = bins.find((bin) => bin.id === selectedBinId) ?? null
+export default function BuildingPage() {
+  const { buildingId = "" } = useParams();
+  const [params, setParams] = useSearchParams();
+  const inv = useInventory();
+  const systems = useLocationSystemStore((s) => s.locationSystems);
+  const addStorage = useStorageStore((s) => s.addStorage);
 
-  const [sheetOpen, setSheetOpen] = useState(false)
-  const [scrollX, setScrollX] = useState(0)
-  const [scrollY, setScrollY] = useState(0)
-  const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight })
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const [filter, setFilter] = useState<BinStatus | null>(null);
+  const [query, setQuery] = useState("");
+  const [layoutOpen, setLayoutOpen] = useState(false);
+  const [codesOpen, setCodesOpen] = useState(false);
 
-  // Track window size changes with debounce
+  const building = inv.buildingsById.get(buildingId);
+  const storage = inv.storageByBuilding.get(buildingId);
+  const system = systems.find((s) => s.id === storage?.locationSystemId);
+  const bins = useMemo(() => (storage ? inv.binsByStorage.get(storage.id) ?? [] : []), [inv, storage]);
+  const summaries = useMemo(() => bins.map((b) => inv.summaries.get(b.id)!).filter(Boolean), [bins, inv]);
+  const counts = useMemo(() => countStatuses(summaries), [summaries]);
+
+  const selectedId = params.get("bin");
+  const selected = selectedId ? inv.summaries.get(selectedId) : undefined;
+  const selectedHere = selected && selected.bin.storageId === storage?.id ? selected : undefined;
+
+  // Reset the filters when switching buildings.
   useEffect(() => {
-    let timeoutId: number;
-    const handleResize = () => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        setWindowSize({ width: window.innerWidth, height: window.innerHeight });
-      }, 150);
+    setFilter(null);
+    setQuery("");
+  }, [buildingId]);
+
+  const select = useCallback(
+    (binId: string | null) => {
+      setParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          if (binId) next.set("bin", binId);
+          else next.delete("bin");
+          return next;
+        },
+        { replace: true }
+      );
+    },
+    [setParams]
+  );
+
+  // Bring a deep-linked bin (e.g. from search) into view.
+  useEffect(() => {
+    if (!selectedId) return;
+    document.querySelector(`[data-bin="${selectedId}"]`)?.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
+  }, [selectedId]);
+
+  useEffect(() => {
+    if (!selectedId) return;
+    const onKey = (e: KeyboardEvent) => {
+      const inField = e.target instanceof HTMLElement && e.target.closest("input, textarea, select, [role=dialog], [role=menu]");
+      if (e.key === "Escape" && !inField) select(null);
     };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [selectedId, select]);
 
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      clearTimeout(timeoutId);
-    };
-  }, []);
-
-  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const target = e.currentTarget
-    setScrollX(target.scrollLeft)
-    setScrollY(target.scrollTop)
-  }
-
-
-
-  // Get the storage for this building
-  const storage = storages.find((s) => s.buildingId === buildingId)
-  const locationSystem = locationSystems.find((ls) => ls.id === storage?.locationSystemId)
-
-
-
-  if (!storage) {
-    return (
-      <div className="flex flex-col h-screen bg-background">
-        <BuildingMenu />
-        <div className="flex-1 min-h-0 overflow-hidden flex items-center justify-center">
-          <p className="text-muted-foreground">No storage found for this building</p>
-        </div>
-        <BuildingStatusbar />
-      </div>
-    )
-  }
-
-  // Get bins for this storage
-  const storageBins = bins.filter((bin) => bin.storageId === storage.id)
-
-  if (storageBins.length === 0) {
-    return (
-      <div className="flex flex-col h-screen bg-background">
-        <BuildingMenu />
-        <div className="flex-1 min-h-0 overflow-hidden flex items-center justify-center">
-          <p className="text-muted-foreground">No bins found, please add them</p>
-        </div>
-        <BuildingStatusbar />
-      </div>
-    )
-  }
-
-  // Calculate matching bins for search highlighting
-  const matchingBinIds = useMemo(() => {
-    if (!searchQuery.trim()) return new Set<string>()
-
-    const query = searchQuery.toLowerCase().trim()
-    return new Set(
-      storageBins
-        .filter((bin) =>
-          bin.locationCode.toLowerCase().includes(query) ||
-          bin.name.toLowerCase().includes(query)
-        )
-        .map((bin) => bin.id)
-    )
-  }, [searchQuery, storageBins])
-
-  // Pre-compute per-bin item count/quantity once per binItems change instead of
-  // filtering the full binItems array for every rendered bin cell.
-  const binItemStatsById = useMemo(() => {
-    const stats = new Map<string, { count: number; totalQuantity: number }>()
-    for (const bi of binItems) {
-      const existing = stats.get(bi.binId)
-      if (existing) {
-        existing.count += 1
-        existing.totalQuantity += bi.quantity
-      } else {
-        stats.set(bi.binId, { count: 1, totalQuantity: bi.quantity })
-      }
+  const matches = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return null;
+    const ids = new Set<string>();
+    for (const s of summaries) {
+      const haystack = [
+        s.bin.locationCode,
+        s.bin.name,
+        ...s.items.map((i) => inv.itemsById.get(i.itemId)?.name ?? ""),
+        ...s.items.map((i) => (i.icnId ? inv.icnsById.get(i.icnId)?.value ?? "" : "")),
+      ]
+        .join(" ")
+        .toLowerCase();
+      if (haystack.includes(q)) ids.add(s.bin.id);
     }
-    return stats
-  }, [binItems])
+    return ids;
+  }, [query, summaries, inv]);
 
-  // Get grid dimensions from location system config
-  const racksPerColumn = locationSystem?.gridConfig?.racksPerColumn ?? 5
-  const rowPrefix = locationSystem?.gridConfig?.rowPrefix ?? "L"
-  const colPrefix = locationSystem?.gridConfig?.columnPrefix ?? ""
+  if (!building) {
+    return <NotFoundPage title="Building not found" description="It may have been deleted." />;
+  }
 
-  const rows = racksPerColumn
-  const columns = Math.max(
-    1,
-    storage.maxColumn + 1,
-    Math.ceil(storageBins.length / racksPerColumn)
-  )
+  const rows = Math.max(system?.gridConfig?.racksPerColumn ?? 5, ...bins.map((b) => b.row + 1));
+  const columns = Math.max(1, (storage?.maxColumn ?? 0) + 1, ...bins.map((b) => b.column + 1));
+  const rowPrefix = system?.gridConfig?.rowPrefix ?? "R";
+  const colPrefix = system?.gridConfig?.columnPrefix ?? "";
 
-  // Organize bins into grid using canonical coordinates
-  const grid = organizeBinsIntoGrid(storageBins, rows, columns)
+  const isDimmed = (s: BinSummary) => (filter !== null && s.status !== filter) || (matches !== null && !matches.has(s.bin.id));
+  const isHighlighted = (s: BinSummary) => matches !== null && matches.has(s.bin.id);
+  const itemNames = (s: BinSummary) => s.items.map((i) => inv.itemsById.get(i.itemId)?.name ?? "Unknown item");
 
-  // Generate labels based on location system prefixes
-  const colLabels = Array.from({ length: columns }, (_, i) =>
-    `${colPrefix}${String(i + 1).padStart(2, '0')}`
-  )
-  const rowLabels = Array.from({ length: rows }, (_, i) =>
-    `${rowPrefix}${String(i + 1).padStart(2, '0')}`
-  )
-
-  // Calculate if grid needs spreadsheet mode (too large to fit comfortably)
-  const gridWidth = columns * 76 + 64 + 4; // bins + row labels + padding
-  const gridHeight = rows * 76 + 40 + 4; // bins + column labels + padding
-  const needsSpreadsheetMode = gridWidth > windowSize.width * 0.9 || gridHeight > windowSize.height * 0.9;
+  const setUpStorage = async () => {
+    try {
+      await addStorage({ buildingId: building.id, name: "Main Storage", locationSystemId: systems[0]?.id ?? "" });
+      setLayoutOpen(true);
+    } catch (err) {
+      toast.error(errorMessage(err, "Couldn't set up the bins."));
+    }
+  };
 
   return (
-    <div className="flex flex-col h-screen bg-background">
-      <BuildingMenu />
-      <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
-        <div className={`flex items-center justify-center w-full flex-1 min-h-0 ${needsSpreadsheetMode ? "p-2" : "p-4"}`}>
-          {needsSpreadsheetMode ? (
-            // Spreadsheet mode: frozen headers, scrollable, with border
-            <div
-              className="relative border border-border rounded-lg overflow-hidden bg-background w-full h-full"
-            >
-              {/* Fixed top-left corner */}
-              <div className="absolute top-0 left-0 z-30 bg-background border-r border-b border-border">
-                <div className="w-16 h-10 flex items-center justify-center" />
-              </div>
+    <div className="flex min-h-0 flex-1">
+      <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex flex-col gap-4 px-6 pt-6 pb-3 lg:px-8">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div className="flex min-w-0 flex-col gap-0.5">
+              <Link to="/" className="flex w-fit items-center gap-0.5 text-xs font-medium text-muted-foreground hover:text-foreground">
+                <ChevronLeftIcon className="size-3.5" /> Overview
+              </Link>
+              <BuildingSwitcher current={building} buildings={inv.buildings} />
+              <p className="text-[13px] text-muted-foreground">
+                {[building.buildingNumber && `Building ${building.buildingNumber}`, plural(bins.length, "bin"), system?.name]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              {storage && (
+                <Button variant="outline" onClick={() => setLayoutOpen(true)}>
+                  <LayoutGridIcon /> Edit Layout
+                </Button>
+              )}
+              <BuildingActions
+                building={building}
+                trigger={
+                  <Button variant="outline" size="icon" aria-label="More options">
+                    <EllipsisIcon />
+                  </Button>
+                }
+              />
+            </div>
+          </div>
 
-              {/* Fixed column headers (scrolls horizontally with grid) */}
-              <div className="absolute top-0 left-16 right-0 z-20 bg-background border-b border-border overflow-hidden">
-                <div
-                  className="flex gap-2 py-2"
-                  style={{
-                    transform: `translateX(-${scrollX}px)`,
-                    width: `${columns * 76}px`
-                  }}
-                >
-                  {colLabels.map((colLabel) => (
-                    <div
-                      key={`col-${colLabel}`}
-                      className="flex items-center justify-center text-xs text-muted-foreground font-medium select-none"
-                      style={{ width: '70px', minWidth: '70px' }}
-                    >
-                      {colLabel}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Fixed row labels (scrolls vertically with grid) */}
-              <div className="absolute top-10 left-0 bottom-0 z-20 bg-background border-r border-border overflow-hidden">
-                <div
-                  style={{
-                    transform: `translateY(-${scrollY}px)`,
-                    height: `${rows * 76}px`
-                  }}
-                >
-                  {rowLabels.map((rowLabel, index) => (
-                    <div
-                      key={`row-${rowLabel}`}
-                      className="flex items-center justify-end pr-3 text-xs text-muted-foreground font-medium select-none"
-                      style={{
-                        height: '70px',
-                        minHeight: '70px',
-                        width: '64px',
-                        marginTop: index === 0 ? '0' : '6px'
-                      }}
-                    >
-                      {rowLabel}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Scrollable grid area */}
-              <div
-                ref={scrollContainerRef}
-                className="absolute top-10 left-16 right-0 bottom-0 overflow-auto"
-                onScroll={handleScroll}
-              >
-                <div
-                  className="grid gap-2"
-                  style={{
-                    gridTemplateColumns: `repeat(${columns}, 70px)`,
-                    gridTemplateRows: `repeat(${rows}, 70px)`,
-                    width: `${columns * 76 - 6}px`,
-                    height: `${rows * 76 - 6}px`,
-                  }}
-                >
-                  {rowLabels.map((_, rowIndex) =>
-                    colLabels.map((_, colIndex) => {
-                      const bin = grid[rowIndex]?.[colIndex];
-
-                      if (!bin) {
-                        return (
-                          <div
-                            key={`empty-${colIndex}-${rowIndex}`}
-                            className="w-17.5 h-17.5"
-                          />
-                        );
-                      }
-
-                      const stats = binItemStatsById.get(bin.id);
-                      const binState = getBinState(bin, stats?.count ?? 0, stats?.totalQuantity ?? 0);
-
-                      const isMatching = matchingBinIds.has(bin.id);
-                      const isSearchActive = searchQuery.trim().length > 0;
-
-                      return (
-                        <div
-                          key={bin.id}
-                          onClick={() => {
-                            setSelectedBinId(bin.id);
-                            setSheetOpen(true);
-                          }}
-                          className={`flex items-center justify-center w-17.5 h-17.5 rounded-[20px] transition-all cursor-pointer ${isSearchActive
-                            ? isMatching
-                              ? "bg-bin-empty ring-2 ring-primary scale-105"
-                              : "bg-bin-empty opacity-50"
-                            : `${binState === "stocked"
-                              ? "bg-bin-stocked"
-                              : binState === "outOfStock"
-                                ? "bg-bin-out-of-stock"
-                                : binState === "outOfService"
-                                  ? "bg-bin-out-of-service"
-                                  : "bg-bin-empty"
-                            } hover:ring-1 hover:ring-border`
-                          }`}
-                        >
-                          {isValidIconName(bin.icon) && (
-                            <BinIcon iconName={bin.icon} size={24} strokeWidth={1.75} />
-                          )}
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
+          {bins.length > 0 && (
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <StatusFilter counts={counts} total={bins.length} value={filter} onChange={setFilter} />
+              <div className="relative w-64">
+                <SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === "Escape" && setQuery("")}
+                  placeholder="Find in this building"
+                  aria-label="Find in this building"
+                  className="h-9 w-full rounded-lg border border-input bg-card pr-8 pl-9 text-[13px] shadow-[0_1px_2px_oklch(0_0_0/0.03)] outline-none transition-[border-color,box-shadow] duration-150 placeholder:text-muted-foreground/80 focus:border-primary focus:ring-3 focus:ring-ring/40 dark:bg-input/20"
+                />
+                {query && (
+                  <button
+                    type="button"
+                    onClick={() => setQuery("")}
+                    aria-label="Clear"
+                    className="absolute top-1/2 right-2 flex size-5 -translate-y-1/2 items-center justify-center rounded text-muted-foreground hover:text-foreground"
+                  >
+                    <XIcon className="size-3.5" />
+                  </button>
+                )}
               </div>
             </div>
+          )}
+          {matches && (
+            <p className="-mt-1 text-xs text-muted-foreground" aria-live="polite">
+              {matches.size ? `${plural(matches.size, "bin")} match “${query.trim()}”` : `No bins match “${query.trim()}”`}
+            </p>
+          )}
+        </div>
+
+        <div className="min-h-0 flex-1 overflow-auto scrollbar-thin">
+          {!storage ? (
+            <EmptyState
+              icon={BoxesIcon}
+              title="No bin grid yet"
+              description="Set up the bins for this building to start tracking what's in them."
+              action={<Button onClick={setUpStorage}>Set Up Bins</Button>}
+            />
+          ) : bins.length === 0 ? (
+            <EmptyState
+              icon={BoxesIcon}
+              title="No bins yet"
+              description="Add bins to match the shelves in this building."
+              action={<Button onClick={() => setLayoutOpen(true)}>Add Bins</Button>}
+            />
           ) : (
-            // Simple centered mode: no scrolling, no border, clean and minimal
-            // eslint-disable-next-line no-unused-vars
-            <div
-              className="inline-grid gap-2 items-center"
-              style={{
-                gridTemplateColumns: `auto repeat(${columns}, minmax(0, 1fr))`,
-              }}
-            >
-              {/* Row 0: Empty Top-Left Corner + Column Numbers */}
-              <div />
-              {colLabels.map((colLabel) => (
-                <div
-                  key={`col-${colLabel}`}
-                  className="flex items-center justify-center text-xs text-muted-foreground font-medium pb-1 select-none"
-                >
-                  {colLabel}
-                </div>
-              ))}
-
-              {/* Rows: Level Label on Left + Bin Cards */}
-              {rowLabels.map((rowLabel, rowIndex) => (
-                <React.Fragment key={`row-${rowLabel}`}>
-                  {/* Column 1: Y-Axis Level Label */}
-                  <div className="flex items-center justify-end pr-3 text-xs text-muted-foreground font-medium select-none">
-                    {rowLabel}
-                  </div>
-
-                  {/* Columns: Bin Cards for this Level */}
-                  {colLabels.map((_, colIndex) => {
-                    const bin = grid[rowIndex]?.[colIndex];
-
-                    if (!bin) {
-                      return (
-                        <div
-                          key={`empty-${colIndex}-${rowIndex}`}
-                          className="w-17.5 h-17.5"
-                        />
-                      );
-                    }
-
-                    const stats = binItemStatsById.get(bin.id);
-                    const binState = getBinState(bin, stats?.count ?? 0, stats?.totalQuantity ?? 0);
-
-                    const isMatching = matchingBinIds.has(bin.id);
-                    const isSearchActive = searchQuery.trim().length > 0;
-
-                    return (
-                      <div
-                        key={bin.id}
-                        onClick={() => {
-                          setSelectedBinId(bin.id);
-                          setSheetOpen(true);
-                        }}
-                        className={`flex items-center justify-center w-17.5 h-17.5 rounded-[20px] transition-all cursor-pointer ${isSearchActive
-                          ? isMatching
-                            ? "bg-bin-empty ring-2 ring-primary scale-105"
-                            : "bg-bin-empty opacity-50"
-                          : `${binState === "stocked"
-                            ? "bg-bin-stocked"
-                            : binState === "outOfStock"
-                              ? "bg-bin-out-of-stock"
-                              : binState === "outOfService"
-                                ? "bg-bin-out-of-service"
-                                : "bg-bin-empty"
-                          } hover:ring-1 hover:ring-border`
-                        }`}
-                      >
-                        {isValidIconName(bin.icon) && (
-                          <BinIcon iconName={bin.icon} size={24} strokeWidth={1.75} />
-                        )}
-                      </div>
-                    );
-                  })}
-                </React.Fragment>
-              ))}
-            </div>
+            <BinGrid
+              summaries={summaries}
+              rows={rows}
+              columns={columns}
+              rowLabel={(i) => `${rowPrefix}${pad(i + 1)}`}
+              columnLabel={(i) => `${colPrefix}${pad(i + 1)}`}
+              selectedId={selectedHere?.bin.id ?? null}
+              onSelect={(id) => select(id === selectedId ? null : id)}
+              isDimmed={isDimmed}
+              isHighlighted={isHighlighted}
+              itemNames={itemNames}
+            />
           )}
         </div>
       </div>
-      <BuildingStatusbar />
 
-      <BinDetailSheet
-        bin={activeBin}
-        open={sheetOpen}
-        onOpenChange={setSheetOpen}
-      />
+      {selectedHere && (
+        <BinInspector summary={selectedHere} building={building} inv={inv} onClose={() => select(null)} />
+      )}
+
+      {storage && (
+        <LayoutDialog
+          open={layoutOpen}
+          onOpenChange={setLayoutOpen}
+          storage={storage}
+          bins={bins}
+          system={system}
+          inv={inv}
+          onEditCodes={() => {
+            setLayoutOpen(false);
+            setCodesOpen(true);
+          }}
+        />
+      )}
+      {storage && system && (
+        <LocationSystemEditorDialog open={codesOpen} onOpenChange={setCodesOpen} systemId={system.id} storageId={storage.id} />
+      )}
     </div>
   );
 }

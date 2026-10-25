@@ -93,7 +93,8 @@ export const useBinStore = create<BinStore>()((set, get) => ({
   },
 
   setBinIcon: async (binId, icon) => {
-    await get().updateBin(binId, { icon: icon ?? undefined });
+    // null rather than undefined, otherwise JSON drops it and the icon never clears.
+    await get().updateBin(binId, { icon });
   },
 
   createBinsInStorage: async (storageId, count) => {
