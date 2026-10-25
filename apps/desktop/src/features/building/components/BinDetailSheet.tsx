@@ -26,7 +26,6 @@ interface BinDetailSheetProps {
 
 export function BinDetailSheet({ bin, open, onOpenChange }: BinDetailSheetProps) {
   const updateBin = useBinStore((s) => s.updateBin);
-  const setBinQuantity = useBinStore((s) => s.setBinQuantity);
   const setBinOutOfService = useBinStore((s) => s.setBinOutOfService);
 
   // Subscribe to the raw binItems array for reactive updates
@@ -224,7 +223,7 @@ export function BinDetailSheet({ bin, open, onOpenChange }: BinDetailSheetProps)
                 {showItemPicker && (
                   <ItemPicker
                     onSelect={(itemId) => {
-                      addItemToBin(bin.id, itemId, 1);
+                      addItemToBin(bin.id, itemId);
                       setShowItemPicker(false);
                     }}
                   />
@@ -240,7 +239,7 @@ export function BinDetailSheet({ bin, open, onOpenChange }: BinDetailSheetProps)
             className="w-full"
             onClick={() => {
               markBinOutOfStock(bin.id);
-              setBinQuantity(bin.id, 0);
+
             }}
             disabled={binItems.length === 0}
           >

@@ -47,7 +47,10 @@ export const useLocationSystemStore = create<LocationSystemState>()((set, get) =
   },
 
   updateLocationSystem: async (id, updateFields) => {
-    const system = await api.patch<LocationSystem>(`/api/location-systems/${id}`, updateFields);
+    const { updatedBinCount: _count, ...system } = await api.patch<LocationSystem & { updatedBinCount?: number }>(
+      `/api/location-systems/${id}`,
+      updateFields
+    );
     set((state) => ({
       locationSystems: state.locationSystems.map((s) => (s.id === id ? system : s))
     }));

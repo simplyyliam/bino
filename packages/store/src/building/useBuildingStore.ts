@@ -4,6 +4,7 @@ import { api } from "../api";
 import { useStorageStore } from "./useStorageStore";
 import { useBinStore } from "./useBinStore";
 import { useMovementHistoryStore } from "./useMovementHistoryStore";
+import { useItemStore } from "./useItemStore";
 import { useTimelineFilterStore } from "../ui/useTimelineFilterStore";
 
 type BuildingState = {
@@ -50,10 +51,19 @@ export const useBuildingStore = create<BuildingState>()((set, get) => ({
   },
 
   updateBuilding: async (id, updateFields) => {
-    const building = await api.patch<Building>(`/api/buildings/${id}`, updateFields);
+    const previous = get().buildings;
     set((state) => ({
-      buildings: state.buildings.map((b) => (b.id === id ? building : b))
+      buildings: state.buildings.map((b) => (b.id === id ? { ...b, ...updateFields } : b))
     }));
+    try {
+      const building = await api.patch<Building>(`/api/buildings/${id}`, updateFields);
+      set((state) => ({
+        buildings: state.buildings.map((b) => (b.id === id ? building : b))
+      }));
+    } catch (err) {
+      set({ buildings: previous });
+      throw err;
+    }
   },
 
   deleteBuilding: async (id) => {
@@ -72,6 +82,7 @@ export const useBuildingStore = create<BuildingState>()((set, get) => ({
     const binIds = new Set(binsToRemove.map((bin) => bin.id));
 
     if (binIds.size > 0) {
+      useItemStore.getState().removeBinItemsForBins(binIds);
       useMovementHistoryStore.setState((state) => ({
         history: state.history.filter(
           (event) =>

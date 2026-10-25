@@ -3,30 +3,11 @@ import { RouterProvider } from "react-router-dom";
 import { Router } from "./Router";
 import { ThemeProvider } from "./theme/theme-provider";
 import { TooltipProvider } from "@bino/ui";
-import {
-  useBuildingStore,
-  useStorageStore,
-  useBinStore,
-  useItemStore,
-  useLocationSystemStore,
-  useMovementHistoryStore,
-} from "@bino/store";
+import { useAppStore } from "@bino/store";
 
 export default function App() {
   useEffect(() => {
-    // Initial load from the API - each store fetches its own slice.
-    Promise.all([
-      useLocationSystemStore.getState().fetchLocationSystems(),
-      useBuildingStore.getState().fetchBuildings(),
-      useStorageStore.getState().fetchStorages(),
-      useBinStore.getState().fetchBins(),
-      useItemStore.getState().fetchItems(),
-      useItemStore.getState().fetchICNs(),
-      useItemStore.getState().fetchBinItems(),
-      useMovementHistoryStore.getState().fetchHistory(),
-    ]).catch((err) => {
-      console.error("Failed to load initial data from API", err);
-    });
+    void useAppStore.getState().load();
   }, []);
 
   return (
