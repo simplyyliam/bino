@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-26 · A proper ICN screen
+
+- The ICN number arrives large in the centre, then settles into the header while the details fade in one after another. It plays once per tag per visit, and not at all with reduced motion.
+- Details are grouped into boxes: **Location** (code, shelf and column, building), **In stock** (count, alert, last change), **Item** (with the other bins it's in), **Part details**, **History** and **Tag**.
+- The Tag box has a real, printable Code 39 barcode of the ICN.
+- History reads as plain sentences ("Down to 4 in 06/10/01/03/04"), with bins you can click and quantities you can hover.
+
 ## 2026-10-26 · Unique codes for every store
 
 - **New buildings get their own store number.** The second store on the `Group / Store / Row / Rack / Bin` format now starts at `06/11/01/01/01` instead of repeating `06/10/…`, and the `Aisle / Shelf / Bay` format numbers its aisles the same way. The next free number is filled in for you and you can change it.
