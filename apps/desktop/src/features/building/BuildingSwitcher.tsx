@@ -8,6 +8,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@bino/ui";
+import { BuildingGlyph } from "@/components/BuildingGlyph";
 
 export function BuildingSwitcher({ current, buildings }: { current: Building; buildings: Building[] }) {
   const navigate = useNavigate();
@@ -18,10 +19,11 @@ export function BuildingSwitcher({ current, buildings }: { current: Building; bu
         render={
           <button
             type="button"
-            className="-ml-2 flex items-center gap-1.5 rounded-lg px-2 py-1 text-2xl font-medium tracking-tight outline-none transition-colors duration-150 hover:bg-accent focus-visible:ring-3 focus-visible:ring-ring aria-expanded:bg-accent"
+            className="-mx-1.5 flex items-center gap-2 rounded-md px-1.5 py-0.5 font-medium text-foreground outline-none transition-colors duration-100 hover:bg-accent focus-visible:ring-3 focus-visible:ring-ring aria-expanded:bg-accent"
           >
+            <BuildingGlyph id={current.id} name={current.name} className="size-4 rounded text-[9px]" />
             {current.name}
-            <ChevronsUpDownIcon className="size-4 text-muted-foreground" />
+            <ChevronsUpDownIcon className="size-3.5 text-muted-foreground" />
           </button>
         }
       />
@@ -29,6 +31,7 @@ export function BuildingSwitcher({ current, buildings }: { current: Building; bu
         <DropdownMenuLabel>Switch building</DropdownMenuLabel>
         {buildings.map((b) => (
           <DropdownMenuItem key={b.id} onClick={() => navigate(`/buildings/${b.id}`)}>
+            <BuildingGlyph id={b.id} name={b.name} className="size-4 rounded text-[9px]" />
             <span className="truncate">{b.name}</span>
             {b.id === current.id && <CheckIcon className="ml-auto" />}
           </DropdownMenuItem>

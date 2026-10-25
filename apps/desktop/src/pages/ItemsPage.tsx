@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import Fuse from "fuse.js";
 import { ArrowDownIcon, ArrowUpIcon, DownloadIcon, EllipsisIcon, PackageIcon, PencilIcon, PlusIcon, Trash2Icon } from "lucide-react";
@@ -11,6 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  Kbd,
   NativeSelect,
   Table,
   TableBody,
@@ -24,7 +25,8 @@ import {
   cn,
   toast,
 } from "@bino/ui";
-import { Page, PageHeader } from "@/components/PageHeader";
+import { TopBar, Toolbar } from "@/components/TopBar";
+import { useHotkey } from "@/lib/hotkeys";
 import { EmptyState } from "@/components/EmptyState";
 import { LocationTag } from "@/components/LocationTag";
 import { SearchField } from "@/components/SearchField";
@@ -60,6 +62,9 @@ export default function ItemsPage() {
   const [editing, setEditing] = useState<Item | null>(null);
   const [creating, setCreating] = useState(false);
   const [deleting, setDeleting] = useState<Row | null>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
+  useHotkey("c", () => setCreating(true));
+  useHotkey("f", () => searchRef.current?.focus());
 
   const setQuery = (q: string) =>
     setParams((prev) => {
@@ -117,24 +122,32 @@ export default function ItemsPage() {
   };
 
   return (
-    <Page>
-      <PageHeader
-        title="Items"
-        description={`${plural(rows.length, "item")} · ${formatNumber(totalUnits)} in stock`}
+    <>
+      <TopBar
+        crumbs={[{ label: "Items" }]}
         actions={
           <>
-            <Button variant="outline" onClick={() => exportItemsCsv(inv)} disabled={rows.length === 0}>
-              <DownloadIcon /> Export CSV
+            <Button variant="ghost" size="sm" onClick={() => exportItemsCsv(inv)} disabled={rows.length === 0}>
+              <DownloadIcon /> Export
             </Button>
-            <Button onClick={() => setCreating(true)}>
-              <PlusIcon /> New Item
-            </Button>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button size="sm" onClick={() => setCreating(true)}>
+                    <PlusIcon /> New Item
+                  </Button>
+                }
+              />
+              <TooltipContent className="gap-2">
+                New item <Kbd>C</Kbd>
+              </TooltipContent>
+            </Tooltip>
           </>
         }
       />
 
       {rows.length === 0 ? (
-        <div className="rounded-[22px] bg-card shadow-card">
+        <div className="flex flex-1 items-center justify-center">
           <EmptyState
             icon={PackageIcon}
             title="No items yet"
@@ -143,26 +156,28 @@ export default function ItemsPage() {
           />
         </div>
       ) : (
-        <div className="flex flex-col gap-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <SearchField value={query} onChange={setQuery} placeholder="Search items" className="w-72" />
-            <NativeSelect tone="canvas" value={category} onChange={(e) => setCategory(e.target.value)} aria-label="Category" className="w-48">
+        <>
+          <Toolbar>
+            <SearchField value={query} onChange={setQuery} placeholder="Search items" className="w-64" inputRef={searchRef} />
+            <NativeSelect tone="pill" value={category} onChange={(e) => setCategory(e.target.value)} aria-label="Category" className="w-48">
               <option value="">All categories</option>
               {categories.map((c) => <option key={c} value={c}>{c}</option>)}
             </NativeSelect>
-            <NativeSelect tone="canvas" value={show} onChange={(e) => setShow(e.target.value as Show)} aria-label="Show" className="w-48">
+            <NativeSelect tone="pill" value={show} onChange={(e) => setShow(e.target.value as Show)} aria-label="Show" className="w-48">
               <option value="all">All items</option>
               <option value="attention">Low or out of stock</option>
               <option value="unplaced">Not in any bin</option>
             </NativeSelect>
             <span className="ml-auto text-xs text-muted-foreground tabular-nums">
-              {visible.length !== rows.length && `${visible.length} of ${rows.length}`}
+              {visible.length !== rows.length
+                ? `${visible.length} of ${rows.length}`
+                : `${plural(rows.length, "item")} · ${formatNumber(totalUnits)} in stock`}
             </span>
-          </div>
+          </Toolbar>
 
-          <div className="overflow-hidden rounded-[20px] bg-card p-1.5 shadow-card">
-            <Table>
-              <TableHeader>
+          <div className="min-h-0 flex-1 overflow-auto scrollbar-thin">
+            <Table className="[&_td:first-child]:pl-5 [&_th:first-child]:pl-5 [&_td:last-child]:pr-4 [&_th:last-child]:pr-4">
+              <TableHeader className="sticky top-0 z-10 bg-background">
                 <TableRow className="hover:bg-transparent">
                   <TableHead>
                     <button type="button" onClick={() => toggleSort("name")} className="flex items-center gap-1 hover:text-foreground">
@@ -256,7 +271,7 @@ export default function ItemsPage() {
               </TableBody>
             </Table>
           </div>
-        </div>
+        </>
       )}
 
       <ItemDialog open={creating || editing !== null} onOpenChange={(o) => { if (!o) { setCreating(false); setEditing(null); } }} item={editing ?? undefined} />
@@ -272,6 +287,6 @@ export default function ItemsPage() {
         confirmLabel="Delete Item"
         onConfirm={() => deleting && remove(deleting)}
       />
-    </Page>
+    </>
   );
 }

@@ -2,6 +2,7 @@ import { SearchIcon, XIcon } from "lucide-react";
 import { cn } from "@bino/ui";
 
 type SearchFieldProps = {
+  inputRef?: React.Ref<HTMLInputElement>;
   value: string;
   onChange: (value: string) => void;
   placeholder: string;
@@ -9,11 +10,12 @@ type SearchFieldProps = {
   autoFocus?: boolean;
 };
 
-export function SearchField({ value, onChange, placeholder, className, autoFocus }: SearchFieldProps) {
+export function SearchField({ value, onChange, placeholder, className, autoFocus, inputRef }: SearchFieldProps) {
   return (
     <div className={cn("relative w-64", className)}>
-      <SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+      <SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
       <input
+        ref={inputRef}
         type="search"
         value={value}
         autoFocus={autoFocus}
@@ -21,7 +23,7 @@ export function SearchField({ value, onChange, placeholder, className, autoFocus
         onKeyDown={(e) => e.key === "Escape" && value && (e.stopPropagation(), onChange(""))}
         placeholder={placeholder}
         aria-label={placeholder}
-        className="h-9 w-full rounded-full bg-card pr-8 pl-9 text-[13px] shadow-pill outline-none transition-shadow duration-150 placeholder:text-faint-foreground focus:ring-3 focus:ring-ring/30 [&::-webkit-search-cancel-button]:hidden"
+        className="h-8 w-full rounded-full border border-transparent bg-field pr-8 pl-8.5 text-[13px] outline-none transition-[background-color,border-color,box-shadow] duration-150 placeholder:text-faint-foreground hover:bg-[color-mix(in_oklch,var(--field),var(--foreground)_3%)] focus:border-input focus:bg-background focus:ring-3 focus:ring-ring/30 [&::-webkit-search-cancel-button]:hidden"
       />
       {value && (
         <button

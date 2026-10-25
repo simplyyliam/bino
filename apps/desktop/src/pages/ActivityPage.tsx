@@ -4,7 +4,8 @@ import { DownloadIcon, HistoryIcon, Trash2Icon } from "lucide-react";
 import type { MovementHistoryEvent } from "@bino/types";
 import { useMovementHistoryStore } from "@bino/store";
 import { Button, Checkbox, NativeSelect, cn, toast } from "@bino/ui";
-import { Page, PageHeader } from "@/components/PageHeader";
+import { Page } from "@/components/Page";
+import { TopBar, Toolbar } from "@/components/TopBar";
 import { EmptyState } from "@/components/EmptyState";
 import { LocationTag } from "@/components/LocationTag";
 import { SearchField } from "@/components/SearchField";
@@ -108,40 +109,41 @@ export default function ActivityPage() {
     );
 
   return (
-    <Page className="max-w-4xl">
-      <PageHeader
-        title="Activity"
-        description={building ? `Everything that's changed in ${building.name}` : "Everything that's changed, newest first"}
+    <>
+      <TopBar
+        crumbs={building ? [{ label: "Activity", to: "/activity" }, { label: building.name }] : [{ label: "Activity" }]}
         actions={
-          <Button variant="outline" onClick={exportCsv} disabled={filtered.length === 0}>
-            <DownloadIcon /> Export CSV
+          <Button variant="ghost" size="sm" onClick={exportCsv} disabled={filtered.length === 0}>
+            <DownloadIcon /> Export
           </Button>
         }
       />
-
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-center gap-2">
+      <Toolbar>
           <SearchField value={query} onChange={setQuery} placeholder="Search activity" />
-          <NativeSelect tone="canvas" value={buildingId} onChange={(e) => setBuilding(e.target.value)} aria-label="Building" className="w-48">
+          <NativeSelect tone="pill" value={buildingId} onChange={(e) => setBuilding(e.target.value)} aria-label="Building" className="w-48">
             <option value="">All buildings</option>
             {inv.buildings.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
           </NativeSelect>
-          <NativeSelect tone="canvas" value={kind} onChange={(e) => setKind(e.target.value as EventKind | "")} aria-label="Type of change" className="w-52">
+          <NativeSelect tone="pill" value={kind} onChange={(e) => setKind(e.target.value as EventKind | "")} aria-label="Type of change" className="w-52">
             <option value="">All changes</option>
             {EVENT_KINDS.map((k) => <option key={k.value} value={k.value}>{k.label}</option>)}
           </NativeSelect>
-          {selected.size > 0 && (
-            <div className="ml-auto flex items-center gap-2 animate-in fade-in-0 duration-150">
-              <Button variant="ghost" size="sm" onClick={() => setSelected(new Set())}>Clear</Button>
-              <Button variant="destructive" size="sm" onClick={() => setConfirming(true)}>
-                <Trash2Icon /> Delete {selected.size}
+          {selected.size > 0 ? (
+            <div className="ml-auto flex items-center gap-1.5 animate-in fade-in-0 duration-150">
+              <span className="mr-1 text-xs text-muted-foreground tabular-nums">{selected.size} selected</span>
+              <Button variant="ghost" size="xs" onClick={() => setSelected(new Set())}>Clear</Button>
+              <Button variant="destructive" size="xs" onClick={() => setConfirming(true)}>
+                <Trash2Icon /> Delete
               </Button>
             </div>
+          ) : (
+            <span className="ml-auto text-xs text-muted-foreground tabular-nums">{plural(filtered.length, "change")}</span>
           )}
-        </div>
+      </Toolbar>
+      <Page className="max-w-4xl gap-6">
 
         {filtered.length === 0 ? (
-          <div className="rounded-[22px] bg-card shadow-card">
+          <div className="rounded-2xl bg-card shadow-card">
             <EmptyState
               icon={HistoryIcon}
               title={history.length ? "No activity matches" : "No activity yet"}
@@ -154,7 +156,7 @@ export default function ActivityPage() {
               <h2 className="px-1 text-xs font-medium text-muted-foreground">
                 {group.label}
               </h2>
-              <ol className="flex flex-col rounded-[20px] bg-card p-1.5 shadow-card">
+              <ol className="flex flex-col rounded-2xl bg-card p-1 shadow-card">
                 {group.events.map((e) => {
                   const meta = eventMeta(e.eventType);
                   const Icon = meta.icon;
@@ -164,7 +166,7 @@ export default function ActivityPage() {
                     <li
                       key={e.id}
                       className={cn(
-                        "group flex items-center gap-3 rounded-[14px] px-3 py-2.5 transition-colors duration-150",
+                        "group flex items-center gap-3 rounded-xl px-3 py-2 transition-colors duration-100",
                         isSelected ? "bg-accent-blue/8" : "hover:bg-surface"
                       )}
                     >
@@ -215,7 +217,7 @@ export default function ActivityPage() {
             Show More ({formatNumber(filtered.length - limit)} older)
           </Button>
         )}
-      </div>
+      </Page>
 
       <ConfirmDialog
         open={confirming}
@@ -225,6 +227,6 @@ export default function ActivityPage() {
         confirmLabel="Delete"
         onConfirm={remove}
       />
-    </Page>
+    </>
   );
 }
