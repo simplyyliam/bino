@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { TriangleAlertIcon } from "lucide-react";
 import type { Bin, LocationSystem, Storage } from "@bino/types";
 import { sortBinsLastFirst, useBinStore } from "@bino/store";
@@ -29,17 +29,23 @@ type LayoutDialogProps = {
 
 const MAX_BINS = 1000;
 
-export function LayoutDialog({ open, onOpenChange, storage, bins, system, inv, onEditCodes }: LayoutDialogProps) {
+export function LayoutDialog(props: LayoutDialogProps) {
+  return (
+    <Dialog open={props.open} onOpenChange={props.onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <LayoutForm {...props} />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function LayoutForm({ onOpenChange, storage, bins, system, inv, onEditCodes }: LayoutDialogProps) {
   const createBins = useBinStore((s) => s.createBinsInStorage);
   const removeBins = useBinStore((s) => s.removeBinsFromStorage);
   const perColumn = system?.gridConfig?.racksPerColumn ?? 5;
 
   const [target, setTarget] = useState(bins.length);
   const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    if (open) setTarget(bins.length);
-  }, [open, bins.length]);
 
   const delta = target - bins.length;
   const toRemove = useMemo(
@@ -65,8 +71,7 @@ export function LayoutDialog({ open, onOpenChange, storage, bins, system, inv, o
   };
 
   return (
-    <Dialog open={open} onOpenChange={(next) => !saving && onOpenChange(next)}>
-      <DialogContent className="sm:max-w-md">
+    <>
         <DialogHeader>
           <DialogTitle>Edit Layout</DialogTitle>
           <DialogDescription>
@@ -133,7 +138,6 @@ export function LayoutDialog({ open, onOpenChange, storage, bins, system, inv, o
                   : "No Changes"}
           </Button>
         </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    </>
   );
 }

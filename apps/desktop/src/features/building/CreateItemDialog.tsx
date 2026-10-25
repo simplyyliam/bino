@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type { Bin } from "@bino/types";
 import { useItemStore } from "@bino/store";
 import {
@@ -27,7 +27,17 @@ type CreateItemDialogProps = {
 
 const empty = { category: "", description: "", alert: "", manufacturer: "", partNumber: "", serialNumber: "" };
 
-export function CreateItemDialog({ open, onOpenChange, initialName, bin }: CreateItemDialogProps) {
+export function CreateItemDialog(props: CreateItemDialogProps) {
+  return (
+    <Dialog open={props.open} onOpenChange={props.onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <CreateItemForm {...props} />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function CreateItemForm({ onOpenChange, initialName, bin }: CreateItemDialogProps) {
   const items = useItemStore((s) => s.items);
   const createItem = useItemStore((s) => s.createItem);
   const createICN = useItemStore((s) => s.createICN);
@@ -39,15 +49,6 @@ export function CreateItemDialog({ open, onOpenChange, initialName, bin }: Creat
   const [withIcn, setWithIcn] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    setName(initialName);
-    setFields(empty);
-    setQuantity(1);
-    setWithIcn(false);
-    setError(null);
-  }, [open, initialName]);
 
   const categories = useMemo(
     () => [...new Set(items.map((i) => i.category).filter(Boolean) as string[])].sort(),
@@ -91,8 +92,7 @@ export function CreateItemDialog({ open, onOpenChange, initialName, bin }: Creat
   };
 
   return (
-    <Dialog open={open} onOpenChange={(o) => !saving && onOpenChange(o)}>
-      <DialogContent className="sm:max-w-md">
+    <>
         <form onSubmit={submit} className="flex flex-col gap-5">
           <DialogHeader>
             <DialogTitle>New Item</DialogTitle>
@@ -163,7 +163,6 @@ export function CreateItemDialog({ open, onOpenChange, initialName, bin }: Creat
             <Button type="submit" disabled={saving || !name.trim()}>{saving ? "Adding…" : "Add to Bin"}</Button>
           </DialogFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+    </>
   );
 }

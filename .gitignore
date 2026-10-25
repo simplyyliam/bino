@@ -25,3 +25,12 @@ dist-ssr
 *.md
 *.env*
 .vercel
+
+docs/design/
+!README.md
+!CLAUDE.md
+!DECISIONS.md
+!CHANGELOG.md
+
+# Build info for tsc -b. Committing it made fresh clones skip emitting dist.
+*.tsbuildinfo

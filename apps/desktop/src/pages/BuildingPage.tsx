@@ -41,12 +41,6 @@ export default function BuildingPage() {
   const selected = selectedId ? inv.summaries.get(selectedId) : undefined;
   const selectedHere = selected && selected.bin.storageId === storage?.id ? selected : undefined;
 
-  // Reset the filters when switching buildings.
-  useEffect(() => {
-    setFilter(null);
-    setQuery("");
-  }, [buildingId]);
-
   const select = useCallback(
     (binId: string | null) => {
       setParams(

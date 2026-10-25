@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { MinusIcon, PlusIcon } from "lucide-react";
 import { cn } from "@bino/ui";
 
@@ -13,15 +13,14 @@ type QuantityStepperProps = {
 
 // − [ 12 ] +  — buttons save straight away, typing saves on Enter or blur.
 export function QuantityStepper({ value, onChange, min = 0, label, className, tone = "default" }: QuantityStepperProps) {
-  const [draft, setDraft] = useState(String(value));
-
-  useEffect(() => setDraft(String(value)), [value]);
+  // Only holds text while the field is being typed in; otherwise we show `value`.
+  const [draft, setDraft] = useState<string | null>(null);
 
   const commit = () => {
-    const parsed = Number.parseInt(draft, 10);
-    if (Number.isNaN(parsed)) return setDraft(String(value));
+    const parsed = Number.parseInt(draft ?? "", 10);
+    setDraft(null);
+    if (Number.isNaN(parsed)) return;
     const next = Math.max(min, parsed);
-    setDraft(String(next));
     if (next !== value) onChange(next);
   };
 
@@ -46,25 +45,29 @@ export function QuantityStepper({ value, onChange, min = 0, label, className, to
         <MinusIcon className="size-3.5" />
       </button>
       <input
-        value={draft}
+        value={draft ?? String(value)}
         inputMode="numeric"
         aria-label={label}
         onChange={(e) => setDraft(e.target.value.replace(/[^\d]/g, ""))}
-        onFocus={(e) => e.currentTarget.select()}
+        onFocus={(e) => {
+          setDraft(String(value));
+          e.currentTarget.select();
+        }}
         onBlur={commit}
         onKeyDown={(e) => {
           if (e.key === "Enter") e.currentTarget.blur();
           if (e.key === "Escape") {
-            setDraft(String(value));
-            e.currentTarget.blur();
+            // Throw the typing away *before* blur runs commit.
+            e.stopPropagation();
+            setDraft(null);
+            const input = e.currentTarget;
+            requestAnimationFrame(() => input.blur());
           }
-          if (e.key === "ArrowUp") {
+          if (e.key === "ArrowUp" || e.key === "ArrowDown") {
             e.preventDefault();
-            step(1);
-          }
-          if (e.key === "ArrowDown") {
-            e.preventDefault();
-            step(-1);
+            const next = Math.max(min, value + (e.key === "ArrowUp" ? 1 : -1));
+            setDraft(String(next));
+            if (next !== value) onChange(next);
           }
         }}
         className={cn(

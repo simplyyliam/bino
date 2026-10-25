@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Building } from "@bino/types";
 import { generateLocationCode } from "@bino/data";
@@ -28,7 +28,17 @@ type BuildingDialogProps = {
   building?: Building;
 };
 
-export function BuildingDialog({ open, onOpenChange, building }: BuildingDialogProps) {
+export function BuildingDialog(props: BuildingDialogProps) {
+  return (
+    <Dialog open={props.open} onOpenChange={props.onOpenChange}>
+      <DialogContent className="sm:max-w-lg">
+        <BuildingForm {...props} />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function BuildingForm({ onOpenChange, building }: BuildingDialogProps) {
   const navigate = useNavigate();
   const addBuilding = useBuildingStore((s) => s.addBuilding);
   const updateBuilding = useBuildingStore((s) => s.updateBuilding);
@@ -36,23 +46,14 @@ export function BuildingDialog({ open, onOpenChange, building }: BuildingDialogP
   const createBins = useBinStore((s) => s.createBinsInStorage);
   const systems = useLocationSystemStore((s) => s.locationSystems);
 
-  const [name, setName] = useState("");
-  const [number, setNumber] = useState("");
-  const [systemId, setSystemId] = useState("");
+  const [name, setName] = useState(building?.name ?? "");
+  const [number, setNumber] = useState(building?.buildingNumber ?? "");
+  const [systemId, setSystemId] = useState(systems[0]?.id ?? "");
   const [binCount, setBinCount] = useState(20);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const isEdit = !!building;
-
-  useEffect(() => {
-    if (!open) return;
-    setName(building?.name ?? "");
-    setNumber(building?.buildingNumber ?? "");
-    setSystemId(systems[0]?.id ?? "");
-    setBinCount(20);
-    setError(null);
-  }, [open, building, systems]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,8 +81,7 @@ export function BuildingDialog({ open, onOpenChange, building }: BuildingDialogP
   };
 
   return (
-    <Dialog open={open} onOpenChange={(next) => !saving && onOpenChange(next)}>
-      <DialogContent className="sm:max-w-lg">
+    <>
         <form onSubmit={submit} className="flex flex-col gap-5">
           <DialogHeader>
             <DialogTitle>{isEdit ? "Rename Building" : "New Building"}</DialogTitle>
@@ -157,7 +157,6 @@ export function BuildingDialog({ open, onOpenChange, building }: BuildingDialogP
             </Button>
           </DialogFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+    </>
   );
 }

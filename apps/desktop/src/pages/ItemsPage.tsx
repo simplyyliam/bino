@@ -44,6 +44,11 @@ type Row = {
   state: "ok" | "low" | "out" | "unplaced";
 };
 
+function SortIcon({ sort, k }: { sort: Sort; k: Sort["key"] }) {
+  if (sort.key !== k) return null;
+  return sort.dir === 1 ? <ArrowUpIcon className="size-3" /> : <ArrowDownIcon className="size-3" />;
+}
+
 export default function ItemsPage() {
   const inv = useInventory();
   const deleteItem = useItemStore((s) => s.deleteItem);
@@ -101,9 +106,6 @@ export default function ItemsPage() {
 
   const toggleSort = (key: Sort["key"]) =>
     setSort((s) => (s.key === key ? { key, dir: s.dir === 1 ? -1 : 1 } : { key, dir: key === "total" ? -1 : 1 }));
-
-  const SortIcon = ({ k }: { k: Sort["key"] }) =>
-    sort.key === k ? (sort.dir === 1 ? <ArrowUpIcon className="size-3" /> : <ArrowDownIcon className="size-3" />) : null;
 
   const remove = async (row: Row) => {
     try {
@@ -164,14 +166,14 @@ export default function ItemsPage() {
                 <TableRow className="hover:bg-transparent">
                   <TableHead>
                     <button type="button" onClick={() => toggleSort("name")} className="flex items-center gap-1 hover:text-foreground">
-                      Item <SortIcon k="name" />
+                      Item <SortIcon sort={sort} k="name" />
                     </button>
                   </TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead>Where it is</TableHead>
                   <TableHead className="text-right">
                     <button type="button" onClick={() => toggleSort("total")} className="ml-auto flex items-center gap-1 hover:text-foreground">
-                      <SortIcon k="total" /> Total
+                      <SortIcon sort={sort} k="total" /> Total
                     </button>
                   </TableHead>
                   <TableHead className="w-10" />

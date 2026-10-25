@@ -1,7 +1,7 @@
 import type { Bin } from "@bino/types";
 import { cn } from "@bino/ui";
 import type { BinSummary } from "@/lib/inventory";
-import { statusSwatch } from "@/components/StatusBadge";
+import { statusSwatch } from "@/lib/bin-styles";
 
 type MiniBinMapProps = {
   bins: Bin[];

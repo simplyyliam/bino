@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { PlusIcon, Trash2Icon } from "lucide-react";
 import type { Building, LocationMappingRule, LocationSystem, Storage } from "@bino/types";
 import { generateLocationCode } from "@bino/data";
@@ -65,7 +65,17 @@ type CodeFormatDialogProps = {
   sharedWith: Building[];
 };
 
-export function CodeFormatDialog({ open, onOpenChange, system, storage, building, sharedWith }: CodeFormatDialogProps) {
+export function CodeFormatDialog(props: CodeFormatDialogProps) {
+  return (
+    <Dialog open={props.open} onOpenChange={props.onOpenChange}>
+      <DialogContent className="sm:max-w-xl">
+        <CodeFormatForm {...props} />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function CodeFormatForm({ onOpenChange, system, storage, building, sharedWith }: CodeFormatDialogProps) {
   const updateSystem = useLocationSystemStore((s) => s.updateLocationSystem);
   const addSystem = useLocationSystemStore((s) => s.addLocationSystem);
   const updateStorage = useStorageStore((s) => s.updateStorage);
@@ -76,18 +86,8 @@ export function CodeFormatDialog({ open, onOpenChange, system, storage, building
   const [digits, setDigits] = useState(system.paddingWidth);
   const [segments, setSegments] = useState<Segment[]>(() => toSegments(system));
   const [grid, setGrid] = useState(system.gridConfig ?? {});
-  const [scope, setScope] = useState<"all" | "this">("all");
+  const [scope, setScope] = useState<"all" | "this">(sharedWith.length > 0 ? "this" : "all");
   const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    if (!open) return;
-    setName(system.name);
-    setSeparator(system.separator);
-    setDigits(system.paddingWidth);
-    setSegments(toSegments(system));
-    setGrid(system.gridConfig ?? {});
-    setScope(sharedWith.length > 0 ? "this" : "all");
-  }, [open, system, sharedWith.length]);
 
   const draft = useMemo(
     () => toSystem(system, segments, { name: name.trim() || system.name, separator, paddingWidth: digits, gridConfig: grid }),
@@ -129,8 +129,7 @@ export function CodeFormatDialog({ open, onOpenChange, system, storage, building
   const perColumn = grid.racksPerColumn ?? 5;
 
   return (
-    <Dialog open={open} onOpenChange={(o) => !saving && onOpenChange(o)}>
-      <DialogContent className="sm:max-w-xl">
+    <>
         <DialogHeader>
           <DialogTitle>Bin Code Format</DialogTitle>
           <DialogDescription>Choose how the codes on your bin labels are built. Every bin gets its new code straight away.</DialogDescription>
@@ -247,7 +246,6 @@ export function CodeFormatDialog({ open, onOpenChange, system, storage, building
             {saving ? "Saving…" : "Save Format"}
           </Button>
         </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    </>
   );
 }
