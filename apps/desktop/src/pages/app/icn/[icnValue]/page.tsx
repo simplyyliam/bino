@@ -240,7 +240,7 @@ export default function IcnPage() {
                         <Tooltip key={l.id}>
                           <TooltipTrigger
                             render={
-                              <Link to={binLink(b!.id, bin!.id)} className="rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring">
+                              <Link to={binLink(b!.id, bin!.id)} className="rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring">
                                 <LocationTag code={bin!.locationCode} className="h-6 transition-colors hover:bg-accent" />
                               </Link>
                             }

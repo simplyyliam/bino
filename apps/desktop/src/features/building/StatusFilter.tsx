@@ -13,12 +13,12 @@ type StatusFilterProps = {
 export function StatusFilter({ counts, total, value, onChange }: StatusFilterProps) {
   const chip = (active: boolean) =>
     cn(
-      "flex h-8 items-center gap-2 rounded-full px-3 text-[13px] font-medium whitespace-nowrap transition-[color,background-color,box-shadow] duration-150 outline-none focus-visible:ring-3 focus-visible:ring-ring",
+      "flex h-7 items-center gap-2 rounded-md px-3 text-[13px] font-medium whitespace-nowrap transition-[color,background-color,box-shadow] duration-150 outline-none focus-visible:ring-3 focus-visible:ring-ring",
       active ? "bg-card text-foreground shadow-pill" : "text-muted-foreground hover:text-foreground"
     );
 
   return (
-    <div role="radiogroup" aria-label="Show bins" className="flex flex-wrap items-center gap-0.5 rounded-full bg-foreground/[0.04] p-1">
+    <div role="radiogroup" aria-label="Show bins" className="flex flex-wrap items-center gap-0.5 rounded-lg bg-foreground/[0.04] p-0.5">
       <button type="button" role="radio" aria-checked={value === null} className={chip(value === null)} onClick={() => onChange(null)}>
         All <span className="text-muted-foreground tabular-nums">{total}</span>
       </button>

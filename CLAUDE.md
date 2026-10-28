@@ -54,7 +54,7 @@ src/
 
 ## UI conventions
 
-- Soft minimal: grey canvas, white containers with hairline `shadow-card`, `rounded-2xl` cards, pill buttons. Neutral greys only.
+- Soft minimal: grey canvas, white containers with hairline `shadow-card`, `rounded-2xl` cards, softly squared controls (`rounded-lg`, no pills). Neutral greys only.
 - Colour is spent on bin status (`bin-*` tokens) and the blue accent (`accent-blue`) for selection, focus and links. Primary buttons are near-black.
 - Weights: regular and medium. Semibold only for tiny glyph letters.
 - 13px body (`text-[13px]`), `text-xs` for meta. Numbers that change get `tabular-nums`.

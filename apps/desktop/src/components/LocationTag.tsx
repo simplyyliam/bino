@@ -5,7 +5,7 @@ export function LocationTag({ code, className }: { code: string; className?: str
   return (
     <span
       className={cn(
-        "inline-flex h-6 items-center rounded-full bg-surface px-2 font-mono text-[11.5px] tracking-tight text-foreground/80 tabular-nums",
+        "inline-flex h-6 items-center rounded-md bg-surface px-2 font-mono text-[11.5px] tracking-tight text-foreground/80 tabular-nums",
         className
       )}
     >
