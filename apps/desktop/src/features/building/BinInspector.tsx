@@ -96,7 +96,7 @@ export function BinInspector({ summary, building, inv, onClose }: BinInspectorPr
           <Tooltip>
             <TooltipTrigger
               render={
-                <button type="button" onClick={() => copyText(bin.locationCode)} className="rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring" aria-label={`Copy code ${bin.locationCode}`}>
+                <button type="button" onClick={() => copyText(bin.locationCode)} className="rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring" aria-label={`Copy code ${bin.locationCode}`}>
                   <LocationTag code={bin.locationCode} className="transition-colors hover:bg-accent" />
                 </button>
               }

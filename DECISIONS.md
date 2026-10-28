@@ -11,6 +11,7 @@ The inset panel (white page floating on the grey canvas) is gone. The sidebar is
 - Theme and keyboard shortcuts moved into that menu, so the sidebar has no footer.
 - The building list stays in the sidebar too: one-click switching and the right-click menu still matter more than avoiding the repeat.
 - Dark mode is based on `#0A0A0A` (`oklch(0.145 0 0)`), with cards, popovers and fields stepping up from it.
+- Pills are retired (this replaces the pill call in "Soft minimal visual language"). They read as playful; the app should feel premium. `--radius` went from 0.75rem to 0.5rem so every corner scales down together, and buttons, selects, search fields, the status filter, steppers, tags and badges use `rounded-lg`/`rounded-md`. Only true circles (status dots, icon chips) stay round.
 
 ### 2026-10-25 · Custom ICNs are limited to Code 39 characters
 

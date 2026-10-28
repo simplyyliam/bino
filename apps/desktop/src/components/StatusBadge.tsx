@@ -26,7 +26,7 @@ export function StatusBadge({ status, className }: { status: BinStatus; classNam
   return (
     <span
       className={cn(
-        "inline-flex h-6 items-center gap-1.5 rounded-full px-2.5 text-xs font-medium",
+        "inline-flex h-6 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium",
         badgeTone[status],
         className
       )}

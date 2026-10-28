@@ -30,14 +30,14 @@ export function QuantityStepper({ value, onChange, min = 0, label, className, to
   };
 
   const buttonClass =
-    "flex size-7 items-center justify-center rounded-full text-muted-foreground transition-[background-color,color,scale,box-shadow] duration-150 hover:bg-card hover:text-foreground hover:shadow-pill active:scale-[0.92] disabled:pointer-events-none disabled:opacity-35";
+    "flex size-7 items-center justify-center rounded-md text-muted-foreground transition-[background-color,color,scale,box-shadow] duration-150 hover:bg-card hover:text-foreground hover:shadow-pill active:scale-[0.92] disabled:pointer-events-none disabled:opacity-35";
 
   return (
     <div
       role="group"
       aria-label={label}
       className={cn(
-        "inline-flex h-8 items-center gap-0.5 rounded-full bg-field p-0.5",
+        "inline-flex h-8 items-center gap-0.5 rounded-lg bg-field p-0.5",
         className
       )}
     >
@@ -71,7 +71,7 @@ export function QuantityStepper({ value, onChange, min = 0, label, className, to
           }
         }}
         className={cn(
-          "h-7 w-10 rounded-full bg-transparent text-center text-[13px] font-medium tabular-nums outline-none focus:bg-card focus:shadow-pill",
+          "h-7 w-10 rounded-md bg-transparent text-center text-[13px] font-medium tabular-nums outline-none focus:bg-card focus:shadow-pill",
           tone === "low" && "text-bin-low-fg",
           tone === "out" && "text-bin-out-fg"
         )}

@@ -46,7 +46,7 @@ export const BinTile = forwardRef<HTMLButtonElement, BinTileProps>(function BinT
             aria-label={`${binTitle(bin)}, ${statusLabel(status)}${total ? `, ${total} items` : ""}`}
             aria-pressed={selected}
             className={cn(
-              "relative flex size-14 items-center justify-center rounded-[15px] text-[13px] font-medium tabular-nums outline-none transition-[opacity,box-shadow,scale] duration-150 ease-out focus-visible:ring-3 focus-visible:ring-ring active:scale-[0.95]",
+              "relative flex size-14 items-center justify-center rounded-[10px] text-[13px] font-medium tabular-nums outline-none transition-[opacity,box-shadow,scale] duration-150 ease-out focus-visible:ring-3 focus-visible:ring-ring active:scale-[0.95]",
               tone[status],
               dimmed && "opacity-20 hover:opacity-60",
               highlighted && "ring-2 ring-accent-blue/50 ring-offset-2 ring-offset-background",

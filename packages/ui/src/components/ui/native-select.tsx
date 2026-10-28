@@ -8,7 +8,7 @@ const tones = {
   field:
     "rounded-xl border border-transparent bg-field hover:bg-[color-mix(in_oklch,var(--field),var(--foreground)_3%)] focus-visible:border-input focus-visible:bg-background",
   // Toolbar filters.
-  pill: "rounded-full border border-transparent bg-field hover:bg-[color-mix(in_oklch,var(--field),var(--foreground)_3%)] focus-visible:border-input focus-visible:bg-background",
+  pill: "rounded-lg border border-transparent bg-field hover:bg-[color-mix(in_oklch,var(--field),var(--foreground)_3%)] focus-visible:border-input focus-visible:bg-background",
 }
 
 type NativeSelectProps = React.ComponentProps<"select"> & { tone?: keyof typeof tones }

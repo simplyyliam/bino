@@ -7,6 +7,7 @@
 - **New Building**, **Overview**, **Items** and **Activity** sit together at the top of the sidebar, with your buildings listed below.
 - The page you're on now shows as a grey pill at the top. On a building, its **···** menu sits right next to it.
 - Dark mode is darker and crisper (`#0A0A0A`).
+- Corners are tighter everywhere. Buttons, search boxes and filters are softly squared instead of round pills, for a calmer look.
 
 ## 2026-10-25 · Right-click buildings in the sidebar
 

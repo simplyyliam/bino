@@ -68,7 +68,7 @@
 }
 
 :root {
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
     /* Hairline + barely-there lift. Borders do the work, shadows just soften. */
     --elev-card: 0 0 0 1px oklch(0 0 0 / 0.07), 0 1px 3px oklch(0 0 0 / 0.04);
