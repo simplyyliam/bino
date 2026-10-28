@@ -111,7 +111,7 @@ export default function ActivityPage() {
   return (
     <>
       <TopBar
-        crumbs={building ? [{ label: "Activity", to: "/activity" }, { label: building.name }] : [{ label: "Activity" }]}
+        crumbs={building ? [{ label: "Activity", to: "/activity", icon: HistoryIcon }, { label: building.name }] : [{ label: "Activity", icon: HistoryIcon }]}
         actions={
           <Button variant="ghost" size="sm" onClick={exportCsv} disabled={filtered.length === 0}>
             <DownloadIcon /> Export

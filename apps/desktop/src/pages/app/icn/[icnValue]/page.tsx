@@ -132,7 +132,7 @@ export default function IcnPage() {
   return (
     <>
       <TopBar
-        crumbs={[{ label: "Items", to: "/items" }, { label: icn.value }]}
+        crumbs={[{ label: "Items", to: "/items", icon: PackageIcon }, { label: icn.value, icon: TagIcon }]}
         actions={
           <Button variant="ghost" size="sm" nativeButton={false} render={<Link to={`/tag/${encodeURIComponent(icn.value)}`} />}>
             <SmartphoneIcon /> Tag View

@@ -71,7 +71,7 @@
     --radius: 0.75rem;
 
     /* Hairline + barely-there lift. Borders do the work, shadows just soften. */
-    --elev-card: 0 0 0 1px oklch(0 0 0 / 0.06), 0 1px 2px oklch(0 0 0 / 0.03);
+    --elev-card: 0 0 0 1px oklch(0 0 0 / 0.07), 0 1px 3px oklch(0 0 0 / 0.04);
     --elev-raised: 0 0 0 1px oklch(0 0 0 / 0.07), 0 12px 32px -10px oklch(0 0 0 / 0.14), 0 2px 6px -2px oklch(0 0 0 / 0.05);
     --elev-pill: 0 0 0 1px oklch(0 0 0 / 0.09), 0 1px 2px oklch(0 0 0 / 0.04);
 
@@ -100,11 +100,11 @@
     --input: oklch(0.9 0 0);
     --ring: oklch(0.585 0.19 256 / 0.45);
 
-    --sidebar: var(--canvas);
+    --sidebar: oklch(0.985 0 0);
     --sidebar-foreground: var(--foreground);
     --sidebar-primary: var(--primary);
     --sidebar-primary-foreground: var(--primary-foreground);
-    --sidebar-accent: oklch(0.925 0 0);
+    --sidebar-accent: oklch(0.94 0 0);
     --sidebar-accent-foreground: var(--foreground);
     --sidebar-border: var(--border);
     --sidebar-ring: var(--ring);
@@ -121,41 +121,42 @@
 }
 
 .dark {
-    --canvas: oklch(0.165 0 0);
-    --background: oklch(0.205 0 0);
-    --surface: oklch(0.24 0 0);
+    /* #0A0A0A base. Panels step up in small, even increments from it. */
+    --canvas: oklch(0.145 0 0);
+    --background: oklch(0.145 0 0);
+    --surface: oklch(0.215 0 0);
     --foreground: oklch(0.95 0 0);
-    --card: oklch(0.225 0 0);
+    --card: oklch(0.18 0 0);
     --card-foreground: var(--foreground);
-    --popover: oklch(0.245 0 0);
+    --popover: oklch(0.2 0 0);
     --popover-foreground: var(--foreground);
     --primary: oklch(0.95 0 0);
-    --primary-foreground: oklch(0.2 0 0);
+    --primary-foreground: oklch(0.18 0 0);
     --accent-blue: oklch(0.68 0.16 256);
-    --secondary: oklch(0.27 0 0);
+    --secondary: oklch(0.235 0 0);
     --secondary-foreground: var(--foreground);
-    --muted: oklch(0.27 0 0);
+    --muted: oklch(0.235 0 0);
     --muted-foreground: oklch(0.7 0 0);
-    --faint-foreground: oklch(0.55 0 0);
-    --accent: oklch(0.27 0 0);
+    --faint-foreground: oklch(0.52 0 0);
+    --accent: oklch(0.235 0 0);
     --accent-foreground: var(--foreground);
-    --field: oklch(0.265 0 0);
-    --destructive: oklch(0.68 0.17 25);
+    --field: oklch(0.215 0 0);
+    --destructive: oklch(0.64 0.19 25);
     --border: oklch(1 0 0 / 8%);
     --input: oklch(1 0 0 / 12%);
     --ring: oklch(0.68 0.16 256 / 0.5);
 
-    --sidebar: var(--canvas);
+    --sidebar: oklch(0.165 0 0);
     --sidebar-foreground: var(--foreground);
     --sidebar-primary: var(--primary);
     --sidebar-primary-foreground: var(--primary-foreground);
-    --sidebar-accent: oklch(0.24 0 0);
+    --sidebar-accent: oklch(0.235 0 0);
     --sidebar-accent-foreground: var(--foreground);
     --sidebar-border: var(--border);
     --sidebar-ring: var(--ring);
 
-    --elev-card: 0 0 0 1px oklch(1 0 0 / 0.06);
-    --elev-raised: 0 0 0 1px oklch(1 0 0 / 0.08), 0 12px 32px -8px oklch(0 0 0 / 0.55);
+    --elev-card: 0 0 0 1px oklch(1 0 0 / 0.07);
+    --elev-raised: 0 0 0 1px oklch(1 0 0 / 0.09), 0 12px 32px -8px oklch(0 0 0 / 0.7);
     --elev-pill: 0 0 0 1px oklch(1 0 0 / 0.1);
 
     --bin-empty: oklch(0.38 0 0);

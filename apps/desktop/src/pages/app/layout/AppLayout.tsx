@@ -14,7 +14,7 @@ function LoadingSkeleton() {
   return (
     <div className="flex h-full flex-col" aria-busy="true" aria-label="Loading">
       <div className="flex h-12 items-center border-b border-border px-4">
-        <div className={`${bar} h-3.5 w-28 animate-pulse`} />
+        <div className={`${bar} h-7 w-32 animate-pulse rounded-lg`} />
       </div>
       <div className="flex flex-col gap-6 p-8">
         <div className={`${bar} h-5 w-48 animate-pulse`} />
@@ -50,12 +50,10 @@ export default function AppLayout() {
   const ready = status === "ready";
 
   return (
-    <div className="flex h-dvh bg-canvas">
+    <div className="flex h-dvh bg-background">
       {sidebarOpen && ready && <Sidebar />}
-      <main className={`flex min-w-0 flex-1 p-2 ${sidebarOpen && ready ? "pl-0" : ""}`}>
-        <div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-[14px] bg-background shadow-card">
-          {status === "error" ? <Offline /> : ready ? <Outlet /> : <LoadingSkeleton />}
-        </div>
+      <main className="flex min-w-0 flex-1 flex-col overflow-hidden bg-background">
+        {status === "error" ? <Offline /> : ready ? <Outlet /> : <LoadingSkeleton />}
       </main>
       {ready && (
         <>

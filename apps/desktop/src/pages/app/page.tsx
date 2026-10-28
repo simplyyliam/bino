@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Building2Icon, CheckCircle2Icon, EllipsisIcon, PlusIcon } from "lucide-react";
+import { Building2Icon, CheckCircle2Icon, EllipsisIcon, LayoutGridIcon, PlusIcon } from "lucide-react";
 import type { Building } from "@bino/types";
 import { useLocationSystemStore } from "@bino/store";
 import { Button, Kbd, Tooltip, TooltipContent, TooltipTrigger } from "@bino/ui";
@@ -156,7 +156,7 @@ export default function OverviewPage() {
   return (
     <>
       <TopBar
-        crumbs={[{ label: "Overview" }]}
+        crumbs={[{ label: "Overview", icon: LayoutGridIcon }]}
         actions={
           <Tooltip>
             <TooltipTrigger
