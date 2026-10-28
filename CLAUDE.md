@@ -10,7 +10,7 @@ pnpm monorepo.
 | --- | --- |
 | `apps/desktop` | The web app. Vite, React 19 (with the React Compiler), Tailwind v4, react-router 7 |
 | `apps/api` | Express + Prisma on Postgres (Supabase in prod, Render hosts the API) |
-| `apps/mobile` | Untouched Expo starter. Not wired up to anything yet |
+| `apps/mobile` | Untouched Expo starter. Will become the scanner "remote" (see `docs/scanner.md`) |
 | `packages/types` | Shared TS types. Built to `dist` with `tsc -b` |
 | `packages/data` | Location-code engine (`generateLocationCode`, `getNextBinLocation`) and the default code formats. Built to `dist`, the API imports the build |
 | `packages/store` | Zustand stores + the fetch client. Imported from source |
