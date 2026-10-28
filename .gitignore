@@ -30,6 +30,7 @@ docs/design/
 !README.md
 !CLAUDE.md
 !DECISIONS.md
+!docs/scanner.md
 !CHANGELOG.md
 
 # Build info for tsc -b. Committing it made fresh clones skip emitting dist.
