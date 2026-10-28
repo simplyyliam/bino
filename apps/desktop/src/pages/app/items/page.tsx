@@ -124,7 +124,7 @@ export default function ItemsPage() {
   return (
     <>
       <TopBar
-        crumbs={[{ label: "Items" }]}
+        crumbs={[{ label: "Items", icon: PackageIcon }]}
         actions={
           <>
             <Button variant="ghost" size="sm" onClick={() => exportItemsCsv(inv)} disabled={rows.length === 0}>

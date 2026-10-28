@@ -4,6 +4,14 @@ Why things are the way they are. Newest first. Add to this when you make a call 
 
 ---
 
+### 2026-10-28 · Flush sidebar, building switcher in the header
+
+The inset panel (white page floating on the grey canvas) is gone. The sidebar is a full-height column with a hairline edge and the page sits flush beside it, matching the `(1) History _ X` reference closely, as asked. The sidebar header is a building switcher rather than the Bino name, since everyone already knows which app they're in. The last building opened is remembered per viewer (`useUiStore.lastBuildingId`) so the switcher shows something useful on other pages.
+
+- Theme and keyboard shortcuts moved into that menu, so the sidebar has no footer.
+- The building list stays in the sidebar too: one-click switching and the right-click menu still matter more than avoiding the repeat.
+- Dark mode is based on `#0A0A0A` (`oklch(0.145 0 0)`), with cards, popovers and fields stepping up from it.
+
 ### 2026-10-25 · Custom ICNs are limited to Code 39 characters
 
 ICNs can now be typed in, because parts often arrive with their own number already on a tag. Typed values are trimmed, uppercased and limited to letters, digits, `-` and `.` (max 32). That's what the ICN screen's Code 39 barcode can print and what sits cleanly in a `/icn/…` URL (no `/`). The rule lives in `@bino/data` (`normalizeIcn`, `icnProblem`, `nextIcnValue`) so the dialog and the API agree.

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { BoxesIcon, EllipsisIcon, LayoutGridIcon } from "lucide-react";
-import { useLocationSystemStore, useStorageStore } from "@bino/store";
+import { useLocationSystemStore, useStorageStore, useUiStore } from "@bino/store";
 import { Button, Kbd, Tooltip, TooltipContent, TooltipTrigger, toast } from "@bino/ui";
 import { EmptyState } from "@/components/EmptyState";
 import { SearchField } from "@/components/SearchField";
@@ -33,10 +33,15 @@ export function BuildingPage() {
   const [layoutOpen, setLayoutOpen] = useState(false);
   const [codesOpen, setCodesOpen] = useState(false);
   const findRef = useRef<HTMLInputElement>(null);
+  const setLastBuilding = useUiStore((s) => s.setLastBuilding);
   useHotkey("f", () => findRef.current?.focus());
   useHotkey("l", () => setLayoutOpen(true));
 
   const building = inv.buildingsById.get(buildingId);
+
+  useEffect(() => {
+    if (building) setLastBuilding(building.id);
+  }, [building, setLastBuilding]);
   const storage = inv.storageByBuilding.get(buildingId);
   const system = systems.find((s) => s.id === storage?.locationSystemId);
   const bins = useMemo(() => (storage ? inv.binsByStorage.get(storage.id) ?? [] : []), [inv, storage]);
@@ -122,32 +127,32 @@ export function BuildingPage() {
   return (
     <>
       <TopBar
-        crumbs={[{ label: "Overview", to: "/" }, { label: <BuildingSwitcher current={building} buildings={inv.buildings} /> }]}
+        crumbs={[{ label: "Overview", to: "/", icon: LayoutGridIcon }, { label: <BuildingSwitcher current={building} buildings={inv.buildings} /> }]}
+        menu={
+          <BuildingActions
+            building={building}
+            trigger={
+              <Button variant="ghost" size="icon-xs" className="text-muted-foreground hover:text-foreground" aria-label="More options">
+                <EllipsisIcon />
+              </Button>
+            }
+          />
+        }
         actions={
-          <>
-            {storage && (
-              <Tooltip>
-                <TooltipTrigger
-                  render={
-                    <Button variant="ghost" size="sm" onClick={() => setLayoutOpen(true)}>
-                      <LayoutGridIcon /> Edit Layout
-                    </Button>
-                  }
-                />
-                <TooltipContent className="gap-2">
-                  Add or remove bins <Kbd>L</Kbd>
-                </TooltipContent>
-              </Tooltip>
-            )}
-            <BuildingActions
-              building={building}
-              trigger={
-                <Button variant="ghost" size="icon-sm" aria-label="More options">
-                  <EllipsisIcon />
-                </Button>
-              }
-            />
-          </>
+          storage && (
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button variant="ghost" size="sm" onClick={() => setLayoutOpen(true)}>
+                    <LayoutGridIcon /> Edit Layout
+                  </Button>
+                }
+              />
+              <TooltipContent className="gap-2">
+                Add or remove bins <Kbd>L</Kbd>
+              </TooltipContent>
+            </Tooltip>
+          )
         }
       />
 

@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-28 · A cleaner app frame
+
+- The sidebar now runs the full height of the window, with the page right next to it instead of floating in a panel.
+- The top of the sidebar shows your building. Click it to switch buildings, add a new one, change the look (light, dark or match system) or see keyboard shortcuts.
+- **New Building**, **Overview**, **Items** and **Activity** sit together at the top of the sidebar, with your buildings listed below.
+- The page you're on now shows as a grey pill at the top. On a building, its **···** menu sits right next to it.
+- Dark mode is darker and crisper (`#0A0A0A`).
+
 ## 2026-10-25 · Right-click buildings in the sidebar
 
 - Right-click any building in the sidebar to **Open**, **Rename**, **View Activity**, **Export Inventory** or **Delete** it.
