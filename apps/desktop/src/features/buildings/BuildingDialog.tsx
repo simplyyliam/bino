@@ -188,7 +188,7 @@ function BuildingForm({ onOpenChange, building }: BuildingDialogProps) {
         )}
         <DialogFooter className="shrink-0">
           <DialogClose render={<Button variant="outline" type="button" disabled={saving} />}>Cancel</DialogClose>
-          <Button type="submit" disabled={saving || !name.trim() || !!clash}>
+          <Button type="submit" loading={saving} disabled={!name.trim() || !!clash}>
             {saving ? "Saving…" : isEdit ? "Save" : "Create Building"}
           </Button>
         </DialogFooter>

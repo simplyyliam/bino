@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
-import { LoaderCircleIcon } from "lucide-react";
 import { useAppStore } from "@bino/store";
+import { DotmSquare12 } from "@bino/ui";
 import { Offline } from "@/components/Offline";
 
 // For pages that stand on their own: no sidebar, no app chrome. Think a
@@ -16,7 +16,7 @@ export default function StandaloneLayout() {
         <Outlet />
       ) : (
         <div className="flex flex-1 items-center justify-center">
-          <LoaderCircleIcon className="size-5 animate-spin text-muted-foreground" aria-label="Loading" />
+          <DotmSquare12 size={32} dotSize={4} dotShape="square" ariaLabel="Loading" className="text-foreground" />
         </div>
       )}
     </div>

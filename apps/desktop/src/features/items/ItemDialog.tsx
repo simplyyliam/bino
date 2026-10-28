@@ -99,7 +99,7 @@ function ItemForm({ onOpenChange, item }: ItemDialogProps) {
           {error && <p role="alert" className="text-[13px] text-destructive">{error}</p>}
           <DialogFooter>
             <DialogClose render={<Button type="button" variant="outline" disabled={saving} />}>Cancel</DialogClose>
-            <Button type="submit" disabled={saving || !name.trim()}>{saving ? "Saving…" : item ? "Save" : "Add Item"}</Button>
+            <Button type="submit" loading={saving} disabled={!name.trim()}>{saving ? "Saving…" : item ? "Save" : "Add Item"}</Button>
           </DialogFooter>
         </form>
     </>

@@ -315,7 +315,7 @@ function CodeFormatForm({ onOpenChange, system, storage, building, sharedWith }:
 
         <DialogFooter>
           <DialogClose render={<Button variant="outline" disabled={saving} />}>Cancel</DialogClose>
-          <Button onClick={() => void save()} disabled={saving || segments.length === 0 || !!clash}>
+          <Button onClick={() => void save()} loading={saving} disabled={segments.length === 0 || !!clash}>
             {saving ? "Saving…" : "Save Format"}
           </Button>
         </DialogFooter>

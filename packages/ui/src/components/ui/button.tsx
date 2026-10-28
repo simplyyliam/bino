@@ -2,9 +2,10 @@ import { Button as ButtonPrimitive } from "@base-ui/react/button"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "../../lib/utils"
+import { Dotm3x3_3 } from "./dotm-3x3-3"
 
 const buttonVariants = cva(
-  "group/button relative inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg border border-transparent bg-clip-padding font-medium whitespace-nowrap outline-none select-none transition-[background-color,border-color,color,box-shadow,scale] duration-150 ease-out focus-visible:ring-3 focus-visible:ring-ring active:not-aria-[haspopup]:not-disabled:scale-[0.97] disabled:pointer-events-none disabled:opacity-45 aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "group/button relative inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg border border-transparent bg-clip-padding font-medium whitespace-nowrap outline-none select-none transition-[background-color,border-color,color,box-shadow,scale] duration-150 ease-out focus-visible:ring-3 focus-visible:ring-ring active:not-aria-[haspopup]:not-disabled:scale-[0.97] disabled:pointer-events-none disabled:opacity-45 aria-busy:cursor-progress aria-busy:opacity-100 aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
@@ -43,14 +44,27 @@ function Button({
   className,
   variant = "default",
   size = "default",
+  loading = false,
+  disabled,
+  children,
   ...props
-}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+}: ButtonPrimitive.Props &
+  VariantProps<typeof buttonVariants> & {
+    /** Waiting on the server: shows a dot-matrix loader and blocks clicks, but keeps focus. */
+    loading?: boolean
+  }) {
   return (
     <ButtonPrimitive
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
+      disabled={disabled || loading}
+      focusableWhenDisabled={loading || undefined}
+      aria-busy={loading || undefined}
       {...props}
-    />
+    >
+      {loading && <Dotm3x3_3 size={13} dotSize={3} dotShape="square" ariaLabel="Working" className="animate-in fade-in-0 duration-150" />}
+      {children}
+    </ButtonPrimitive>
   )
 }
 

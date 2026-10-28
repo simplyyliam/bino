@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-28 · Clearer waiting
+
+- Opening Bino shows a small rippling grid of dots with "Loading your bins" while your data comes in, instead of a grey placeholder page. If the server is waking up, it says so.
+- Buttons that save to the server (Create Building, Save, Add to Bin, Move Here, Add ICN, Save Format, layout changes, Delete) show a small moving dot grid while they work, so it's clear the click registered.
+- Scanned part labels show the same dot grid while they load.
+
 ## 2026-10-28 · A cleaner app frame
 
 - The sidebar now runs the full height of the window, with the page right next to it instead of floating in a panel.

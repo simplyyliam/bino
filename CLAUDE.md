@@ -59,6 +59,7 @@ src/
 - Weights: regular and medium. Semibold only for tiny glyph letters.
 - 13px body (`text-[13px]`), `text-xs` for meta. Numbers that change get `tabular-nums`.
 - Status is never colour alone: empty is dashed, low has a dot, out shows 0, out of service is hatched.
+- Loading: `<Button loading={saving}>` for anything that awaits the API; `DotmSquare12` only for full-screen loads. Optimistic actions get no loader.
 - Undo toast for anything reversible (removing an item, service changes). `ConfirmDialog` only for things that can't be undone (deleting a building, removing bins that still hold items).
 - Every page: `<TopBar crumbs actions />`, optional `<Toolbar>`, then `<Page>` or a full-bleed body.
 - Buttons and menu items use Title Case ("Add Item", "Edit Layout"); descriptions use sentence case.
