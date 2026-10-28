@@ -50,7 +50,7 @@ export function ConfirmDialog({
         </div>
         <AlertDialogFooter>
           <AlertDialogClose render={<Button variant="outline" disabled={busy} />}>Cancel</AlertDialogClose>
-          <Button variant={destructive ? "destructive" : "default"} onClick={confirm} disabled={busy}>
+          <Button variant={destructive ? "destructive" : "default"} onClick={confirm} loading={busy}>
             {busy ? "Working…" : confirmLabel}
           </Button>
         </AlertDialogFooter>

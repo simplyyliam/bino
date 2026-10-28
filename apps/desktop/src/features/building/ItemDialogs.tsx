@@ -226,7 +226,7 @@ function MoveItemForm({ onOpenChange, line, itemName, fromBin, inv }: MoveItemDi
 
         <DialogFooter>
           <DialogClose render={<Button variant="outline" disabled={saving} />}>Cancel</DialogClose>
-          <Button onClick={() => void move()} disabled={!targetId || saving}>
+          <Button onClick={() => void move()} loading={saving} disabled={!targetId}>
             {saving ? "Moving…" : "Move Here"}
           </Button>
         </DialogFooter>
@@ -276,7 +276,7 @@ function AddIcnForm({ onOpenChange, line, itemName, binCode }: LineDialogProps &
       <IcnFields draft={draft} onChange={setDraft} next={check.next} problem={check.problem} autoFocus />
       <DialogFooter>
         <DialogClose render={<Button type="button" variant="outline" disabled={saving} />}>Cancel</DialogClose>
-        <Button type="submit" disabled={saving || !!check.problem}>{saving ? "Adding…" : "Add ICN"}</Button>
+        <Button type="submit" loading={saving} disabled={!!check.problem}>{saving ? "Adding…" : "Add ICN"}</Button>
       </DialogFooter>
     </form>
   );

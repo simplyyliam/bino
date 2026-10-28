@@ -168,7 +168,7 @@ function CreateItemForm({ onOpenChange, initialName, bin }: CreateItemDialogProp
 
           <DialogFooter>
             <DialogClose render={<Button type="button" variant="outline" disabled={saving} />}>Cancel</DialogClose>
-            <Button type="submit" disabled={saving || !name.trim() || (withIcn && !!icnCheck.problem)}>{saving ? "Adding…" : "Add to Bin"}</Button>
+            <Button type="submit" loading={saving} disabled={!name.trim() || (withIcn && !!icnCheck.problem)}>{saving ? "Adding…" : "Add to Bin"}</Button>
           </DialogFooter>
         </form>
     </>

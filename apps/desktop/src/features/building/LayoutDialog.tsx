@@ -126,7 +126,8 @@ function LayoutForm({ onOpenChange, storage, bins, system, inv, onEditCodes }: L
           <DialogClose render={<Button variant="outline" disabled={saving} />}>Cancel</DialogClose>
           <Button
             variant={losing.length ? "destructive" : "default"}
-            disabled={saving || delta === 0}
+            loading={saving}
+            disabled={delta === 0}
             onClick={apply}
           >
             {saving

@@ -4,6 +4,15 @@ Why things are the way they are. Newest first. Add to this when you make a call 
 
 ---
 
+### 2026-10-28 · Dot-matrix loaders, only where people actually wait
+
+Loaders come from [Dot Matrix](https://dotmatrix.zzzzshawn.cloud/) (shadcn registry `@dotmatrix`, added to `packages/ui/components.json`), not a home-made component. It's CSS-only, has no dependencies, follows `currentColor` and respects reduced motion. Its licence allows use in products but forbids republishing the components as a library, which is fine because `@bino/ui` is private.
+
+- `DotmSquare12` (Origin Wave, 5×5) for full-screen loads: app start and the standalone tag page. The grid reads as bins.
+- `Dotm3x3_3` (Drift TL, 3×3) inside `Button` via the `loading` prop, for saves the UI has to wait on.
+- No loaders on optimistic actions (quantity changes, service toggles, etc.), search or exports. Those finish instantly as far as the user can tell, and a flash of a loader would just be noise.
+- The vendored files had three unused imports removed so they pass our strict `tsc`; otherwise they're as published.
+
 ### 2026-10-28 · Flush sidebar, building switcher in the header
 
 The inset panel (white page floating on the grey canvas) is gone. The sidebar is a full-height column with a hairline edge and the page sits flush beside it, matching the `(1) History _ X` reference closely, as asked. The sidebar header is a building switcher rather than the Bino name, since everyone already knows which app they're in. The last building opened is remembered per viewer (`useUiStore.lastBuildingId`) so the switcher shows something useful on other pages.
